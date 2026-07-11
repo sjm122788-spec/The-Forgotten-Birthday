@@ -1,0 +1,137 @@
+.chapter-scene {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #080706;
+  color: #f7ecd6;
+}
+
+.chapter-artwork {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.chapter-hero-image,
+.chapter-placeholder {
+  width: 100%;
+  height: 100%;
+}
+
+.chapter-hero-image {
+  display: block;
+  object-fit: cover;
+}
+
+.chapter-placeholder {
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(
+      circle at 50% 45%,
+      rgba(213, 160, 86, 0.28),
+      transparent 30%
+    ),
+    linear-gradient(135deg, #211a18, #0d0b0a);
+  font-family: Georgia, serif;
+  font-size: clamp(1rem, 3vw, 2rem);
+}
+
+.chapter-light-layer {
+  position: absolute;
+  inset: -10%;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      circle at 52% 47%,
+      rgba(255, 197, 106, 0.16),
+      transparent 27%
+    );
+  mix-blend-mode: screen;
+  animation: lightBreath 5.5s ease-in-out infinite;
+}
+
+.chapter-dust-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.28;
+  background-image:
+    radial-gradient(circle, rgba(255, 235, 200, 0.8) 0 1px, transparent 1.5px),
+    radial-gradient(circle, rgba(255, 235, 200, 0.5) 0 1px, transparent 1.5px);
+  background-size: 110px 110px, 170px 170px;
+  background-position: 0 0, 45px 70px;
+  animation: dustDrift 18s linear infinite;
+}
+
+.chapter-narration-wrap {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: clamp(2rem, 8vh, 6rem);
+  width: min(800px, calc(100vw - 3rem));
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+.chapter-narration {
+  margin: 0 0 1.5rem;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.35rem, 3vw, 2.6rem);
+  line-height: 1.35;
+  text-wrap: balance;
+  text-shadow:
+    0 2px 5px rgba(0, 0, 0, 0.95),
+    0 0 24px rgba(0, 0, 0, 0.9);
+}
+
+.chapter-advance,
+.memory-window-back {
+  border: 1px solid rgba(246, 228, 193, 0.35);
+  border-radius: 999px;
+  padding: 0.75rem 1.15rem;
+  cursor: pointer;
+  background: rgba(15, 12, 10, 0.72);
+  color: #f6e4c1;
+  font: inherit;
+}
+
+.chapter-advance:hover,
+.memory-window-back:hover {
+  background: rgba(42, 31, 22, 0.9);
+}
+
+@keyframes lightBreath {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.025);
+  }
+}
+
+@keyframes dustDrift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(35px, -50px, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chapter-light-layer,
+  .chapter-dust-layer {
+    animation: none;
+  }
+}
