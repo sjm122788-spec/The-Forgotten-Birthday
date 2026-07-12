@@ -1,23 +1,39 @@
 .storybook-screen {
   min-height: 100vh;
+
   display: grid;
   place-items: center;
+
   padding: 2rem;
+
+  overflow: hidden;
+
   background:
-    radial-gradient(circle at center, rgba(93, 65, 38, 0.22), transparent 55%),
-    #120f0d;
+    radial-gradient(
+      circle at center,
+      rgba(89, 57, 26, 0.22),
+      transparent 55%
+    ),
+    #0d0a08;
+
   color: #f1e5ca;
 }
 
 .storybook-book {
   position: relative;
-  width: min(1100px, 94vw);
+
+  width: min(1400px, 90vw);
+  max-height: 90vh;
+
   aspect-ratio: 16 / 9;
+
   overflow: hidden;
-  border-radius: 18px;
+
+  border-radius: 16px;
+
   box-shadow:
-    0 30px 80px rgba(0, 0, 0, 0.65),
-    inset 0 0 60px rgba(62, 39, 18, 0.3);
+    0 30px 90px rgba(0, 0, 0, 0.75),
+    0 0 45px rgba(112, 68, 25, 0.12);
 }
 
 .storybook-map-image,
@@ -28,61 +44,17 @@
 
 .storybook-map-image {
   display: block;
-  object-fit: cover;
+
+  object-fit: contain;
+  object-position: center;
 }
 
 .storybook-map-placeholder {
   display: grid;
   place-items: center;
-  background:
-    linear-gradient(
-      90deg,
-      rgba(92, 67, 40, 0.14) 49.5%,
-      rgba(63, 42, 24, 0.45) 50%,
-      rgba(92, 67, 40, 0.14) 50.5%
-    ),
-    #d9c6a1;
+
+  background: #d7c29b;
   color: #3b2e22;
-  font-family: Georgia, serif;
-}
 
-.storybook-ink-blot {
-  position: absolute;
-  left: 22%;
-  top: 64%;
-  width: clamp(42px, 5vw, 70px);
-  aspect-ratio: 1;
-  border: 0;
-  padding: 0;
-  cursor: pointer;
-  background: transparent;
-}
-
-.storybook-ink-core {
-  display: block;
-  width: 100%;
-  height: 100%;
-  border-radius: 47% 53% 55% 45% / 54% 42% 58% 46%;
-  background: #17120f;
-  box-shadow:
-    8px -4px 0 -20px #17120f,
-    -10px 8px 0 -18px #17120f,
-    0 0 18px rgba(21, 14, 9, 0.35);
-  transition:
-    transform 250ms ease,
-    box-shadow 250ms ease;
-}
-
-.storybook-ink-blot:hover .storybook-ink-core,
-.storybook-ink-blot:focus-visible .storybook-ink-core {
-  transform: scale(1.12);
-  box-shadow:
-    0 0 25px rgba(13, 8, 5, 0.55),
-    0 0 45px rgba(255, 223, 158, 0.12);
-}
-
-.storybook-instruction {
-  margin: 1rem 0 0;
-  font-family: Georgia, serif;
-  opacity: 0.7;
+  font-family: Georgia, "Times New Roman", serif;
 }
