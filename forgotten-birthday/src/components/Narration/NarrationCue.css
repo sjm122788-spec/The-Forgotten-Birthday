@@ -1,0 +1,57 @@
+.narration-cue {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(2rem, 8vh, 6rem);
+  z-index: 5;
+
+  width: min(800px, calc(100vw - 3rem));
+
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+.narration-cue__text {
+  margin: 0 0 1.5rem;
+
+  color: #f7ecd6;
+
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.35rem, 3vw, 2.6rem);
+  line-height: 1.35;
+  text-wrap: balance;
+
+  text-shadow:
+    0 2px 5px rgba(0, 0, 0, 0.95),
+    0 0 24px rgba(0, 0, 0, 0.9);
+
+  animation: narrationFadeIn 500ms ease-out both;
+}
+
+.narration-cue__advance {
+  border: 1px solid rgba(246, 228, 193, 0.35);
+  border-radius: 999px;
+
+  padding: 0.75rem 1.15rem;
+
+  background: rgba(15, 12, 10, 0.72);
+  color: #f6e4c1;
+
+  font: inherit;
+  cursor: pointer;
+}
+
+.narration-cue__advance:hover {
+  background: rgba(42, 31, 22, 0.9);
+}
+
+@keyframes narrationFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,22 +1,10 @@
-import { useState } from "react";
+import AtmosphereLayer from "../Atmosphere/AtmosphereLayer";
+import GuardianLayer from "../Guardians/GuardianLayer";
+import ChapterDirector from "./ChapterDirector";
+
 import "./ChapterScene.css";
 
 function ChapterScene({ chapter, onCompleteChapter }) {
-  const [narrationIndex, setNarrationIndex] = useState(0);
-
-  const currentNarration = chapter.narration[narrationIndex];
-  const isLastNarration =
-    narrationIndex === chapter.narration.length - 1;
-
-  function handleAdvance() {
-    if (isLastNarration) {
-      onCompleteChapter();
-      return;
-    }
-
-    setNarrationIndex((currentIndex) => currentIndex + 1);
-  }
-
   return (
     <main className="chapter-scene">
       <div className="chapter-artwork">
@@ -28,26 +16,22 @@ function ChapterScene({ chapter, onCompleteChapter }) {
           />
         ) : (
           <div className="chapter-placeholder">
-            <span>Chapter 1 hero illustration</span>
+            <span>{chapter.title} illustration</span>
           </div>
         )}
 
-        <div className="chapter-light-layer" />
-        <div className="chapter-dust-layer" />
+        <AtmosphereLayer
+          layers={chapter.atmosphere}
+        />
 
-        <div className="chapter-narration-wrap">
-          <p className="chapter-narration">
-            {currentNarration}
-          </p>
+        <GuardianLayer
+          guardian={chapter.guardian}
+        />
 
-          <button
-            className="chapter-advance"
-            type="button"
-            onClick={handleAdvance}
-          >
-            {isLastNarration ? "Return to the storybook" : "Continue"}
-          </button>
-        </div>
+        <ChapterDirector
+          sequence={chapter.sequence}
+          onCompleteChapter={onCompleteChapter}
+        />
       </div>
     </main>
   );

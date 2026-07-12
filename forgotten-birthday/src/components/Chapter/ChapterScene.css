@@ -69,43 +69,6 @@
   animation: dustDrift 18s linear infinite;
 }
 
-.chapter-narration-wrap {
-  position: absolute;
-  z-index: 3;
-  left: 50%;
-  bottom: clamp(2rem, 8vh, 6rem);
-  width: min(800px, calc(100vw - 3rem));
-  transform: translateX(-50%);
-  text-align: center;
-}
-
-.chapter-narration {
-  margin: 0 0 1.5rem;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(1.35rem, 3vw, 2.6rem);
-  line-height: 1.35;
-  text-wrap: balance;
-  text-shadow:
-    0 2px 5px rgba(0, 0, 0, 0.95),
-    0 0 24px rgba(0, 0, 0, 0.9);
-}
-
-.chapter-advance,
-.memory-window-back {
-  border: 1px solid rgba(246, 228, 193, 0.35);
-  border-radius: 999px;
-  padding: 0.75rem 1.15rem;
-  cursor: pointer;
-  background: rgba(15, 12, 10, 0.72);
-  color: #f6e4c1;
-  font: inherit;
-}
-
-.chapter-advance:hover,
-.memory-window-back:hover {
-  background: rgba(42, 31, 22, 0.9);
-}
-
 @keyframes lightBreath {
   0%,
   100% {
