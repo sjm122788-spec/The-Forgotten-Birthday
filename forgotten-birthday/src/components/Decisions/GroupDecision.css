@@ -1,0 +1,52 @@
+.group-decision {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(2rem, 8vh, 6rem);
+  z-index: 5;
+
+  width: min(850px, calc(100vw - 3rem));
+
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+.group-decision__prompt,
+.group-decision__outcome {
+  margin: 0 0 1.5rem;
+
+  color: #f7ecd6;
+
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.35rem, 3vw, 2.5rem);
+  line-height: 1.35;
+
+  text-shadow:
+    0 2px 5px rgba(0, 0, 0, 0.95),
+    0 0 24px rgba(0, 0, 0, 0.9);
+}
+
+.group-decision__options {
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.group-decision__option,
+.group-decision__continue {
+  border: 1px solid rgba(246, 228, 193, 0.35);
+  border-radius: 999px;
+
+  padding: 0.8rem 1.2rem;
+
+  background: rgba(15, 12, 10, 0.78);
+  color: #f6e4c1;
+
+  font: inherit;
+  cursor: pointer;
+}
+
+.group-decision__option:hover,
+.group-decision__continue:hover {
+  background: rgba(42, 31, 22, 0.95);
+}

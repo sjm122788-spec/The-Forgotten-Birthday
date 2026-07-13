@@ -1,0 +1,208 @@
+.observation-cue {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  width: 100%;
+  height: 100%;
+  padding: 2rem;
+
+  overflow-y: auto;
+
+  color: #f6ead4;
+  background: rgba(8, 7, 6, 0.88);
+  box-sizing: border-box;
+}
+
+.observation-cue__header {
+  width: min(760px, 90vw);
+  margin: 0 auto 1.25rem;
+  text-align: center;
+}
+
+.observation-cue__eyebrow {
+  margin: 0 0 0.35rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.72;
+}
+
+.observation-cue__title {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3.6rem);
+}
+
+.observation-cue__instructions {
+  margin: 0.65rem auto 0;
+  max-width: 640px;
+  line-height: 1.6;
+  opacity: 0.88;
+}
+
+.observation-cue__layout {
+  width: min(1200px, 94vw);
+  margin: 0 auto;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.observation-cue__scene {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(246, 234, 212, 0.2);
+  border-radius: 18px;
+  background: rgba(15, 11, 18, 0.8);
+  box-shadow:
+    0 18px 50px rgba(0, 0, 0, 0.35),
+    inset 0 0 40px rgba(255, 224, 174, 0.04);
+}
+
+.observation-cue__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+}
+
+.observation-cue__hotspot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  padding: 0;
+  border: 1px dashed transparent;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.observation-cue__hotspot:hover,
+.observation-cue__hotspot:focus-visible {
+  border-color: rgba(255, 232, 182, 0.65);
+  background: rgba(255, 224, 168, 0.08);
+  outline: none;
+}
+
+.observation-cue__hotspot--found {
+  border-color: rgba(255, 226, 146, 0.9);
+  background: rgba(255, 209, 111, 0.2);
+  cursor: default;
+  animation: observation-found-pulse 700ms ease-out;
+}
+
+.observation-cue__found-marker {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  margin: auto;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 232, 176, 0.92);
+  color: #332318;
+  font-weight: 800;
+  box-shadow: 0 0 22px rgba(255, 212, 123, 0.75);
+}
+
+.observation-cue__clue-panel {
+  padding: 1.1rem;
+  border: 1px solid rgba(246, 234, 212, 0.16);
+  border-radius: 16px;
+  background: rgba(25, 18, 27, 0.9);
+}
+
+.observation-cue__clue-panel h3 {
+  margin: 0 0 0.9rem;
+}
+
+.observation-cue__clue-list {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.observation-cue__clue {
+  display: flex;
+  gap: 0.7rem;
+  align-items: center;
+  opacity: 0.65;
+}
+
+.observation-cue__clue--found {
+  opacity: 1;
+}
+
+.observation-cue__clue-status {
+  display: grid;
+  flex: 0 0 1.7rem;
+  width: 1.7rem;
+  height: 1.7rem;
+  place-items: center;
+  border: 1px solid rgba(246, 234, 212, 0.28);
+  border-radius: 50%;
+}
+
+.observation-cue__clue--found
+  .observation-cue__clue-status {
+  background: rgba(255, 224, 152, 0.9);
+  color: #362518;
+}
+
+.observation-cue__progress {
+  margin: 1rem 0;
+  font-size: 0.9rem;
+  opacity: 0.72;
+}
+
+.observation-cue__complete-button {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(255, 232, 190, 0.5);
+  border-radius: 999px;
+  background: rgba(255, 228, 175, 0.12);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.observation-cue__complete-button:hover {
+  background: rgba(255, 228, 175, 0.2);
+}
+
+.observation-cue--error {
+  padding: 2rem;
+  text-align: center;
+}
+
+@keyframes observation-found-pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0.4;
+  }
+
+  70% {
+    transform: translate(-50%, -50%) scale(1.14);
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 820px) {
+  .observation-cue__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .observation-cue__clue-panel {
+    width: auto;
+  }
+}
