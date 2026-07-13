@@ -5,6 +5,8 @@ import GroupDecision from "../Decisions/GroupDecision";
 import IndividualDecision from "../Decisions/IndividualDecision";
 import ObservationCue from "../Observation/ObservationCue";
 import DiceCue from "../Dice/DiceCue";
+import CooperativePuzzleCue from "../Puzzle/CooperativePuzzleCue";
+import RelicRevealCue from "../Relic/RelicRevealCue";
 
 function ChapterDirector({
   sequence = [],
@@ -12,12 +14,14 @@ function ChapterDirector({
 }) {
   const [currentCueIndex, setCurrentCueIndex] = useState(0);
   const [decisionOutcome, setDecisionOutcome] = useState(null);
+  const [cueResults, setCueResults] = useState({});
 
   const currentCue = sequence[currentCueIndex];
 
   useEffect(() => {
     setCurrentCueIndex(0);
     setDecisionOutcome(null);
+    setCueResults({});
   }, [sequence]);
 
   useEffect(() => {
@@ -25,6 +29,56 @@ function ChapterDirector({
       onCompleteChapter();
     }
   }, [currentCue, onCompleteChapter]);
+
+  const TIER_RANK = {
+    failure: 0,
+    partial: 1,
+    success: 2,
+    greatSuccess: 3,
+  };
+
+  function saveCueResult(cueId, result) {
+    setCueResults((current) => ({
+      ...current,
+      [cueId]: result,
+    }));
+  }
+
+  function relicConditionMet(condition) {
+    if (!condition) {
+      return true;
+    }
+
+    const puzzleResult = cueResults[condition.puzzleCueId];
+    const diceResult = cueResults[condition.diceCueId];
+
+    if (
+      condition.requiresPuzzleCompletion &&
+      !puzzleResult?.completed
+    ) {
+      return false;
+    }
+
+    if (condition.minimumTier) {
+      const actualRank = TIER_RANK[diceResult?.tier] ?? -1;
+      const requiredRank = TIER_RANK[condition.minimumTier] ?? 0;
+
+      if (actualRank < requiredRank) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  useEffect(() => {
+    if (
+      currentCue?.type === "relicReveal" &&
+      !relicConditionMet(currentCue.condition)
+    ) {
+      advanceCue();
+    }
+  }, [currentCue, cueResults]);
 
   function advanceCue() {
     setCurrentCueIndex((currentIndex) => {
@@ -59,6 +113,8 @@ function ChapterDirector({
   }
 
   function handleDiceComplete(result) {
+    saveCueResult(currentCue.id, result);
+
     setDecisionOutcome({
       id: `${currentCue.id}-${result.outcomeId}-outcome`,
       type: "narration",
@@ -72,6 +128,31 @@ function ChapterDirector({
     });
   }
 
+  function handleCooperativePuzzleComplete(result) {
+    saveCueResult(currentCue.id, result);
+
+    if (result.narration) {
+      setDecisionOutcome({
+        id: `${currentCue.id}-${result.outcomeId}-outcome`,
+        type: "narration",
+        text: result.narration,
+        puzzleCueId: currentCue.id,
+        completed: result.completed,
+        attempts: result.attempts,
+        glory: result.glory,
+      });
+
+      return;
+    }
+
+    advanceCue();
+  }
+
+  function handleRelicRevealComplete(result) {
+    saveCueResult(currentCue.id, result);
+    advanceCue();
+  }
+
   function handleOutcomeComplete() {
     setDecisionOutcome(null);
     advanceCue();
@@ -80,14 +161,15 @@ function ChapterDirector({
   if (!currentCue) {
     return null;
   }
-function handleObservationComplete(result) {
-  console.log("Observation Result:", result);
 
-  // Later we'll award Glory and track who found what.
-  // For now, simply continue the chapter.
+  function handleObservationComplete(result) {
+    console.log("Observation Result:", result);
 
-  advanceCue();
-}
+    // Later we'll award Glory and track who found what.
+    // For now, simply continue the chapter.
+
+    advanceCue();
+  }
   /*
     The Director temporarily inserts the selected outcome as narration.
     The GroupDecision component does not narrate story consequences.
@@ -136,6 +218,28 @@ function handleObservationComplete(result) {
           key={currentCue.id}
           cue={currentCue}
           onComplete={handleDiceComplete}
+        />
+      );
+
+    case "cooperativePuzzle":
+      return (
+        <CooperativePuzzleCue
+          key={currentCue.id}
+          cue={currentCue}
+          onComplete={handleCooperativePuzzleComplete}
+        />
+      );
+
+    case "relicReveal":
+      if (!relicConditionMet(currentCue.condition)) {
+        return null;
+      }
+
+      return (
+        <RelicRevealCue
+          key={currentCue.id}
+          cue={currentCue}
+          onComplete={handleRelicRevealComplete}
         />
       );
 

@@ -114,3 +114,66 @@
   object-fit: contain;
   object-position: right bottom;
 }
+.guardian--candle-keeper {
+  position: absolute;
+  left: 5%;
+  bottom: 1%;
+  z-index: 6;
+
+  width: clamp(210px, 25vw, 390px);
+  height: min(76vh, 720px);
+
+  pointer-events: none;
+
+  filter:
+    drop-shadow(
+      0 20px 34px
+      rgba(0, 0, 0, 0.52)
+    )
+    drop-shadow(
+      0 0 18px
+      rgba(255, 187, 96, 0.12)
+    );
+}
+
+.guardian--candle-keeper
+  .guardian-layer__character {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 1;
+
+  display: block;
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+  object-position: left bottom;
+
+  animation:
+    candle-keeper-breathe
+    5.5s ease-in-out infinite;
+}
+
+@keyframes candle-keeper-breathe {
+  0%,
+  100% {
+    transform: translateY(0);
+    filter:
+      brightness(0.96)
+      drop-shadow(
+        0 0 8px
+        rgba(255, 181, 87, 0.08)
+      );
+  }
+
+  50% {
+    transform: translateY(-4px);
+    filter:
+      brightness(1.04)
+      drop-shadow(
+        0 0 18px
+        rgba(255, 191, 97, 0.18)
+      );
+  }
+}
