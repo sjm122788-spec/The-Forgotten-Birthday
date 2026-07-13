@@ -4,6 +4,7 @@ import NarrationCue from "../Narration/NarrationCue";
 import GroupDecision from "../Decisions/GroupDecision";
 import IndividualDecision from "../Decisions/IndividualDecision";
 import ObservationCue from "../Observation/ObservationCue";
+import DiceCue from "../Dice/DiceCue";
 
 function ChapterDirector({
   sequence = [],
@@ -54,6 +55,20 @@ function ChapterDirector({
       text: option.outcome,
       decisionId: currentCue.id,
       optionId: option.id,
+    });
+  }
+
+  function handleDiceComplete(result) {
+    setDecisionOutcome({
+      id: `${currentCue.id}-${result.outcomeId}-outcome`,
+      type: "narration",
+      text: result.narration,
+      diceCueId: currentCue.id,
+      roll: result.roll,
+      sides: result.sides,
+      outcomeId: result.outcomeId,
+      tier: result.tier,
+      glory: result.glory,
     });
   }
 
@@ -112,6 +127,15 @@ function handleObservationComplete(result) {
           key={currentCue.id}
           cue={currentCue}
           onComplete={handleIndividualDecision}
+        />
+      );
+
+    case "dice":
+      return (
+        <DiceCue
+          key={currentCue.id}
+          cue={currentCue}
+          onComplete={handleDiceComplete}
         />
       );
 

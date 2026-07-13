@@ -14,10 +14,12 @@
   Coordinates for Chapter 1.
   left and top correspond to the approved cx=30, cy=33 position.
 */
+/*
+  Each chapter supplies its position through mapPosition
+  in its chapter data file.
+*/
 .story-map-memory-trigger {
   position: absolute;
-  left: 30%;
-  top: 33%;
   z-index: 2;
 
   width: clamp(24px, 2.4vw, 36px);
@@ -189,39 +191,52 @@
   pointer-events: auto;
 }
 
-.story-map-overlay--opening .story-map-memory-trigger {
+.story-map-overlay--opening
+  .story-map-memory-trigger {
   pointer-events: none;
 }
 
-.story-map-overlay--opening .story-map-ink-blot {
+.story-map-memory-trigger--opening
+  .story-map-ink-blot {
   animation: inkStir 750ms ease-in-out forwards;
 }
 
-.story-map-overlay--opening .story-map-halo {
+.story-map-memory-trigger--opening
+  .story-map-halo {
   animation: haloForm 1600ms ease-out 250ms forwards;
 }
 
-.story-map-overlay--opening .story-map-tendril--one {
+.story-map-memory-trigger--opening
+  .story-map-tendril--one {
   animation: tendrilDraw 1050ms ease-out 150ms forwards;
 }
 
-.story-map-overlay--opening .story-map-tendril--two {
+.story-map-memory-trigger--opening
+  .story-map-tendril--two {
   animation: tendrilDraw 1150ms ease-out 230ms forwards;
 }
 
-.story-map-overlay--opening .story-map-tendril--three {
+.story-map-memory-trigger--opening
+  .story-map-tendril--three {
   animation: tendrilDraw 1100ms ease-out 310ms forwards;
 }
 
-.story-map-overlay--opening .story-map-tendril--four {
+.story-map-memory-trigger--opening
+  .story-map-tendril--four {
   animation: tendrilDraw 1200ms ease-out 380ms forwards;
 }
 
-.story-map-overlay--opening .story-map-memory-window {
+.story-map-memory-trigger--opening
+  .story-map-memory-window {
   animation:
-    memoryWindowForm 900ms cubic-bezier(0.2, 0.75, 0.25, 1) 750ms forwards,
-    memoryWindowColor 950ms ease 1500ms forwards,
-    memoryWindowApproach 800ms cubic-bezier(0.3, 0.05, 0.18, 1)
+    memoryWindowForm 900ms
+      cubic-bezier(0.2, 0.75, 0.25, 1)
+      750ms forwards,
+    memoryWindowColor 950ms
+      ease
+      1500ms forwards,
+    memoryWindowApproach 800ms
+      cubic-bezier(0.3, 0.05, 0.18, 1)
       2200ms forwards;
 }
 
@@ -345,10 +360,14 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .story-map-overlay--opening .story-map-ink-blot,
-  .story-map-overlay--opening .story-map-halo,
-  .story-map-overlay--opening .story-map-tendril,
-  .story-map-overlay--opening .story-map-memory-window {
+  .story-map-memory-trigger--opening
+    .story-map-ink-blot,
+  .story-map-memory-trigger--opening
+    .story-map-halo,
+  .story-map-memory-trigger--opening
+    .story-map-tendril,
+  .story-map-memory-trigger--opening
+    .story-map-memory-window {
     animation-duration: 200ms;
     animation-delay: 0ms;
   }

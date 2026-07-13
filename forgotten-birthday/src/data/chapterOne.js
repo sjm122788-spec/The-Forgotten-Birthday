@@ -12,6 +12,15 @@ const chapterOne = {
   id: "chapter-01",
   title: "The Empty Celebration",
 
+  mapPosition: {
+    left: 30,
+    top: 33,
+  },
+
+  mapImage,
+  memoryWindowImage,
+  heroImage,
+
   mapImage,
   memoryWindowImage,
   heroImage,
