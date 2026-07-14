@@ -60,15 +60,19 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .guardian--candle-keeper
-    .guardian-layer__character,
-  .atmosphere--chapter-three-candle-glow::before,
-  .atmosphere--chapter-three-candle-glow::after,
-  .atmosphere--chapter-three-embers::before,
-  .atmosphere--chapter-three-embers::after {
-    animation: none;
-  }
+.guardian--celebration-baker
+  .guardian-layer__character,
+.guardian--parade-marshal
+  .guardian-layer__character,
+.chapter-visual--chapter-four-cake,
+.atmosphere--chapter-four-oven-glow::before,
+.atmosphere--chapter-four-flour-dust::before,
+.atmosphere--chapter-four-flour-dust::after,
+.atmosphere--chapter-five-banner-light::before,
+.atmosphere--chapter-five-banner-light::after,
+.atmosphere--chapter-five-confetti::before,
+.atmosphere--chapter-five-confetti::after {
+  animation: none;
 }
 .atmosphere--chapter-two-fireflies {
   position: absolute;
@@ -293,5 +297,399 @@
   to {
     transform:
       translate3d(2%, -8%, 0);
+  }
+}
+.atmosphere--chapter-four-oven-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+
+  overflow: hidden;
+  pointer-events: none;
+
+  mix-blend-mode: screen;
+}
+
+.atmosphere--chapter-four-oven-glow::before,
+.atmosphere--chapter-four-oven-glow::after {
+  content: "";
+
+  position: absolute;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      ellipse,
+      rgba(255, 206, 115, 0.66) 0%,
+      rgba(255, 135, 45, 0.28) 36%,
+      rgba(255, 91, 25, 0.1) 58%,
+      transparent 76%
+    );
+
+  filter: blur(20px);
+
+  animation:
+    chapter-four-oven-flare
+    3.8s ease-in-out infinite;
+}
+
+.atmosphere--chapter-four-oven-glow::before {
+  right: -10%;
+  bottom: -18%;
+
+  width: 74%;
+  height: 88%;
+}
+
+.atmosphere--chapter-four-oven-glow::after {
+  right: 16%;
+  bottom: -4%;
+
+  width: 44%;
+  height: 54%;
+
+  opacity: 0.68;
+
+  animation-delay: -1.7s;
+  animation-duration: 5.1s;
+}
+
+@keyframes chapter-four-oven-flare {
+  0%,
+  100% {
+    opacity: 0.48;
+    transform: scale(0.94);
+  }
+
+  42% {
+    opacity: 0.92;
+    transform: scale(1.08);
+  }
+
+  65% {
+    opacity: 0.68;
+    transform: scale(1.02);
+  }
+}
+
+.atmosphere--chapter-four-flour-dust {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.atmosphere--chapter-four-flour-dust::before,
+.atmosphere--chapter-four-flour-dust::after {
+  content: "";
+
+  position: absolute;
+  inset: -20%;
+
+  background-image:
+    radial-gradient(
+      circle,
+      rgba(255, 250, 232, 0.95) 0 2.5px,
+      transparent 4px
+    ),
+    radial-gradient(
+      circle,
+      rgba(255, 235, 203, 0.8) 0 1.8px,
+      transparent 3px
+    ),
+    radial-gradient(
+      circle,
+      rgba(255, 255, 246, 0.62) 0 1.2px,
+      transparent 2.5px
+    );
+
+  background-size:
+    90px 115px,
+    145px 165px,
+    65px 135px;
+
+  background-position:
+    10px 20px,
+    55px 95px,
+    30px 145px;
+
+  opacity: 0.22;
+
+  filter:
+    blur(0.25px)
+    drop-shadow(
+      0 0 5px
+      rgba(255, 239, 207, 0.45)
+    );
+
+  animation:
+    chapter-four-flour-storm
+    21s linear infinite;
+}
+
+.atmosphere--chapter-four-flour-dust::after {
+  opacity: 0.14;
+
+  transform: scale(1.15);
+
+  animation-duration: 17s;
+  animation-delay: -7s;
+  animation-direction: reverse;
+}
+
+@keyframes chapter-four-flour-storm {
+  0% {
+    transform:
+      translate3d(-5%, 12%, 0)
+      rotate(-2deg);
+  }
+
+  50% {
+    transform:
+      translate3d(3%, -2%, 0)
+      rotate(1deg);
+  }
+
+  100% {
+    transform:
+      translate3d(7%, -16%, 0)
+      rotate(3deg);
+  }
+}
+.atmosphere--chapter-five-banner-light {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+
+  overflow: hidden;
+  pointer-events: none;
+
+  mix-blend-mode: screen;
+}
+
+.atmosphere--chapter-five-banner-light::before,
+.atmosphere--chapter-five-banner-light::after {
+  content: "";
+
+  position: absolute;
+  top: -26%;
+
+  width: 58%;
+  height: 110%;
+
+  background:
+    linear-gradient(
+      155deg,
+      rgba(255, 235, 176, 0.52) 0%,
+      rgba(255, 184, 91, 0.22) 34%,
+      transparent 68%
+    );
+
+  filter: blur(16px);
+
+  animation:
+    chapter-five-light-sweep
+    5.5s ease-in-out infinite alternate;
+}
+
+.atmosphere--chapter-five-banner-light::before {
+  left: -16%;
+}
+
+.atmosphere--chapter-five-banner-light::after {
+  right: -14%;
+
+  opacity: 0.78;
+
+  animation-delay: -2.6s;
+  animation-duration: 7s;
+}
+
+@keyframes chapter-five-light-sweep {
+  from {
+    opacity: 0.38;
+
+    transform:
+      translateX(-8%)
+      rotate(-7deg)
+      scaleX(0.9);
+  }
+
+  to {
+    opacity: 0.9;
+
+    transform:
+      translateX(12%)
+      rotate(5deg)
+      scaleX(1.12);
+  }
+}
+
+.atmosphere--chapter-five-confetti {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.atmosphere--chapter-five-confetti::before,
+.atmosphere--chapter-five-confetti::after {
+  content: "";
+
+  position: absolute;
+  inset: -22%;
+
+  background-image:
+    linear-gradient(
+      35deg,
+      rgba(255, 202, 70, 0.96) 0 5px,
+      transparent 5px
+    ),
+    linear-gradient(
+      125deg,
+      rgba(205, 74, 88, 0.9) 0 5px,
+      transparent 5px
+    ),
+    linear-gradient(
+      72deg,
+      rgba(79, 173, 188, 0.86) 0 4px,
+      transparent 4px
+    ),
+    linear-gradient(
+      160deg,
+      rgba(161, 104, 197, 0.82) 0 4px,
+      transparent 4px
+    );
+
+  background-size:
+180px 220px,
+240px 270px,
+150px 260px;
+
+  background-position:
+    10px 15px,
+    60px 75px,
+    30px 120px,
+    100px 25px;
+
+  opacity: 0.12;
+
+  filter:
+    drop-shadow(
+      0 0 4px
+      rgba(255, 220, 150, 0.25)
+    );
+
+  animation:
+    chapter-five-confetti-surge
+    9s linear infinite;
+}
+
+.atmosphere--chapter-five-confetti::after {
+  opacity: 0.06;
+
+  transform: scale(1.18);
+
+  animation-duration: 14s;
+  animation-delay: -6s;
+  animation-direction: reverse;
+}
+
+@keyframes chapter-five-confetti-surge {
+  0% {
+    transform:
+      translate3d(-4%, -14%, 0)
+      rotate(-2deg);
+  }
+
+  45% {
+    transform:
+      translate3d(2%, 1%, 0)
+      rotate(2deg);
+  }
+
+  100% {
+    transform:
+      translate3d(7%, 18%, 0)
+      rotate(5deg);
+  }
+}
+.atmosphere--chapter-five-street-lamp-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+
+  overflow: hidden;
+  pointer-events: none;
+
+  mix-blend-mode: screen;
+}
+
+.atmosphere--chapter-five-street-lamp-glow::before {
+  content: "";
+
+  position: absolute;
+
+  /*
+    Adjust these four values to place the glow
+    over the actual street lamp in your artwork.
+  */
+  left: 12%;
+  top: 18%;
+
+  width:12%;
+  height:20%;
+
+  border-radius: 50%;
+
+  background:
+  radial-gradient(
+    ellipse,
+    rgba(255,255,235,.95) 0%,
+    rgba(255,238,180,.85) 8%,
+    rgba(255,210,120,.55) 18%,
+    rgba(255,175,70,.25) 32%,
+    rgba(255,145,40,.08) 48%,
+    transparent 62%
+  );
+
+  filter: blur(16px);
+
+  transform-origin: center top;
+
+  animation:
+    chapter-five-lamp-pulse
+    5.8s ease-in-out infinite;
+}
+
+@keyframes chapter-five-lamp-pulse {
+  0%,
+  100% {
+    opacity: 0.38;
+
+    transform:
+      scale(0.96)
+      translateX(-1%);
+  }
+
+  45% {
+    opacity: 0.72;
+
+    transform:
+      scale(1.04)
+      translateX(1%);
+  }
+
+  65% {
+    opacity: 0.56;
+
+    transform:
+      scale(1)
+      translateX(0);
   }
 }

@@ -7,9 +7,12 @@ import ObservationCue from "../Observation/ObservationCue";
 import DiceCue from "../Dice/DiceCue";
 import CooperativePuzzleCue from "../Puzzle/CooperativePuzzleCue";
 import RelicRevealCue from "../Relic/RelicRevealCue";
+import RhythmChallengeCue from "../Rhythm/RhythmChallengeCue";
+
 
 function ChapterDirector({
   sequence = [],
+  onVisualStateChange,
   onCompleteChapter,
 }) {
   const [currentCueIndex, setCurrentCueIndex] = useState(0);
@@ -102,15 +105,24 @@ function ChapterDirector({
     });
   }
 
-  function handleIndividualDecision(option) {
-    setDecisionOutcome({
-      id: `${currentCue.id}-${option.id}-outcome`,
-      type: "narration",
-      text: option.outcome,
-      decisionId: currentCue.id,
-      optionId: option.id,
-    });
+function handleIndividualDecision(
+  option,
+) {
+  if (option.visualState) {
+    onVisualStateChange?.(
+      option.visualState,
+    );
   }
+
+  setDecisionOutcome({
+    id:
+      `${currentCue.id}-${option.id}-outcome`,
+    type: "narration",
+    text: option.outcome,
+    decisionId: currentCue.id,
+    optionId: option.id,
+  });
+}
 
   function handleDiceComplete(result) {
     saveCueResult(currentCue.id, result);
@@ -150,6 +162,27 @@ function ChapterDirector({
 
   function handleRelicRevealComplete(result) {
     saveCueResult(currentCue.id, result);
+    advanceCue();
+  }
+
+  function handleRhythmChallengeComplete(result) {
+    saveCueResult(currentCue.id, result);
+
+    if (result.narration) {
+      setDecisionOutcome({
+        id: `${currentCue.id}-${result.outcomeId}-outcome`,
+        type: "narration",
+        text: result.narration,
+        rhythmCueId: currentCue.id,
+        completed: result.completed,
+        attempts: result.attempts,
+        accuracy: result.accuracy,
+        glory: result.glory,
+      });
+
+      return;
+    }
+
     advanceCue();
   }
 
@@ -240,6 +273,15 @@ function ChapterDirector({
           key={currentCue.id}
           cue={currentCue}
           onComplete={handleRelicRevealComplete}
+        />
+      );
+
+    case "rhythmChallenge":
+      return (
+        <RhythmChallengeCue
+          key={currentCue.id}
+          cue={currentCue}
+          onComplete={handleRhythmChallengeComplete}
         />
       );
 
