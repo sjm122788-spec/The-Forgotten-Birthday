@@ -238,6 +238,35 @@
       rotate(0.4deg);
   }
 }
+.guardian--parade-marshal {
+  position: absolute;
+  right: 30%;
+  bottom: 30%;
+  z-index: 6;
+
+  width: clamp(
+    250px,
+    25vw,
+    390px
+  );
+  height: min(
+    78vh,
+    730px
+  );
+
+  pointer-events: none;
+
+  filter:
+    drop-shadow(
+      0 20px 34px
+      rgba(0, 0, 0, 0.48)
+    )
+    drop-shadow(
+      0 0 16px
+      rgba(255, 208, 118, 0.12)
+    );
+}
+
 .guardian--parade-marshal
   .guardian-layer__character {
   position: absolute;
@@ -251,40 +280,31 @@
   object-fit: contain;
   object-position: right bottom;
 
-  transform-origin: 54% 90%;
+  transform-origin:
+    55% 88%;
 
   animation:
-    parade-marshal-command
-    4.2s ease-in-out infinite;
+    parade-marshal-ready
+    4.8s ease-in-out infinite;
 }
 
-@keyframes parade-marshal-command {
+@keyframes parade-marshal-ready {
   0%,
   100% {
     transform:
       translateY(0)
-      rotate(0deg)
-      scale(1);
+      rotate(0deg);
   }
 
-  28% {
-    transform:
-      translateY(-5px)
-      rotate(-1.3deg)
-      scale(1.012);
-  }
-
-  52% {
-    transform:
-      translateY(-7px)
-      rotate(0.8deg)
-      scale(1.018);
-  }
-
-  72% {
+  45% {
     transform:
       translateY(-3px)
-      rotate(-0.4deg)
-      scale(1.008);
+      rotate(-0.45deg);
+  }
+
+  60% {
+    transform:
+      translateY(-3px)
+      rotate(-0.45deg);
   }
 }
