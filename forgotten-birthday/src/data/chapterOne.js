@@ -165,51 +165,11 @@ const chapterOne = {
       height: 16,
     },
   ],
-  // TODO: Chapter 1 observation hotspots still need placement and testing.
 },
     {
       id: "after-investigation",
       type: "narration",
       text: "Whatever had happened here, the celebration had been interrupted.",
-    },
-    {
-      id: "unsigned-invitation",
-      type: "individualDecision",
-
-      eyebrow: "A Choice for One Guest",
-      title: "The Unsigned Invitation",
-
-      prompt:
-        "The Confetti Sweeper lifts a small envelope from beneath the chair and offers it forward.",
-
-      instructions:
-        "What should happen next?",
-
-      confirmLabel: "Make This Choice",
-
-      options: [
-        {
-          id: "open-now",
-          label: "Open it now",
-          description:
-            "Step forward before the room has time to grow quiet again.",
-          outcome:
-            "The envelope opens at once. The paper inside trembles as though it has been waiting to be seen.",
-        },
-        {
-          id: "wait",
-          label: "Wait a little longer",
-          description:
-            "Stay with the stillness and listen before opening it.",
-          outcome:
-            "For a little while, no one moves. The music continues softly. Then the envelope is opened with care.",
-        },
-      ],
-    },
-    {
-      id: "invitation-reveal",
-      type: "narration",
-      text: "Inside, only four words had been written: Please remember me.",
     },
 
     {

@@ -1,9 +1,12 @@
-import StoryMapOverlay from "./StoryMapOverlay";
+import StoryRouteOverlay from "./StoryRouteOverlay";
 
 import "./StorybookMap.css";
 
 function StorybookMap({
   chapters = [],
+  activeChapterId,
+  completedChapterIds = [],
+  unlockingChapterId,
   onSelectChapter,
 }) {
   const mapImage = chapters.find(
@@ -25,8 +28,11 @@ function StorybookMap({
           </div>
         )}
 
-        <StoryMapOverlay
+        <StoryRouteOverlay
           chapters={chapters}
+          activeChapterId={activeChapterId}
+          completedChapterIds={completedChapterIds}
+          unlockingChapterId={unlockingChapterId}
           onSelectChapter={onSelectChapter}
         />
       </div>

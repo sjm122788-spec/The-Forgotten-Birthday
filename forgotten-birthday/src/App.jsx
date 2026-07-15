@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import StorybookMap from "./components/Storybook/StorybookMap";
 import MemoryWindow from "./components/MemoryWindow/MemoryWindow";
@@ -21,8 +21,25 @@ function App() {
     chapters[0]?.id ?? "chapter-01",
   );
 
+  const [completedChapterIds, setCompletedChapterIds] =
+    useState([]);
+
+  const [activeChapterIndex, setActiveChapterIndex] =
+    useState(0);
+
+  const [unlockingChapterId, setUnlockingChapterId] =
+    useState(null);
+
   const selectedChapter =
     chapterById[selectedChapterId] ?? chapters[0];
+
+  const activeChapterId =
+    chapters[activeChapterIndex]?.id ?? null;
+
+  const completedChapterIdSet = useMemo(
+    () => new Set(completedChapterIds),
+    [completedChapterIds],
+  );
 
   function handleSelectChapter(chapterId) {
     const nextChapter = chapterById[chapterId];
@@ -34,8 +51,44 @@ function App() {
       return;
     }
 
+    /*
+      Normal mode:
+      only the active chapter can be opened.
+
+      Later, we can add a devMode override.
+    */
+    if (chapterId !== activeChapterId) {
+      return;
+    }
+
     setSelectedChapterId(chapterId);
+    setUnlockingChapterId(null);
     setScreen(SCREENS.MEMORY_WINDOW);
+  }
+
+  function handleCompleteChapter() {
+    const completedId = selectedChapter.id;
+
+    setCompletedChapterIds((currentIds) => {
+      if (currentIds.includes(completedId)) {
+        return currentIds;
+      }
+
+      return [...currentIds, completedId];
+    });
+
+    const completedIndex = chapters.findIndex(
+      (chapter) => chapter.id === completedId,
+    );
+
+    const nextChapter = chapters[completedIndex + 1];
+
+    if (nextChapter) {
+      setActiveChapterIndex(completedIndex + 1);
+      setUnlockingChapterId(nextChapter.id);
+    }
+
+    setScreen(SCREENS.STORYBOOK);
   }
 
   function renderScreen() {
@@ -57,9 +110,7 @@ function App() {
         return (
           <ChapterScene
             chapter={selectedChapter}
-            onCompleteChapter={() =>
-              setScreen(SCREENS.STORYBOOK)
-            }
+            onCompleteChapter={handleCompleteChapter}
           />
         );
 
@@ -68,17 +119,18 @@ function App() {
         return (
           <StorybookMap
             chapters={chapters}
+            activeChapterId={activeChapterId}
+            completedChapterIds={[
+              ...completedChapterIdSet,
+            ]}
+            unlockingChapterId={unlockingChapterId}
             onSelectChapter={handleSelectChapter}
           />
         );
     }
   }
 
-  return (
-    <div className="app">
-      {renderScreen()}
-    </div>
-  );
+  return <div className="app">{renderScreen()}</div>;
 }
 
 export default App;
