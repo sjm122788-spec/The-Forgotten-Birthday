@@ -15,7 +15,7 @@ const SCREENS = {
   CHAPTER: "chapter",
   QUIET_AFTER: "quiet-after",
 };
-
+const DEV_MODE = import.meta.env.DEV;
 function App() {
   const [screen, setScreen] = useState(SCREENS.STORYBOOK);
 
@@ -42,7 +42,25 @@ function App() {
     () => new Set(completedChapterIds),
     [completedChapterIds],
   );
+function handleDevOpenChapter(chapterId) {
+  const chapter = chapterById[chapterId];
 
+  if (!chapter) {
+    console.warn(`Unknown chapter selected: ${chapterId}`);
+    return;
+  }
+
+  setSelectedChapterId(chapterId);
+  setScreen(SCREENS.CHAPTER);
+}
+
+function handleDevOpenQuietAfter() {
+  setScreen(SCREENS.QUIET_AFTER);
+}
+
+function handleDevOpenMap() {
+  setScreen(SCREENS.STORYBOOK);
+}
   function handleSelectChapter(chapterId) {
     const nextChapter = chapterById[chapterId];
 
@@ -151,7 +169,45 @@ function App() {
     }
   }
 
-  return <div className="app">{renderScreen()}</div>;
+  return (
+  <div className="app">
+    {renderScreen()}
+
+    {DEV_MODE && (
+      <aside className="dev-toolbar">
+        <span className="dev-toolbar__label">
+          Dev
+        </span>
+
+        <button
+          type="button"
+          onClick={handleDevOpenMap}
+        >
+          Map
+        </button>
+
+        <button
+          type="button"
+          onClick={handleDevOpenQuietAfter}
+        >
+          Quiet After
+        </button>
+
+        {chapters.map((chapter, index) => (
+          <button
+            key={chapter.id}
+            type="button"
+            onClick={() =>
+              handleDevOpenChapter(chapter.id)
+            }
+          >
+            Ch {index + 1}
+          </button>
+        ))}
+      </aside>
+    )}
+  </div>
+);
 }
 
 export default App;

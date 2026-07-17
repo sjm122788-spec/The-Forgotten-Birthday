@@ -1,3 +1,57 @@
 .app {
   min-height: 100vh;
 }
+.dev-toolbar {
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  z-index: 9999;
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+
+  max-width: min(520px, calc(100vw - 28px));
+  padding: 8px;
+
+  border: 1px solid rgba(255, 225, 177, 0.24);
+  border-radius: 12px;
+
+  background: rgba(8, 6, 7, 0.92);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.55);
+
+  backdrop-filter: blur(10px);
+}
+
+.dev-toolbar__label {
+  display: grid;
+  place-items: center;
+
+  padding: 0 8px;
+
+  color: rgba(255, 226, 180, 0.65);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.dev-toolbar button {
+  padding: 7px 10px;
+
+  border: 1px solid rgba(255, 225, 177, 0.2);
+  border-radius: 8px;
+
+  color: #f8e8cf;
+  background: rgba(255, 255, 255, 0.055);
+
+  font: inherit;
+  font-size: 0.72rem;
+
+  cursor: pointer;
+}
+
+.dev-toolbar button:hover {
+  border-color: rgba(255, 205, 127, 0.55);
+  background: rgba(255, 205, 127, 0.12);
+}
