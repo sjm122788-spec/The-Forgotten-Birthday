@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import StorybookMap from "./components/Storybook/StorybookMap";
 import MemoryWindow from "./components/MemoryWindow/MemoryWindow";
 import ChapterScene from "./components/Chapter/ChapterScene";
+import QuietAfter from "./components/QuietAfter/QuietAfter";
 
 import { chapters, chapterById } from "./data/chapters";
 
@@ -12,6 +13,7 @@ const SCREENS = {
   STORYBOOK: "storybook",
   MEMORY_WINDOW: "memory-window",
   CHAPTER: "chapter",
+  QUIET_AFTER: "quiet-after",
 };
 
 function App() {
@@ -51,12 +53,6 @@ function App() {
       return;
     }
 
-    /*
-      Normal mode:
-      only the active chapter can be opened.
-
-      Later, we can add a devMode override.
-    */
     if (chapterId !== activeChapterId) {
       return;
     }
@@ -66,19 +62,19 @@ function App() {
     setScreen(SCREENS.MEMORY_WINDOW);
   }
 
-  function handleCompleteChapter() {
-    const completedId = selectedChapter.id;
-
+  function markChapterComplete(chapterId) {
     setCompletedChapterIds((currentIds) => {
-      if (currentIds.includes(completedId)) {
+      if (currentIds.includes(chapterId)) {
         return currentIds;
       }
 
-      return [...currentIds, completedId];
+      return [...currentIds, chapterId];
     });
+  }
 
+  function unlockNextChapter(completedChapterId) {
     const completedIndex = chapters.findIndex(
-      (chapter) => chapter.id === completedId,
+      (chapter) => chapter.id === completedChapterId,
     );
 
     const nextChapter = chapters[completedIndex + 1];
@@ -89,6 +85,24 @@ function App() {
     }
 
     setScreen(SCREENS.STORYBOOK);
+  }
+
+  function handleCompleteChapter() {
+    const completedId = selectedChapter.id;
+
+    markChapterComplete(completedId);
+
+    if (completedId === "chapter-05") {
+      setUnlockingChapterId(null);
+      setScreen(SCREENS.QUIET_AFTER);
+      return;
+    }
+
+    unlockNextChapter(completedId);
+  }
+
+  function handleQuietAfterComplete() {
+    unlockNextChapter("chapter-05");
   }
 
   function renderScreen() {
@@ -111,6 +125,13 @@ function App() {
           <ChapterScene
             chapter={selectedChapter}
             onCompleteChapter={handleCompleteChapter}
+          />
+        );
+
+      case SCREENS.QUIET_AFTER:
+        return (
+          <QuietAfter
+            onComplete={handleQuietAfterComplete}
           />
         );
 

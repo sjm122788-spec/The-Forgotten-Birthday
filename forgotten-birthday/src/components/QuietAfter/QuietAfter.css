@@ -1,0 +1,551 @@
+.quiet-after {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  overflow: hidden;
+  background: #050403;
+}
+
+.quiet-after__frame {
+  position: relative;
+  width: min(1400px, 90vw);
+  max-height: 90vh;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #000;
+  box-shadow:
+    0 30px 100px rgba(0, 0, 0, 0.88),
+    0 0 55px rgba(91, 54, 25, 0.1);
+}
+
+.quiet-after__map-layer,
+.quiet-after__room-layer,
+.quiet-after__window-bloom,
+.quiet-after__final-blackout {
+  position: absolute;
+  inset: 0;
+}
+
+/* ---------------------------------------------------------
+   Storybook map and camera approach
+   --------------------------------------------------------- */
+
+.quiet-after__map-layer {
+  z-index: 1;
+  overflow: hidden;
+  opacity: 1;
+}
+
+.quiet-after__map-camera {
+  position: absolute;
+  inset: 0;
+  transform-origin: 21% 47%;
+  transform: translate3d(0, 0, 0) scale(1);
+  will-change: transform;
+}
+
+.quiet-after__map {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  user-select: none;
+}
+
+/*
+  This glow sits over the tiny window in the map artwork and
+  travels with the map as the camera zooms. Adjust only left
+  and top if the window needs a small positional correction.
+*/
+.quiet-after__window-light {
+  position: absolute;
+  left: 24%;
+  top: 45.5%;
+  z-index: 2;
+
+  width: 1.00%;
+  aspect-ratio: 0.72;
+
+  opacity: 0;
+
+  border-radius: 42% 42% 48% 48%;
+
+  transform: translate(-50%, -50%) scale(0.72);
+  transform-origin: center;
+
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(255, 251, 219, 1) 0%,
+      rgba(255, 218, 137, 0.96) 24%,
+      rgba(237, 154, 65, 0.72) 48%,
+      rgba(180, 91, 34, 0.24) 70%,
+      transparent 82%
+    );
+
+  filter: blur(0.7px);
+  mix-blend-mode: screen;
+
+  pointer-events: none;
+  will-change: opacity, transform, filter;
+}
+
+.quiet-after--first-flicker .quiet-after__window-light {
+  animation:
+    quietAfterFirstWindowFlicker
+    2500ms
+    ease-in-out
+    forwards;
+}
+
+.quiet-after--second-flicker .quiet-after__window-light {
+  animation:
+    quietAfterSecondWindowFlicker
+    3500ms
+    ease-in-out
+    forwards;
+}
+
+.quiet-after--map-zoom .quiet-after__window-light,
+.quiet-after--window-bloom .quiet-after__window-light {
+  opacity: 0.54;
+
+  animation:
+    quietAfterLivingWindow
+    2900ms
+    ease-in-out
+    infinite;
+}
+
+.quiet-after--map-zoom .quiet-after__map-camera,
+.quiet-after--window-bloom .quiet-after__map-camera,
+.quiet-after--room .quiet-after__map-camera,
+.quiet-after--ending .quiet-after__map-camera {
+  animation:
+    quietAfterMapZoom
+    18000ms
+    cubic-bezier(0.34, 0.02, 0.16, 1)
+    forwards;
+}
+
+.quiet-after--room .quiet-after__map-layer,
+.quiet-after--ending .quiet-after__map-layer {
+  opacity: 0;
+}
+
+/* ---------------------------------------------------------
+   Candlelight becomes the transition into the room
+   --------------------------------------------------------- */
+
+.quiet-after__window-bloom {
+  z-index: 4;
+  opacity: 0;
+  pointer-events: none;
+
+  background:
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(255, 249, 214, 1) 0%,
+      rgba(255, 215, 137, 0.98) 17%,
+      rgba(236, 157, 72, 0.94) 40%,
+      rgba(144, 72, 29, 0.88) 68%,
+      rgba(18, 9, 5, 0.98) 100%
+    );
+}
+
+.quiet-after--window-bloom .quiet-after__window-bloom {
+  animation:
+    quietAfterWindowBloom
+    1100ms
+    cubic-bezier(0.3, 0, 0.14, 1)
+    forwards;
+}
+
+.quiet-after--room .quiet-after__window-bloom {
+  animation:
+    quietAfterBloomRelease
+    1000ms
+    ease-out
+    forwards;
+}
+
+/* ---------------------------------------------------------
+   Quiet room
+   --------------------------------------------------------- */
+
+.quiet-after__room-layer {
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.quiet-after--room .quiet-after__room-layer,
+.quiet-after--ending .quiet-after__room-layer {
+  animation:
+    quietAfterRoomReveal
+    1000ms
+    ease-out
+    forwards;
+}
+
+.quiet-after__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.quiet-after__candle-glow {
+  position: absolute;
+  left: 48.8%;
+  top: 42.4%;
+  z-index: 2;
+  width: 25%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background:
+    radial-gradient(
+      circle,
+      rgba(255, 239, 190, 0.98) 0%,
+      rgba(255, 207, 126, 0.68) 10%,
+      rgba(232, 151, 72, 0.34) 28%,
+      rgba(164, 83, 35, 0.12) 50%,
+      transparent 73%
+    );
+  filter: blur(7px);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  animation:
+    quietAfterCandleBreathe
+    3300ms
+    ease-in-out
+    infinite;
+}
+
+.quiet-after__flame-core {
+  position: absolute;
+  left: 48.9%;
+  top: 42.8%;
+  z-index: 3;
+  width: 3.2%;
+  aspect-ratio: 0.72;
+  border-radius: 50% 50% 45% 45%;
+  transform: translate(-50%, -50%);
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(255, 255, 226, 1) 0%,
+      rgba(255, 227, 151, 0.92) 30%,
+      rgba(242, 158, 66, 0.42) 62%,
+      transparent 78%
+    );
+  filter: blur(2px);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  animation:
+    quietAfterFlameFlicker
+    1800ms
+    ease-in-out
+    infinite;
+}
+
+.quiet-after__vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse at 50% 46%,
+      transparent 30%,
+      rgba(2, 4, 4, 0.12) 59%,
+      rgba(1, 2, 2, 0.58) 100%
+    );
+}
+
+/* ---------------------------------------------------------
+   Final candle extinction and blackout
+   --------------------------------------------------------- */
+
+.quiet-after__final-blackout {
+  z-index: 5;
+  opacity: 0;
+  background: #000;
+  pointer-events: none;
+}
+
+.quiet-after--ending .quiet-after__candle-glow,
+.quiet-after--ending .quiet-after__flame-core {
+  animation:
+    quietAfterLightExtinguish
+    1700ms
+    ease-in
+    forwards;
+}
+
+.quiet-after--ending .quiet-after__final-blackout {
+  animation:
+    quietAfterFinalBlackout
+    5000ms
+    ease-in
+    forwards;
+}
+
+/* ---------------------------------------------------------
+   Keyframes
+   --------------------------------------------------------- */
+
+@keyframes quietAfterFirstWindowFlicker {
+  0%,
+  18% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.72);
+  }
+
+  30% {
+    opacity: 0.22;
+    transform: translate(-50%, -50%) scale(0.88);
+  }
+
+  42% {
+    opacity: 0.06;
+    transform: translate(-50%, -50%) scale(0.76);
+  }
+
+  54% {
+    opacity: 0.3;
+    transform: translate(-50%, -50%) scale(0.94);
+  }
+
+  70%,
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.72);
+  }
+}
+
+@keyframes quietAfterSecondWindowFlicker {
+  0%,
+  8% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.76);
+  }
+
+  22% {
+    opacity: 0.34;
+    transform: translate(-50%, -50%) scale(0.94);
+  }
+
+  36% {
+    opacity: 0.18;
+    transform: translate(-50%, -50%) scale(0.86);
+  }
+
+  49% {
+    opacity: 0.48;
+    transform: translate(-50%, -50%) scale(1.02);
+  }
+
+  63% {
+    opacity: 0.27;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+
+  82%,
+  100% {
+    opacity: 0.5;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes quietAfterLivingWindow {
+  0%,
+  100% {
+    opacity: 0.42;
+    filter: blur(0.8px) brightness(0.92);
+    transform: translate(-50%, -50%) scale(0.96, 1);
+  }
+
+  17% {
+    opacity: 0.62;
+    filter: blur(0.65px) brightness(1.08);
+    transform: translate(-50%, -51%) scale(1.04, 1.08);
+  }
+
+  29% {
+    opacity: 0.48;
+    filter: blur(0.8px) brightness(0.96);
+    transform: translate(-49%, -50%) scale(0.98, 1.02);
+  }
+
+  54% {
+    opacity: 0.69;
+    filter: blur(0.6px) brightness(1.14);
+    transform: translate(-50%, -52%) scale(1.07, 1.12);
+  }
+
+  68% {
+    opacity: 0.31;
+    filter: blur(1px) brightness(0.82);
+    transform: translate(-51%, -50%) scale(0.9, 0.96);
+  }
+
+  77% {
+    opacity: 0.58;
+    filter: blur(0.7px) brightness(1.04);
+    transform: translate(-50%, -51%) scale(1.02, 1.08);
+  }
+}
+
+@keyframes quietAfterMapZoom {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  16% {
+    transform: translate3d(0, 0, 0) scale(1.08);
+  }
+
+  55% {
+    transform: translate3d(1.5%, -1%, 0) scale(2.35);
+  }
+
+  100% {
+    transform: translate3d(7%, -5%, 0) scale(6.2);
+  }
+}
+
+@keyframes quietAfterWindowBloom {
+  0% {
+    opacity: 0;
+    transform: scale(0.12);
+    filter: blur(18px);
+  }
+
+  52% {
+    opacity: 0.72;
+    transform: scale(1.3);
+    filter: blur(10px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes quietAfterBloomRelease {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes quietAfterRoomReveal {
+  from {
+    opacity: 0;
+    filter: brightness(0.62);
+  }
+
+  to {
+    opacity: 1;
+    filter: brightness(1);
+  }
+}
+
+@keyframes quietAfterCandleBreathe {
+  0%,
+  100% {
+    opacity: 0.62;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+
+  42% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+
+  57% {
+    opacity: 0.78;
+    transform: translate(-50%, -50%) scale(0.97);
+  }
+
+  74% {
+    opacity: 0.92;
+    transform: translate(-50%, -50%) scale(1.03);
+  }
+}
+
+@keyframes quietAfterFlameFlicker {
+  0%,
+  100% {
+    opacity: 0.72;
+    transform: translate(-50%, -50%) scale(0.9, 0.96);
+  }
+
+  36% {
+    opacity: 1;
+    transform: translate(-50%, -51%) scale(1.04, 1.13);
+  }
+
+  58% {
+    opacity: 0.8;
+    transform: translate(-49%, -50%) scale(0.94, 1.02);
+  }
+
+  76% {
+    opacity: 0.96;
+    transform: translate(-51%, -52%) scale(1.01, 1.08);
+  }
+}
+
+@keyframes quietAfterLightExtinguish {
+  0% {
+    opacity: 1;
+  }
+
+  72% {
+    opacity: 0.25;
+    transform: translate(-50%, -50%) scale(0.72);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.3);
+  }
+}
+
+@keyframes quietAfterFinalBlackout {
+  0% {
+    opacity: 0;
+  }
+
+  45% {
+    opacity: 0.12;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quiet-after__map-camera,
+  .quiet-after__window-light,
+  .quiet-after__window-bloom,
+  .quiet-after__room-layer,
+  .quiet-after__candle-glow,
+  .quiet-after__flame-core,
+  .quiet-after__final-blackout {
+    animation-duration: 200ms !important;
+    animation-delay: 0ms !important;
+  }
+}
