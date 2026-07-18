@@ -1,181 +1,242 @@
-# Gameplay System
+# The Forgotten Birthday
+# Gameplay
 
-Status: LOCKED CORE / SOME CONTENT DETAILS IN REVIEW
+Status: CORE GAMEPLAY LOCKED
 
-## Player Structure
+---
 
-The group consists of:
+# The Experience
 
-- One Host
-- Multiple Guests
+The Forgotten Birthday is not a competitive party game.
 
-The Host reads narration and advances shared story moments.
+It is a cooperative storybook that occasionally asks the Guests to participate.
 
-Guests use their phones for individual decisions, secret prompts, dice, Glory, and relics.
+The goal is never to defeat an enemy.
 
-## Chapter Rhythm
+The goal is to help restore a forgotten celebration.
 
-Chapters should not follow an identical template.
+Players experience the story together while sitting around a television.
 
-Across the story, chapters may include:
+The television presents the world.
 
-- Group decisions
-- Individual Guest decisions
-- Observation challenges
-- Cooperative puzzles
-- Dice moments
-- Rhythm challenges
-- Secret prompts
-- Relic opportunities
-- Chapters with no interaction at all
+Each Guest participates privately through their phone.
 
-Some chapters may contain three interactions.
+The Host guides the journey by reading narration and advancing the story.
 
-Some may contain one major interaction.
+---
 
-The Quiet After contains none.
+# The Core Gameplay Loop
+
+Every chapter follows the same emotional rhythm rather than the same mechanical rhythm.
+
+Story
+
+↓
+
+Participation
+
+↓
+
+Story
+
+↓
+
+Participation
+
+↓
+
+Reflection
+
+↓
+
+Return to the Storybook
+
+The narration is always the primary experience.
+
+Gameplay exists to deepen the story—not interrupt it.
+
+---
+
+# Shared vs Individual Moments
+
+The Forgotten Birthday constantly shifts between two perspectives.
 
 ## Shared Moments
 
-Everyone contributes to a single experience.
+Everyone experiences these together.
 
-Examples:
+Examples include:
 
-- Observation
-- Discussion
-- Rhythm
-- Cooperative puzzle
-- Group selection
+- Group Decisions
+- Observation Scenes
+- Cooperative Puzzles
+- Rhythm Challenges
+- Story Reveals
 
-Shared outcomes advance the story and may award Glory to the group.
+These encourage conversation, teamwork, and shared discovery.
 
-## Individual Guest Moments
+The Host guides the discussion before locking in the group's choice.
 
-One selected Guest receives a decision on their phone.
+---
 
-The story chooses whose moment it is.
+## Individual Moments
 
-The Host does not decide who deserves Glory.
+Throughout each chapter, one Guest is quietly invited into the spotlight.
 
-The game assigns the spotlight.
+Only that Guest sees the prompt.
 
-The selected Guest’s choice determines:
+The television pauses while they make their choice.
 
-- Narration flavor
-- Individual Glory
-- A possible relic
-- A later callback
+The rest of the table waits to discover the outcome together.
 
-## Secret Prompts
+These moments create the feeling that every Guest has a unique part to play.
 
-Exactly three major secret prompts are currently planned.
+---
 
-Only one Guest sees each prompt.
+# Glory
 
-The television does not announce the secret.
+Glory is not a score.
 
-The Host does not know the content.
+It represents the hope, kindness, courage, and attention restored throughout the journey.
 
-Current planned locations:
+Guests earn Glory by:
 
-- The Hall of Echoes
-- The Clockmaker’s Hour
-- The Last Invitation
+- noticing details
+- helping Guardians
+- making thoughtful decisions
+- succeeding during challenges
+- supporting one another
 
-## Dice
+Glory is intentionally private.
 
-Dice are used only when uncertainty creates emotional tension.
+There is no leaderboard.
 
-Dice do not block the story.
+There is no winner.
 
-Failure creates a different consequence rather than a dead end.
+During the Finale, every Guest chooses how much Glory they wish to return to the Birthday.
 
-## Glory
+The more Glory restored...
 
-Glory is individual.
+the more complete the celebration becomes.
 
-Mechanically, it represents success points earned through selected story moments.
+---
 
-Narratively, it represents restored:
+# Keepsakes
 
-- Memories
-- Traditions
-- Kindness
-- Hope
-- Belonging
-- Celebration
+Throughout the story, certain Guests are entrusted with Keepsakes by the Guardians.
 
-Glory follows the story rather than strict competitive balance.
+Keepsakes are not weapons or power-ups.
 
-The television does not show a leaderboard.
+They are symbolic pieces of the forgotten celebration.
 
-Phones may quietly show a Guest’s Glory.
-
-Glory may be theatrical and intentionally uneven.
-
-## Relics
-
-Relics are rare.
-
-The current plan is approximately five major Story Relics across the journey.
-
-Relics are earned by an individual Guest through a successful story moment.
-
-A relic may be:
-
-- Used during a later decision
-- Saved until the finale
-- Offered in the finale for a unique restoration effect
-
-Current Story Relics:
+Examples include:
 
 - Candle of First Light
 - Laughter Balloon
 - Ribbon of Belonging
 - Pocket Watch of Lost Time
-- Fifth relic still requires final confirmation
+- Open Seal
 
-Important:
-The previously discussed two random role-based relics no longer work because Guests no longer choose roles.
+A Keepsake may occasionally help during a later chapter, but its true purpose is fulfilled during the Finale, when it restores part of the Birthday.
 
-This needs to be either:
+---
 
-- Removed
-- Replaced with two random Guest discoveries
-- Folded into the five Story Relics
+# Dice
 
-## Finale
+Dice are used sparingly.
 
-There is one ending.
+They represent uncertainty—not skill.
 
-Each Guest chooses what to return:
+A failed roll never blocks progress.
+
+Instead, it changes how the story unfolds.
+
+Success may restore more.
+
+Failure may leave something imperfect.
+
+The journey always continues.
+
+---
+
+# Secret Moments
+
+Several times during the story, one Guest receives a private prompt.
+
+No one else sees it.
+
+The Host does not know what was asked.
+
+These choices quietly influence later narration and make every playthrough feel personal.
+
+---
+
+# The Quiet After
+
+One hidden chapter contains no gameplay at all.
+
+No decisions.
+
+No Glory.
+
+No puzzles.
+
+No instructions.
+
+The Guests simply witness a moment together.
+
+Its purpose is to create empathy before the final act.
+
+---
+
+# The Finale
+
+The Finale is not a boss fight.
+
+It is a restoration.
+
+Every Guest is invited to give something back:
 
 - Glory
-- A relic
-- Both
-- Or neither
+- Keepsakes
+- or simply their presence
 
-The choice does not change the ending.
+As each contribution is returned, the Birthday slowly comes back to life.
 
-It changes how fully the celebration is restored before the ending.
+The room brightens.
 
-Glory restores visual and musical layers such as:
+Music grows.
 
-- Candlelight
-- Flowers
-- Ribbons
-- Color
-- Guests at the table
-- Confetti
-- Instruments in the score
-- The clarity of the Birthday
+Candles relight.
 
-The Birthday eventually pulls out the final chair for the Uninvited Guest.
+Flowers bloom.
 
-The Uninvited Guest sits.
+Laughter returns.
 
-The unopened present is placed at the table.
+When everything possible has been restored...
 
-The Birthday says:
+one final chair is pulled out.
 
-“I knew you’d remember.”
+The Uninvited Guest finally has a place at the table.
+
+The story ends not with victory—
+
+but with belonging.
+
+---
+
+# Gameplay Philosophy
+
+Every mechanic should answer one question:
+
+**"Does this help the Guests feel more connected to the story?"**
+
+If the answer is no...
+
+it doesn't belong.
+
+The illustration is always the hero.
+
+The narration is always the guide.
+
+The gameplay exists only to help the Guests remember.

@@ -3,6 +3,7 @@ import chapterTwo from "./chapterTwo";
 import chapterThree from "./chapterThree";
 import chapterFour from "./chapterFour";
 import chapterFive from "./chapterFive";
+import chapterSix from "./chapterSix";
 
 const chapters = [
   chapterOne,
@@ -10,6 +11,7 @@ const chapters = [
   chapterThree,
   chapterFour,
   chapterFive,
+  chapterSix,
 ];
 
 const chapterById = Object.fromEntries(

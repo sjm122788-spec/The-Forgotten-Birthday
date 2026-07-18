@@ -8,6 +8,7 @@ import DiceCue from "../Dice/DiceCue";
 import CooperativePuzzleCue from "../Puzzle/CooperativePuzzleCue";
 import RelicRevealCue from "../Relic/RelicRevealCue";
 import RhythmChallengeCue from "../Rhythm/RhythmChallengeCue";
+import GiftSelectionCue from "../GiftSelection/GiftSelectionCue";
 
 
 function ChapterDirector({
@@ -39,7 +40,28 @@ function ChapterDirector({
     success: 2,
     greatSuccess: 3,
   };
+function handleGiftSelectionComplete(result) {
+  saveCueResult(currentCue.id, result);
 
+  if (result.narration) {
+    setDecisionOutcome({
+      id:
+        `${currentCue.id}-${result.outcomeId}-outcome`,
+      type: "narration",
+      text: result.narration,
+      giftSelectionCueId:
+        currentCue.id,
+      completed: result.completed,
+      selectedGiftIds:
+        result.selectedGiftIds,
+      glory: result.glory,
+    });
+
+    return;
+  }
+
+  advanceCue();
+}
   function saveCueResult(cueId, result) {
     setCueResults((current) => ({
       ...current,
@@ -262,7 +284,16 @@ function handleIndividualDecision(
           onComplete={handleCooperativePuzzleComplete}
         />
       );
-
+    case "giftSelection":
+  return (
+    <GiftSelectionCue
+      key={currentCue.id}
+      cue={currentCue}
+      onComplete={
+        handleGiftSelectionComplete
+      }
+    />
+  );
     case "relicReveal":
       if (!relicConditionMet(currentCue.condition)) {
         return null;
