@@ -59,7 +59,6 @@
     transform: translate3d(10px, -18px, 0);
   }
 }
-
 @media (prefers-reduced-motion: reduce) {
   .atmosphere--chapter-four-oven-glow::before,
   .atmosphere--chapter-four-oven-glow::after,
@@ -76,9 +75,21 @@
   .atmosphere--chapter-six-ribbon-drift::before,
   .atmosphere--chapter-six-ribbon-drift::after,
   .atmosphere--chapter-seven-memory-light::before,
-.atmosphere--chapter-seven-memory-light::after,
-.atmosphere--chapter-seven-memory-dust::before,
-.atmosphere--chapter-seven-memory-dust::after {
+  .atmosphere--chapter-seven-memory-light::after,
+  .atmosphere--chapter-seven-memory-dust::before,
+  .atmosphere--chapter-seven-memory-dust::after,
+  .atmosphere--chapter-eight-clocklight::before,
+  .atmosphere--chapter-eight-clocklight::after,
+  .atmosphere--chapter-eight-dust::before,
+  .atmosphere--chapter-eight-dust::after,
+  .atmosphere--chapter-eight-pendulum::before,
+  .atmosphere--chapter-eight-pendulum::after,
+  .atmosphere--chapter-nine-garden-light::before,
+  .atmosphere--chapter-nine-garden-light::after,
+  .atmosphere--chapter-nine-drifting-petals::before,
+  .atmosphere--chapter-nine-drifting-petals::after,
+  .atmosphere--chapter-nine-pollen::before,
+  .atmosphere--chapter-nine-pollen::after {
     animation: none;
   }
 }
@@ -1124,5 +1135,551 @@
     transform:
       translate3d(5%, -10%, 0)
       rotate(2deg);
+  }
+}
+.atmosphere--chapter-eight-clocklight {
+  position: absolute;
+  inset: 0;
+
+  z-index: 2;
+
+  overflow: hidden;
+  pointer-events: none;
+
+  mix-blend-mode: screen;
+}
+
+.atmosphere--chapter-eight-clocklight::before {
+  content: "";
+
+  position: absolute;
+
+  top: -28%;
+  left: 8%;
+
+  width: 76%;
+  height: 138%;
+
+  background:
+    radial-gradient(
+      ellipse at 48% 18%,
+      rgba(255, 231, 174, 0.46) 0%,
+      rgba(225, 175, 92, 0.2) 30%,
+      rgba(167, 111, 53, 0.08) 52%,
+      transparent 72%
+    );
+
+  filter: blur(18px);
+
+  transform-origin: top center;
+
+  animation:
+    chapter-eight-clocklight-breathe
+    8s ease-in-out infinite;
+}
+
+.atmosphere--chapter-eight-clocklight::after {
+  content: "";
+
+  position: absolute;
+
+  inset: 0;
+
+  background:
+    radial-gradient(
+      circle at 52% 42%,
+      rgba(255, 212, 126, 0.24) 0%,
+      rgba(255, 190, 89, 0.08) 22%,
+      transparent 48%
+    );
+
+  opacity: 0.45;
+
+  animation:
+    chapter-eight-clocklight-pulse
+    5.5s ease-in-out infinite;
+}
+
+@keyframes chapter-eight-clocklight-breathe {
+  0%,
+  100% {
+    opacity: 0.42;
+
+    transform:
+      translate3d(-2%, 1%, 0)
+      scale(0.96);
+  }
+
+  50% {
+    opacity: 0.82;
+
+    transform:
+      translate3d(3%, -1%, 0)
+      scale(1.06);
+  }
+}
+
+@keyframes chapter-eight-clocklight-pulse {
+  0%,
+  100% {
+    opacity: 0.28;
+
+    transform:
+      scale(0.98);
+  }
+
+  50% {
+    opacity: 0.62;
+
+    transform:
+      scale(1.05);
+  }
+}
+.atmosphere--chapter-eight-dust {
+  position: absolute;
+  inset: 0;
+
+  z-index: 4;
+
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.atmosphere--chapter-eight-dust::before,
+.atmosphere--chapter-eight-dust::after {
+  content: "";
+
+  position: absolute;
+
+  inset: -20%;
+
+  background-image:
+    radial-gradient(
+      circle,
+      rgba(255, 230, 175, 0.78)
+      0 1.2px,
+      transparent 2.2px
+    ),
+    radial-gradient(
+      circle,
+      rgba(255, 198, 105, 0.48)
+      0 0.9px,
+      transparent 1.9px
+    ),
+    radial-gradient(
+      circle,
+      rgba(255, 244, 216, 0.5)
+      0 1px,
+      transparent 2px
+    );
+
+  background-size:
+    145px 185px,
+    210px 255px,
+    112px 165px;
+
+  background-position:
+    15px 40px,
+    80px 115px,
+    45px 80px;
+
+  opacity: 0.2;
+
+  filter:
+    drop-shadow(
+      0 0 5px
+      rgba(255, 213, 135, 0.2)
+    );
+
+  animation:
+    chapter-eight-dust-rise
+    22s linear infinite;
+}
+
+.atmosphere--chapter-eight-dust::after {
+  opacity: 0.11;
+
+  transform: scale(1.16);
+
+  animation-duration: 30s;
+  animation-delay: -11s;
+  animation-direction: reverse;
+}
+
+@keyframes chapter-eight-dust-rise {
+  0% {
+    transform:
+      translate3d(-3%, 10%, 0)
+      rotate(-1deg);
+  }
+
+  50% {
+    transform:
+      translate3d(1%, 0, 0)
+      rotate(0.5deg);
+  }
+
+  100% {
+    transform:
+      translate3d(4%, -12%, 0)
+      rotate(1.5deg);
+  }
+}
+.atmosphere--chapter-eight-pendulum {
+  position: absolute;
+  inset: 0;
+
+  z-index: 3;
+
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.atmosphere--chapter-eight-pendulum::before {
+  content: "";
+
+  position: absolute;
+
+  top: 16%;
+  left: 50%;
+
+  width: 5px;
+  height: 54%;
+
+  border-radius: 999px;
+
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(45, 27, 13, 0.2),
+      rgba(45, 27, 13, 0.62)
+    );
+
+  box-shadow:
+    0 0 10px rgba(0, 0, 0, 0.25);
+
+  transform-origin: top center;
+
+  animation:
+    chapter-eight-pendulum-swing
+    5.8s ease-in-out infinite alternate;
+}
+
+.atmosphere--chapter-eight-pendulum::after {
+  content: "";
+
+  position: absolute;
+
+  top: 65%;
+  left: calc(50% - 18px);
+
+  width: 40px;
+  height: 52px;
+
+  border-radius: 50% 50% 46% 46%;
+
+  background:
+    radial-gradient(
+      circle at 38% 30%,
+      rgba(214, 158, 75, 0.4),
+      rgba(74, 42, 16, 0.72) 68%
+    );
+
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.35);
+
+  transform-origin:
+    20px
+    calc(-49vh);
+
+  animation:
+    chapter-eight-pendulum-swing
+    5.8s ease-in-out infinite alternate;
+}
+
+@keyframes chapter-eight-pendulum-swing {
+  from {
+    transform:
+      rotate(-2.5deg);
+  }
+
+  to {
+    transform:
+      rotate(2.5deg);
+  }
+}
+.atmosphere--chapter-nine-garden-light {
+  position: absolute;
+  inset: 0;
+
+  z-index: 2;
+
+  overflow: hidden;
+  pointer-events: none;
+
+  mix-blend-mode: screen;
+}
+
+.atmosphere--chapter-nine-garden-light::before {
+  content: "";
+
+  position: absolute;
+
+  top: -18%;
+  left: -8%;
+
+  width: 78%;
+  height: 112%;
+
+  background:
+    radial-gradient(
+      ellipse at 34% 24%,
+      rgba(255, 236, 183, 0.4) 0%,
+      rgba(221, 185, 119, 0.18) 30%,
+      rgba(144, 127, 77, 0.06) 54%,
+      transparent 74%
+    );
+
+  filter: blur(22px);
+
+  transform-origin: top left;
+
+  animation:
+    chapter-nine-garden-light-breathe
+    8.5s ease-in-out infinite;
+}
+
+.atmosphere--chapter-nine-garden-light::after {
+  content: "";
+
+  position: absolute;
+
+  right: -12%;
+  bottom: -22%;
+
+  width: 74%;
+  height: 92%;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      ellipse,
+      rgba(212, 183, 126, 0.2) 0%,
+      rgba(144, 116, 76, 0.08) 44%,
+      transparent 72%
+    );
+
+  filter: blur(28px);
+
+  opacity: 0.5;
+
+  animation:
+    chapter-nine-garden-light-secondary
+    11s ease-in-out infinite alternate;
+}
+
+@keyframes chapter-nine-garden-light-breathe {
+  0%,
+  100% {
+    opacity: 0.38;
+
+    transform:
+      translate3d(-2%, 1%, 0)
+      scale(0.96);
+  }
+
+  48% {
+    opacity: 0.78;
+
+    transform:
+      translate3d(3%, -1%, 0)
+      scale(1.06);
+  }
+
+  72% {
+    opacity: 0.56;
+
+    transform:
+      translate3d(1%, 0, 0)
+      scale(1);
+  }
+}
+
+@keyframes chapter-nine-garden-light-secondary {
+  from {
+    opacity: 0.28;
+
+    transform:
+      translate3d(-3%, 2%, 0)
+      scale(0.96);
+  }
+
+  to {
+    opacity: 0.58;
+
+    transform:
+      translate3d(4%, -2%, 0)
+      scale(1.05);
+  }
+}
+
+.atmosphere--chapter-nine-drifting-petals {
+  position: absolute;
+  inset: 0;
+
+  z-index: 4;
+
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.atmosphere--chapter-nine-drifting-petals::before,
+.atmosphere--chapter-nine-drifting-petals::after {
+  content: "";
+
+  position: absolute;
+
+  inset: -20%;
+
+  background-image:
+    radial-gradient(
+      ellipse,
+      rgba(240, 205, 179, 0.7)
+      0 2px,
+      transparent 3.5px
+    ),
+    radial-gradient(
+      ellipse,
+      rgba(221, 184, 204, 0.52)
+      0 1.6px,
+      transparent 3px
+    ),
+    radial-gradient(
+      ellipse,
+      rgba(247, 226, 188, 0.46)
+      0 1.3px,
+      transparent 2.6px
+    );
+
+  background-size:
+    170px 220px,
+    235px 285px,
+    125px 195px;
+
+  background-position:
+    22px 40px,
+    95px 120px,
+    55px 85px;
+
+  opacity: 0.16;
+
+  filter:
+    blur(0.2px)
+    drop-shadow(
+      0 0 5px
+      rgba(255, 223, 178, 0.16)
+    );
+
+  animation:
+    chapter-nine-petal-drift
+    24s linear infinite;
+}
+
+.atmosphere--chapter-nine-drifting-petals::after {
+  opacity: 0.09;
+
+  transform: scale(1.14);
+
+  animation-duration: 31s;
+  animation-delay: -12s;
+  animation-direction: reverse;
+}
+
+@keyframes chapter-nine-petal-drift {
+  0% {
+    transform:
+      translate3d(-4%, -8%, 0)
+      rotate(-2deg);
+  }
+
+  45% {
+    transform:
+      translate3d(1%, 1%, 0)
+      rotate(1deg);
+  }
+
+  100% {
+    transform:
+      translate3d(6%, 12%, 0)
+      rotate(4deg);
+  }
+}
+
+.atmosphere--chapter-nine-pollen {
+  position: absolute;
+  inset: 0;
+
+  z-index: 3;
+
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.atmosphere--chapter-nine-pollen::before,
+.atmosphere--chapter-nine-pollen::after {
+  content: "";
+
+  position: absolute;
+
+  inset: -16%;
+
+  background-image:
+    radial-gradient(
+      circle,
+      rgba(255, 226, 145, 0.76)
+      0 1.2px,
+      transparent 2.3px
+    ),
+    radial-gradient(
+      circle,
+      rgba(246, 204, 108, 0.42)
+      0 0.9px,
+      transparent 1.8px
+    );
+
+  background-size:
+    145px 185px,
+    215px 255px;
+
+  background-position:
+    18px 35px,
+    90px 115px;
+
+  opacity: 0.13;
+
+  animation:
+    chapter-nine-pollen-rise
+    20s linear infinite;
+}
+
+.atmosphere--chapter-nine-pollen::after {
+  opacity: 0.07;
+
+  transform: scale(1.18);
+
+  animation-duration: 28s;
+  animation-delay: -9s;
+}
+
+@keyframes chapter-nine-pollen-rise {
+  from {
+    transform:
+      translate3d(-2%, 7%, 0);
+  }
+
+  to {
+    transform:
+      translate3d(4%, -9%, 0);
   }
 }

@@ -1,8 +1,13 @@
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 
 import NarrationCue from "../Narration/NarrationCue";
 import GroupDecision from "../Decisions/GroupDecision";
 import IndividualDecision from "../Decisions/IndividualDecision";
+import DifficultChoiceCue from "../Decisions/DifficultChoiceCue";
+
 import ObservationCue from "../Observation/ObservationCue";
 import DiceCue from "../Dice/DiceCue";
 import CooperativePuzzleCue from "../Puzzle/CooperativePuzzleCue";
@@ -10,17 +15,37 @@ import RelicRevealCue from "../Relic/RelicRevealCue";
 import RhythmChallengeCue from "../Rhythm/RhythmChallengeCue";
 import GiftSelectionCue from "../GiftSelection/GiftSelectionCue";
 
+import ProgressIllustrationCue from "../ProgressIllustration/ProgressIllustrationCue";
 
 function ChapterDirector({
   sequence = [],
   onVisualStateChange,
   onCompleteChapter,
 }) {
-  const [currentCueIndex, setCurrentCueIndex] = useState(0);
-  const [decisionOutcome, setDecisionOutcome] = useState(null);
-  const [cueResults, setCueResults] = useState({});
+  const [
+    currentCueIndex,
+    setCurrentCueIndex,
+  ] = useState(0);
 
-  const currentCue = sequence[currentCueIndex];
+  const [
+    decisionOutcome,
+    setDecisionOutcome,
+  ] = useState(null);
+
+  const [
+    cueResults,
+    setCueResults,
+  ] = useState({});
+
+  const currentCue =
+    sequence[currentCueIndex];
+
+  const TIER_RANK = {
+    failure: 0,
+    partial: 1,
+    success: 2,
+    greatSuccess: 3,
+  };
 
   useEffect(() => {
     setCurrentCueIndex(0);
@@ -29,53 +54,86 @@ function ChapterDirector({
   }, [sequence]);
 
   useEffect(() => {
-    if (currentCue?.type === "chapterComplete") {
-      onCompleteChapter();
+    if (
+      currentCue?.type ===
+      "chapterComplete"
+    ) {
+      onCompleteChapter?.();
     }
-  }, [currentCue, onCompleteChapter]);
+  }, [
+    currentCue,
+    onCompleteChapter,
+  ]);
 
-  const TIER_RANK = {
-    failure: 0,
-    partial: 1,
-    success: 2,
-    greatSuccess: 3,
-  };
-function handleGiftSelectionComplete(result) {
-  saveCueResult(currentCue.id, result);
+  function advanceCue() {
+    setCurrentCueIndex(
+      (currentIndex) => {
+        const nextIndex =
+          currentIndex + 1;
 
-  if (result.narration) {
+        if (
+          nextIndex >=
+          sequence.length
+        ) {
+          return currentIndex;
+        }
+
+        return nextIndex;
+      },
+    );
+  }
+
+  function saveCueResult(
+    cueId,
+    result,
+  ) {
+    setCueResults(
+      (currentResults) => ({
+        ...currentResults,
+
+        [cueId]:
+          result,
+      }),
+    );
+  }
+
+  function showOutcomeNarration({
+    outcomeId,
+    text,
+    resultData = {},
+  }) {
     setDecisionOutcome({
       id:
-        `${currentCue.id}-${result.outcomeId}-outcome`,
-      type: "narration",
-      text: result.narration,
-      giftSelectionCueId:
+        `${currentCue.id}-${outcomeId}-outcome`,
+
+      type:
+        "narration",
+
+      text,
+
+      sourceCueId:
         currentCue.id,
-      completed: result.completed,
-      selectedGiftIds:
-        result.selectedGiftIds,
-      glory: result.glory,
+
+      ...resultData,
     });
-
-    return;
   }
 
-  advanceCue();
-}
-  function saveCueResult(cueId, result) {
-    setCueResults((current) => ({
-      ...current,
-      [cueId]: result,
-    }));
-  }
-
-  function relicConditionMet(condition) {
+  function relicConditionMet(
+    condition,
+  ) {
     if (!condition) {
       return true;
     }
 
-    const puzzleResult = cueResults[condition.puzzleCueId];
-    const diceResult = cueResults[condition.diceCueId];
+    const puzzleResult =
+      cueResults[
+        condition.puzzleCueId
+      ];
+
+    const diceResult =
+      cueResults[
+        condition.diceCueId
+      ];
 
     if (
       condition.requiresPuzzleCompletion &&
@@ -84,11 +142,23 @@ function handleGiftSelectionComplete(result) {
       return false;
     }
 
-    if (condition.minimumTier) {
-      const actualRank = TIER_RANK[diceResult?.tier] ?? -1;
-      const requiredRank = TIER_RANK[condition.minimumTier] ?? 0;
+    if (
+      condition.minimumTier
+    ) {
+      const actualRank =
+        TIER_RANK[
+          diceResult?.tier
+        ] ?? -1;
 
-      if (actualRank < requiredRank) {
+      const requiredRank =
+        TIER_RANK[
+          condition.minimumTier
+        ] ?? 0;
+
+      if (
+        actualRank <
+        requiredRank
+      ) {
         return false;
       }
     }
@@ -98,82 +168,178 @@ function handleGiftSelectionComplete(result) {
 
   useEffect(() => {
     if (
-      currentCue?.type === "relicReveal" &&
-      !relicConditionMet(currentCue.condition)
+      currentCue?.type ===
+        "relicReveal" &&
+      !relicConditionMet(
+        currentCue.condition,
+      )
     ) {
       advanceCue();
     }
-  }, [currentCue, cueResults]);
+  }, [
+    currentCue,
+    cueResults,
+  ]);
 
-  function advanceCue() {
-    setCurrentCueIndex((currentIndex) => {
-      const nextIndex = currentIndex + 1;
+  function handleGroupDecision(
+    option,
+  ) {
+    showOutcomeNarration({
+      outcomeId:
+        option.id,
 
-      if (nextIndex >= sequence.length) {
-        return currentIndex;
-      }
+      text:
+        option.outcome,
 
-      return nextIndex;
+      resultData: {
+        decisionId:
+          currentCue.id,
+
+        optionId:
+          option.id,
+      },
     });
   }
 
-  function handleGroupDecision(option) {
-    setDecisionOutcome({
-      id: `${currentCue.id}-${option.id}-outcome`,
-      type: "narration",
-      text: option.outcome,
-      decisionId: currentCue.id,
-      optionId: option.id,
+  function handleIndividualDecision(
+    option,
+  ) {
+    if (
+      option.visualState
+    ) {
+      onVisualStateChange?.(
+        option.visualState,
+      );
+    }
+
+    showOutcomeNarration({
+      outcomeId:
+        option.id,
+
+      text:
+        option.outcome,
+
+      resultData: {
+        decisionId:
+          currentCue.id,
+
+        optionId:
+          option.id,
+      },
     });
   }
 
-function handleIndividualDecision(
-  option,
-) {
-  if (option.visualState) {
-    onVisualStateChange?.(
-      option.visualState,
+  function handleDifficultChoiceComplete(
+    result,
+  ) {
+    saveCueResult(
+      currentCue.id,
+      result,
     );
+
+    if (
+      result.visualState
+    ) {
+      onVisualStateChange?.(
+        result.visualState,
+      );
+    }
+
+    if (
+      result.narration
+    ) {
+      showOutcomeNarration({
+        outcomeId:
+          result.outcomeId ??
+          result.optionId ??
+          "choice",
+
+        text:
+          result.narration,
+
+        resultData: {
+          difficultChoiceCueId:
+            currentCue.id,
+
+          optionId:
+            result.optionId,
+
+          glory:
+            result.glory ?? 0,
+        },
+      });
+
+      return;
+    }
+
+    advanceCue();
   }
 
-  setDecisionOutcome({
-    id:
-      `${currentCue.id}-${option.id}-outcome`,
-    type: "narration",
-    text: option.outcome,
-    decisionId: currentCue.id,
-    optionId: option.id,
-  });
-}
+  function handleDiceComplete(
+    result,
+  ) {
+    saveCueResult(
+      currentCue.id,
+      result,
+    );
 
-  function handleDiceComplete(result) {
-    saveCueResult(currentCue.id, result);
+    showOutcomeNarration({
+      outcomeId:
+        result.outcomeId,
 
-    setDecisionOutcome({
-      id: `${currentCue.id}-${result.outcomeId}-outcome`,
-      type: "narration",
-      text: result.narration,
-      diceCueId: currentCue.id,
-      roll: result.roll,
-      sides: result.sides,
-      outcomeId: result.outcomeId,
-      tier: result.tier,
-      glory: result.glory,
+      text:
+        result.narration,
+
+      resultData: {
+        diceCueId:
+          currentCue.id,
+
+        roll:
+          result.roll,
+
+        sides:
+          result.sides,
+
+        tier:
+          result.tier,
+
+        glory:
+          result.glory,
+      },
     });
   }
 
-  function handleCooperativePuzzleComplete(result) {
-    saveCueResult(currentCue.id, result);
+  function handleCooperativePuzzleComplete(
+    result,
+  ) {
+    saveCueResult(
+      currentCue.id,
+      result,
+    );
 
-    if (result.narration) {
-      setDecisionOutcome({
-        id: `${currentCue.id}-${result.outcomeId}-outcome`,
-        type: "narration",
-        text: result.narration,
-        puzzleCueId: currentCue.id,
-        completed: result.completed,
-        attempts: result.attempts,
-        glory: result.glory,
+    if (
+      result.narration
+    ) {
+      showOutcomeNarration({
+        outcomeId:
+          result.outcomeId,
+
+        text:
+          result.narration,
+
+        resultData: {
+          puzzleCueId:
+            currentCue.id,
+
+          completed:
+            result.completed,
+
+          attempts:
+            result.attempts,
+
+          glory:
+            result.glory,
+        },
       });
 
       return;
@@ -182,28 +348,162 @@ function handleIndividualDecision(
     advanceCue();
   }
 
-  function handleRelicRevealComplete(result) {
-    saveCueResult(currentCue.id, result);
-    advanceCue();
-  }
+  function handleGiftSelectionComplete(
+    result,
+  ) {
+    saveCueResult(
+      currentCue.id,
+      result,
+    );
 
-  function handleRhythmChallengeComplete(result) {
-    saveCueResult(currentCue.id, result);
+    if (
+      result.narration
+    ) {
+      showOutcomeNarration({
+        outcomeId:
+          result.outcomeId,
 
-    if (result.narration) {
-      setDecisionOutcome({
-        id: `${currentCue.id}-${result.outcomeId}-outcome`,
-        type: "narration",
-        text: result.narration,
-        rhythmCueId: currentCue.id,
-        completed: result.completed,
-        attempts: result.attempts,
-        accuracy: result.accuracy,
-        glory: result.glory,
+        text:
+          result.narration,
+
+        resultData: {
+          giftSelectionCueId:
+            currentCue.id,
+
+          completed:
+            result.completed,
+
+          selectedGiftIds:
+            result.selectedGiftIds,
+
+          glory:
+            result.glory,
+        },
       });
 
       return;
     }
+
+    advanceCue();
+  }
+
+  function handleProgressIllustrationComplete(
+    result,
+  ) {
+    saveCueResult(
+      currentCue.id,
+      result,
+    );
+
+    if (
+      result.visualState
+    ) {
+      onVisualStateChange?.(
+        result.visualState,
+      );
+    }
+
+    if (
+      result.narration
+    ) {
+      showOutcomeNarration({
+        outcomeId:
+          result.outcomeId ??
+          "completed",
+
+        text:
+          result.narration,
+
+        resultData: {
+          progressIllustrationCueId:
+            currentCue.id,
+
+          completed:
+            result.completed,
+
+          contributed:
+            result.contributed,
+
+          contributions:
+            result.contributions,
+
+          frameIndex:
+            result.frameIndex,
+
+          finalFrameId:
+            result.finalFrameId,
+
+          glory:
+            result.glory,
+        },
+      });
+
+      return;
+    }
+
+    advanceCue();
+  }
+
+  function handleRelicRevealComplete(
+    result,
+  ) {
+    saveCueResult(
+      currentCue.id,
+      result,
+    );
+
+    advanceCue();
+  }
+
+  function handleRhythmChallengeComplete(
+    result,
+  ) {
+    saveCueResult(
+      currentCue.id,
+      result,
+    );
+
+    if (
+      result.narration
+    ) {
+      showOutcomeNarration({
+        outcomeId:
+          result.outcomeId,
+
+        text:
+          result.narration,
+
+        resultData: {
+          rhythmCueId:
+            currentCue.id,
+
+          completed:
+            result.completed,
+
+          attempts:
+            result.attempts,
+
+          accuracy:
+            result.accuracy,
+
+          glory:
+            result.glory,
+        },
+      });
+
+      return;
+    }
+
+    advanceCue();
+  }
+
+  function handleObservationComplete(
+    result,
+  ) {
+    saveCueResult(
+      currentCue.id,
+      result,
+    );
 
     advanceCue();
   }
@@ -217,113 +517,202 @@ function handleIndividualDecision(
     return null;
   }
 
-  function handleObservationComplete(result) {
-    console.log("Observation Result:", result);
-
-    // Later we'll award Glory and track who found what.
-    // For now, simply continue the chapter.
-
-    advanceCue();
-  }
   /*
-    The Director temporarily inserts the selected outcome as narration.
-    The GroupDecision component does not narrate story consequences.
+    The Director temporarily inserts the selected
+    outcome as narration.
+
+    Gameplay components return results.
+    They do not control chapter progression.
   */
   if (decisionOutcome) {
     return (
       <NarrationCue
-        key={decisionOutcome.id}
-        cue={decisionOutcome}
-        onAdvance={handleOutcomeComplete}
+        key={
+          decisionOutcome.id
+        }
+        cue={
+          decisionOutcome
+        }
+        onAdvance={
+          handleOutcomeComplete
+        }
       />
     );
   }
 
-  switch (currentCue.type) {
+  switch (
+    currentCue.type
+  ) {
     case "narration":
       return (
         <NarrationCue
-          key={currentCue.id}
-          cue={currentCue}
-          onAdvance={advanceCue}
+          key={
+            currentCue.id
+          }
+          cue={
+            currentCue
+          }
+          onAdvance={
+            advanceCue
+          }
         />
       );
 
     case "groupDecision":
       return (
         <GroupDecision
-          key={currentCue.id}
-          cue={currentCue}
-          onComplete={handleGroupDecision}
+          key={
+            currentCue.id
+          }
+          cue={
+            currentCue
+          }
+          onComplete={
+            handleGroupDecision
+          }
         />
       );
 
     case "individualDecision":
       return (
         <IndividualDecision
-          key={currentCue.id}
-          cue={currentCue}
-          onComplete={handleIndividualDecision}
+          key={
+            currentCue.id
+          }
+          cue={
+            currentCue
+          }
+          onComplete={
+            handleIndividualDecision
+          }
+        />
+      );
+
+    case "difficultChoice":
+      return (
+        <DifficultChoiceCue
+          key={
+            currentCue.id
+          }
+          cue={
+            currentCue
+          }
+          onComplete={
+            handleDifficultChoiceComplete
+          }
         />
       );
 
     case "dice":
       return (
         <DiceCue
-          key={currentCue.id}
-          cue={currentCue}
-          onComplete={handleDiceComplete}
+          key={
+            currentCue.id
+          }
+          cue={
+            currentCue
+          }
+          onComplete={
+            handleDiceComplete
+          }
         />
       );
 
     case "cooperativePuzzle":
       return (
         <CooperativePuzzleCue
-          key={currentCue.id}
-          cue={currentCue}
-          onComplete={handleCooperativePuzzleComplete}
+          key={
+            currentCue.id
+          }
+          cue={
+            currentCue
+          }
+          onComplete={
+            handleCooperativePuzzleComplete
+          }
         />
       );
+
     case "giftSelection":
-  return (
-    <GiftSelectionCue
-      key={currentCue.id}
-      cue={currentCue}
-      onComplete={
-        handleGiftSelectionComplete
-      }
-    />
-  );
+      return (
+        <GiftSelectionCue
+          key={
+            currentCue.id
+          }
+          cue={
+            currentCue
+          }
+          onComplete={
+            handleGiftSelectionComplete
+          }
+        />
+      );
+
+    case "progressIllustration":
+      return (
+        <ProgressIllustrationCue
+          key={
+            currentCue.id
+          }
+          cue={
+            currentCue
+          }
+          onComplete={
+            handleProgressIllustrationComplete
+          }
+        />
+      );
+
     case "relicReveal":
-      if (!relicConditionMet(currentCue.condition)) {
+      if (
+        !relicConditionMet(
+          currentCue.condition,
+        )
+      ) {
         return null;
       }
 
       return (
         <RelicRevealCue
-          key={currentCue.id}
-          cue={currentCue}
-          onComplete={handleRelicRevealComplete}
+          key={
+            currentCue.id
+          }
+          cue={
+            currentCue
+          }
+          onComplete={
+            handleRelicRevealComplete
+          }
         />
       );
 
     case "rhythmChallenge":
       return (
         <RhythmChallengeCue
-          key={currentCue.id}
-          cue={currentCue}
-          onComplete={handleRhythmChallengeComplete}
+          key={
+            currentCue.id
+          }
+          cue={
+            currentCue
+          }
+          onComplete={
+            handleRhythmChallengeComplete
+          }
         />
       );
 
     case "observation":
-      console.log("Rendering observation cue:", currentCue);
-
       return (
         <ObservationCue
-          key={currentCue.id}
-          cue={currentCue}
-          onComplete={handleObservationComplete}
+          key={
+            currentCue.id
+          }
+          cue={
+            currentCue
+          }
+          onComplete={
+            handleObservationComplete
+          }
         />
       );
 
@@ -338,9 +727,17 @@ function handleIndividualDecision(
 
       return (
         <div className="chapter-director-error">
-          <p>Unsupported cue: {currentCue.type}</p>
+          <p>
+            Unsupported cue:{" "}
+            {currentCue.type}
+          </p>
 
-          <button type="button" onClick={advanceCue}>
+          <button
+            type="button"
+            onClick={
+              advanceCue
+            }
+          >
             Skip cue
           </button>
         </div>

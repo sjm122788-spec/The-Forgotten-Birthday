@@ -1,0 +1,957 @@
+.difficult-choice-cue {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+
+  display: grid;
+  place-items: center;
+
+  padding:
+    clamp(
+      1rem,
+      3vw,
+      2.5rem
+    );
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(
+        34,
+        31,
+        24,
+        0.2
+      ),
+      rgba(
+        7,
+        7,
+        8,
+        0.84
+      )
+    );
+
+  backdrop-filter:
+    blur(4px);
+}
+
+.difficult-choice-cue__card {
+  width:
+    min(
+      820px,
+      calc(
+        100vw - 2rem
+      )
+    );
+
+  max-height:
+    calc(
+      100vh - 2rem
+    );
+
+  overflow-y:
+    auto;
+
+  padding:
+    clamp(
+      1.1rem,
+      3vw,
+      2.25rem
+    );
+
+  border:
+    1px solid
+    rgba(
+      239,
+      215,
+      169,
+      0.26
+    );
+
+  border-radius:
+    22px;
+
+  background:
+    linear-gradient(
+      155deg,
+      rgba(
+        29,
+        27,
+        22,
+        0.97
+      ),
+      rgba(
+        11,
+        11,
+        12,
+        0.98
+      )
+    );
+
+  box-shadow:
+    0 30px 90px
+      rgba(
+        0,
+        0,
+        0,
+        0.66
+      ),
+    inset 0 1px 0
+      rgba(
+        255,
+        245,
+        222,
+        0.07
+      );
+
+  animation:
+    difficult-choice-card-enter
+    500ms ease-out both;
+}
+
+.difficult-choice-cue__header {
+  max-width:
+    680px;
+
+  margin:
+    0 auto 1.5rem;
+
+  text-align:
+    center;
+}
+
+.difficult-choice-cue__eyebrow {
+  margin:
+    0 0 0.45rem;
+
+  color:
+    rgba(
+      215,
+      190,
+      133,
+      0.78
+    );
+
+  font-size:
+    0.72rem;
+
+  font-weight:
+    800;
+
+  letter-spacing:
+    0.17em;
+
+  text-transform:
+    uppercase;
+}
+
+.difficult-choice-cue__title {
+  margin:
+    0;
+
+  color:
+    #fff3dc;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size:
+    clamp(
+      1.8rem,
+      4vw,
+      3rem
+    );
+
+  font-weight:
+    500;
+
+  line-height:
+    1.08;
+}
+
+.difficult-choice-cue__prompt {
+  max-width:
+    650px;
+
+  margin:
+    0.9rem auto 0;
+
+  color:
+    rgba(
+      255,
+      245,
+      225,
+      0.9
+    );
+
+  font-size:
+    clamp(
+      1rem,
+      1.8vw,
+      1.15rem
+    );
+
+  line-height:
+    1.6;
+}
+
+.difficult-choice-cue__discussion {
+  max-width:
+    620px;
+
+  margin:
+    0.7rem auto 0;
+
+  color:
+    rgba(
+      244,
+      222,
+      186,
+      0.7
+    );
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-style:
+    italic;
+
+  line-height:
+    1.55;
+}
+
+.difficult-choice-cue__instructions {
+  margin:
+    0.75rem auto 0;
+
+  color:
+    rgba(
+      255,
+      238,
+      208,
+      0.52
+    );
+
+  font-size:
+    0.82rem;
+
+  font-weight:
+    700;
+
+  letter-spacing:
+    0.07em;
+
+  text-transform:
+    uppercase;
+}
+
+.difficult-choice-cue__options {
+  display:
+    grid;
+
+  gap:
+    0.8rem;
+
+  width:
+    min(
+      100%,
+      700px
+    );
+
+  margin:
+    0 auto;
+}
+
+.difficult-choice-cue__option {
+  position: relative;
+
+  display:
+    grid;
+
+  grid-template-columns:
+    auto
+    minmax(
+      0,
+      1fr
+    )
+    auto;
+
+  align-items:
+    center;
+
+  gap:
+    1rem;
+
+  width:
+    100%;
+
+  min-height:
+    88px;
+
+  padding:
+    1rem 1.1rem;
+
+  border:
+    1px solid
+    rgba(
+      255,
+      228,
+      182,
+      0.17
+    );
+
+  border-radius:
+    16px;
+
+  color:
+    #fff1d8;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(
+        255,
+        255,
+        255,
+        0.055
+      ),
+      rgba(
+        255,
+        255,
+        255,
+        0.018
+      )
+    );
+
+  font:
+    inherit;
+
+  text-align:
+    left;
+
+  cursor:
+    pointer;
+
+  transition:
+    transform
+      180ms ease,
+    border-color
+      180ms ease,
+    background
+      180ms ease,
+    box-shadow
+      180ms ease;
+}
+
+.difficult-choice-cue__option:hover {
+  transform:
+    translateY(
+      -2px
+    );
+
+  border-color:
+    rgba(
+      237,
+      199,
+      130,
+      0.42
+    );
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(
+        215,
+        184,
+        122,
+        0.13
+      ),
+      rgba(
+        255,
+        255,
+        255,
+        0.025
+      )
+    );
+}
+
+.difficult-choice-cue__option:focus-visible {
+  outline:
+    2px solid
+    rgba(
+      246,
+      211,
+      150,
+      0.85
+    );
+
+  outline-offset:
+    3px;
+}
+
+.difficult-choice-cue__option--selected {
+  border-color:
+    rgba(
+      241,
+      202,
+      129,
+      0.68
+    );
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(
+        171,
+        139,
+        78,
+        0.25
+      ),
+      rgba(
+        89,
+        107,
+        73,
+        0.12
+      )
+    );
+
+  box-shadow:
+    0 0 0 1px
+      rgba(
+        255,
+        223,
+        165,
+        0.08
+      ),
+    0 14px 34px
+      rgba(
+        0,
+        0,
+        0,
+        0.22
+      );
+}
+
+.difficult-choice-cue__option:disabled {
+  cursor:
+    default;
+}
+
+.difficult-choice-cue__option-number {
+  display:
+    grid;
+
+  place-items:
+    center;
+
+  width:
+    42px;
+
+  height:
+    42px;
+
+  border:
+    1px solid
+    rgba(
+      241,
+      209,
+      153,
+      0.24
+    );
+
+  border-radius:
+    50%;
+
+  color:
+    rgba(
+      248,
+      220,
+      168,
+      0.74
+    );
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size:
+    0.88rem;
+}
+
+.difficult-choice-cue__option--selected
+  .difficult-choice-cue__option-number {
+  color:
+    #fff0ce;
+
+  border-color:
+    rgba(
+      255,
+      218,
+      148,
+      0.62
+    );
+
+  background:
+    rgba(
+      233,
+      195,
+      125,
+      0.12
+    );
+
+  box-shadow:
+    0 0 18px
+      rgba(
+        236,
+        193,
+        111,
+        0.14
+      );
+}
+
+.difficult-choice-cue__option-copy {
+  display:
+    grid;
+
+  gap:
+    0.32rem;
+}
+
+.difficult-choice-cue__option-label {
+  color:
+    #fff2dc;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size:
+    clamp(
+      1.05rem,
+      2vw,
+      1.28rem
+    );
+
+  line-height:
+    1.25;
+}
+
+.difficult-choice-cue__option-description {
+  color:
+    rgba(
+      250,
+      236,
+      212,
+      0.64
+    );
+
+  font-size:
+    0.9rem;
+
+  line-height:
+    1.45;
+}
+
+.difficult-choice-cue__option-marker {
+  min-width:
+    78px;
+
+  color:
+    rgba(
+      238,
+      211,
+      162,
+      0.42
+    );
+
+  font-size:
+    0.72rem;
+
+  font-weight:
+    800;
+
+  letter-spacing:
+    0.08em;
+
+  text-align:
+    right;
+
+  text-transform:
+    uppercase;
+}
+
+.difficult-choice-cue__option--selected
+  .difficult-choice-cue__option-marker {
+  color:
+    rgba(
+      255,
+      224,
+      164,
+      0.92
+    );
+}
+
+.difficult-choice-cue__confirmation {
+  display:
+    grid;
+
+  grid-template-columns:
+    minmax(
+      0,
+      1fr
+    )
+    auto;
+
+  align-items:
+    center;
+
+  gap:
+    1rem;
+
+  width:
+    min(
+      100%,
+      700px
+    );
+
+  margin:
+    1.1rem auto 0;
+
+  padding-top:
+    1rem;
+
+  border-top:
+    1px solid
+    rgba(
+      255,
+      231,
+      193,
+      0.12
+    );
+
+  animation:
+    difficult-choice-confirmation-enter
+    300ms ease-out both;
+}
+
+.difficult-choice-cue__selected-summary {
+  min-width:
+    0;
+}
+
+.difficult-choice-cue__selected-label {
+  margin:
+    0 0 0.2rem;
+
+  color:
+    rgba(
+      232,
+      207,
+      164,
+      0.52
+    );
+
+  font-size:
+    0.7rem;
+
+  font-weight:
+    800;
+
+  letter-spacing:
+    0.12em;
+
+  text-transform:
+    uppercase;
+}
+
+.difficult-choice-cue__selected-value {
+  margin:
+    0;
+
+  overflow:
+    hidden;
+
+  color:
+    #f7dfb5;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size:
+    1.05rem;
+
+  text-overflow:
+    ellipsis;
+
+  white-space:
+    nowrap;
+}
+
+.difficult-choice-cue__actions {
+  display:
+    flex;
+
+  gap:
+    0.65rem;
+}
+
+.difficult-choice-cue__reconsider,
+.difficult-choice-cue__confirm {
+  min-height:
+    46px;
+
+  padding:
+    0.72rem 1rem;
+
+  border:
+    1px solid
+    rgba(
+      246,
+      215,
+      158,
+      0.24
+    );
+
+  border-radius:
+    11px;
+
+  color:
+    #fff0d2;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.045
+    );
+
+  font:
+    inherit;
+
+  font-weight:
+    800;
+
+  cursor:
+    pointer;
+
+  transition:
+    transform
+      160ms ease,
+    border-color
+      160ms ease,
+    background
+      160ms ease;
+}
+
+.difficult-choice-cue__confirm {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(
+        169,
+        131,
+        69,
+        0.35
+      ),
+      rgba(
+        97,
+        109,
+        73,
+        0.2
+      )
+    );
+}
+
+.difficult-choice-cue__reconsider:hover,
+.difficult-choice-cue__confirm:hover {
+  transform:
+    translateY(
+      -2px
+    );
+
+  border-color:
+    rgba(
+      248,
+      211,
+      143,
+      0.56
+    );
+}
+
+.difficult-choice-cue__reconsider:disabled,
+.difficult-choice-cue__confirm:disabled {
+  opacity:
+    0.62;
+
+  cursor:
+    wait;
+
+  transform:
+    none;
+}
+
+.difficult-choice-cue__error {
+  color:
+    #ffd2c6;
+
+  text-align:
+    center;
+}
+
+@keyframes difficult-choice-card-enter {
+  from {
+    opacity:
+      0;
+
+    transform:
+      translateY(
+        10px
+      )
+      scale(
+        0.985
+      );
+  }
+
+  to {
+    opacity:
+      1;
+
+    transform:
+      translateY(
+        0
+      )
+      scale(
+        1
+      );
+  }
+}
+
+@keyframes difficult-choice-confirmation-enter {
+  from {
+    opacity:
+      0;
+
+    transform:
+      translateY(
+        5px
+      );
+  }
+
+  to {
+    opacity:
+      1;
+
+    transform:
+      translateY(
+        0
+      );
+  }
+}
+
+@media (
+  max-width:
+    680px
+) {
+  .difficult-choice-cue {
+    padding:
+      0.75rem;
+  }
+
+  .difficult-choice-cue__card {
+    max-height:
+      calc(
+        100vh - 1.5rem
+      );
+
+    padding:
+      1rem;
+  }
+
+  .difficult-choice-cue__option {
+    grid-template-columns:
+      auto
+      minmax(
+        0,
+        1fr
+      );
+
+    min-height:
+      78px;
+  }
+
+  .difficult-choice-cue__option-marker {
+    display:
+      none;
+  }
+
+  .difficult-choice-cue__confirmation {
+    grid-template-columns:
+      1fr;
+  }
+
+  .difficult-choice-cue__actions {
+    display:
+      grid;
+
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(
+          0,
+          1fr
+        )
+      );
+  }
+}
+
+@media (
+  max-width:
+    440px
+) {
+  .difficult-choice-cue__option {
+    gap:
+      0.7rem;
+
+    padding:
+      0.85rem;
+  }
+
+  .difficult-choice-cue__option-number {
+    width:
+      36px;
+
+    height:
+      36px;
+  }
+
+  .difficult-choice-cue__actions {
+    grid-template-columns:
+      1fr;
+  }
+}
+
+@media (
+  prefers-reduced-motion:
+    reduce
+) {
+  .difficult-choice-cue__card,
+  .difficult-choice-cue__confirmation {
+    animation:
+      none;
+  }
+
+  .difficult-choice-cue__option,
+  .difficult-choice-cue__reconsider,
+  .difficult-choice-cue__confirm {
+    transition:
+      none;
+  }
+}
