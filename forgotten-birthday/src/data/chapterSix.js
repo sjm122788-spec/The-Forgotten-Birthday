@@ -9,6 +9,7 @@ import ribbonOfBelongingImage from "../assets/images/relics/RibbonOfBelonging.pn
 import giftOneImage from "../assets/images/layers/Gift1.png";
 import giftTwoImage from "../assets/images/layers/Gift2.png";
 import giftThreeImage from "../assets/images/layers/Gift3.png";
+import chapter6RibbonLayer from "../assets/images/layers/Chapter6Layer.png";
 
 const chapterSix = {
   id: "chapter-06",
@@ -45,22 +46,16 @@ const chapterSix = {
   },
 
   atmosphere: [
-    {
-      id:
-        "chapter-six-workshop-light",
-
-      className:
-        "atmosphere--chapter-six-workshop-light",
-    },
-
-    {
-      id:
-        "chapter-six-ribbon-drift",
-
-      className:
-        "atmosphere--chapter-six-ribbon-drift",
-    },
-  ],
+  {
+    type: "effect",
+    className: "atmosphere--chapter-six-workshop-light",
+  },
+  {
+    type: "image",
+    image: chapter6RibbonLayer,
+    className: "atmosphere--chapter-six-ribbon-layer",
+  },
+],
 
   sequence: [
     {

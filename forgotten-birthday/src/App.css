@@ -3,15 +3,21 @@
 }
 .dev-toolbar {
   position: fixed;
+
+  left: 14px;
   right: 14px;
   bottom: 14px;
+
   z-index: 9999;
 
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
+
+  flex-wrap: nowrap;
   gap: 6px;
 
-  max-width: min(520px, calc(100vw - 28px));
+  overflow-x: auto;
+
   padding: 8px;
 
   border: 1px solid rgba(255, 225, 177, 0.24);
@@ -21,6 +27,13 @@
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.55);
 
   backdrop-filter: blur(10px);
+}
+.dev-toolbar::-webkit-scrollbar {
+  display: none;
+}
+
+.dev-toolbar {
+  scrollbar-width: none;
 }
 
 .dev-toolbar__label {

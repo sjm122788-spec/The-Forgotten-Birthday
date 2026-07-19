@@ -74,7 +74,11 @@
   .atmosphere--chapter-six-workshop-light::before,
   .atmosphere--chapter-six-workshop-light::after,
   .atmosphere--chapter-six-ribbon-drift::before,
-  .atmosphere--chapter-six-ribbon-drift::after {
+  .atmosphere--chapter-six-ribbon-drift::after,
+  .atmosphere--chapter-seven-memory-light::before,
+.atmosphere--chapter-seven-memory-light::after,
+.atmosphere--chapter-seven-memory-dust::before,
+.atmosphere--chapter-seven-memory-dust::after {
     animation: none;
   }
 }
@@ -728,65 +732,63 @@
 .atmosphere--chapter-six-workshop-light {
   position: absolute;
   inset: 0;
+  z-index: 2;
   overflow: hidden;
   pointer-events: none;
+  mix-blend-mode: screen;
 }
 
 .atmosphere--chapter-six-workshop-light::before {
   content: "";
   position: absolute;
-  left: -8%;
-  top: -12%;
 
-  width: 72%;
-  height: 88%;
+  left: -10%;
+  top: -16%;
+
+  width: 82%;
+  height: 100%;
 
   background:
     radial-gradient(
       ellipse at 32% 28%,
-      rgba(255, 224, 165, 0.28) 0%,
-      rgba(231, 174, 94, 0.13) 34%,
-      rgba(163, 104, 48, 0.04) 58%,
-      transparent 76%
+      rgba(255, 235, 188, 0.48) 0%,
+      rgba(241, 186, 105, 0.25) 32%,
+      rgba(179, 111, 49, 0.08) 58%,
+      transparent 78%
     );
 
-  filter: blur(18px);
-  mix-blend-mode: screen;
+  filter: blur(20px);
   transform-origin: 30% 28%;
 
   animation:
     chapter-six-workshop-light-breathe
-    7.5s
-    ease-in-out
-    infinite;
+    4.6s ease-in-out infinite;
 }
 
 .atmosphere--chapter-six-workshop-light::after {
   content: "";
   position: absolute;
-  inset: 0;
+  inset: -10%;
 
   background:
     linear-gradient(
       112deg,
-      rgba(255, 225, 171, 0.07) 0%,
-      transparent 37%,
-      transparent 100%
+      rgba(255, 235, 190, 0.18) 0%,
+      rgba(255, 205, 130, 0.08) 28%,
+      transparent 55%
     );
 
-  opacity: 0.55;
+  opacity: 0.7;
 
   animation:
     chapter-six-workshop-light-shift
-    30s
-    ease-in-out
-    infinite
-    alternate;
+    10s ease-in-out infinite alternate;
 }
 
 .atmosphere--chapter-six-ribbon-drift {
   position: absolute;
   inset: 0;
+  z-index: 4;
   overflow: hidden;
   pointer-events: none;
 }
@@ -796,124 +798,331 @@
   content: "";
   position: absolute;
 
-  width: 24%;
-  height: 7%;
+  width: 30%;
+  height: 10%;
 
   border-radius: 50%;
 
   border-top:
-    2px solid rgba(191, 95, 87, 0.22);
+    3px solid rgba(211, 109, 97, 0.48);
 
   filter:
-    blur(0.35px)
+    blur(0.2px)
     drop-shadow(
-      0 0 5px rgba(229, 173, 124, 0.08)
+      0 0 7px rgba(246, 187, 132, 0.22)
     );
-
-  opacity: 0.38;
 }
 
 .atmosphere--chapter-six-ribbon-drift::before {
-  right: 7%;
-  top: 18%;
+  right: 5%;
+  top: 16%;
 
-  transform:
-    rotate(-8deg)
-    translate3d(0, 0, 0);
+  opacity: 0.66;
 
   animation:
     chapter-six-ribbon-sway
-    9s
-    ease-in-out
-    infinite;
+    5.5s ease-in-out infinite;
 }
 
 .atmosphere--chapter-six-ribbon-drift::after {
-  left: 18%;
-  bottom: 14%;
+  left: 14%;
+  bottom: 12%;
 
-  width: 18%;
-
-  opacity: 0.24;
-
-  transform:
-    rotate(12deg)
-    translate3d(0, 0, 0);
+  width: 24%;
+  opacity: 0.48;
 
   animation:
     chapter-six-ribbon-sway-secondary
-    12s
-    ease-in-out
-    infinite
-    alternate;
+    7s ease-in-out infinite alternate;
 }
 
 @keyframes chapter-six-workshop-light-breathe {
   0%,
   100% {
-    opacity: 0.62;
-    transform: scale(0.98);
+    opacity: 0.48;
+    transform:
+      scale(0.94)
+      translate3d(-1%, 1%, 0);
   }
 
-  48% {
-    opacity: 0.9;
-    transform: scale(1.025);
+  40% {
+    opacity: 1;
+    transform:
+      scale(1.08)
+      translate3d(1%, -1%, 0);
   }
 
   68% {
-    opacity: 0.76;
-    transform: scale(1.008);
+    opacity: 0.7;
+    transform:
+      scale(1.01)
+      translate3d(0, 0, 0);
   }
 }
 
 @keyframes chapter-six-workshop-light-shift {
   from {
     opacity: 0.38;
-    transform: translate3d(-0.6%, 0, 0);
+    transform:
+      translate3d(-4%, 1%, 0)
+      rotate(-1deg);
+  }
+
+  to {
+    opacity: 0.82;
+    transform:
+      translate3d(5%, -2%, 0)
+      rotate(2deg);
+  }
+}
+.atmosphere--chapter-six-ribbon-layer {
+  position: absolute;
+
+  width: 50%;
+  height: auto;
+
+  top: 6%;
+  left: 27%;
+
+  object-fit: contain;
+
+  transform-origin: center top;
+
+  animation: chapter-six-ribbon-layer-drift 7s ease-in-out infinite;
+}
+
+@keyframes chapter-six-ribbon-layer-drift {
+
+  0%,
+  100%{
+    transform:
+      translate3d(0px,0px,0)
+      rotate(-0.35deg)
+      scale(1);
+  }
+
+  25%{
+    transform:
+      translate3d(-2px,-3px,0)
+      rotate(0.2deg)
+      scale(1.01);
+  }
+
+  50%{
+    transform:
+      translate3d(2px,-6px,0)
+      rotate(0.5deg)
+      scale(1.015);
+  }
+
+  75%{
+    transform:
+      translate3d(1px,-2px,0)
+      rotate(0deg)
+      scale(1.005);
+  }
+}
+.atmosphere--chapter-seven-memory-light {
+  position: absolute;
+  inset: 0;
+
+  z-index: 2;
+
+  overflow: hidden;
+  pointer-events: none;
+
+  mix-blend-mode: screen;
+}
+
+.atmosphere--chapter-seven-memory-light::before,
+.atmosphere--chapter-seven-memory-light::after {
+  content: "";
+
+  position: absolute;
+
+  top: -24%;
+
+  width: 56%;
+  height: 120%;
+
+  filter: blur(22px);
+
+  transform-origin: top center;
+}
+
+.atmosphere--chapter-seven-memory-light::before {
+  left: 5%;
+
+  background:
+    linear-gradient(
+      164deg,
+      rgba(224, 239, 255, 0.42) 0%,
+      rgba(169, 199, 231, 0.2) 28%,
+      rgba(111, 128, 178, 0.08) 52%,
+      transparent 72%
+    );
+
+  animation:
+    chapter-seven-memory-light-breathe
+    7.5s ease-in-out infinite;
+}
+
+.atmosphere--chapter-seven-memory-light::after {
+  right: 2%;
+
+  width: 42%;
+
+  opacity: 0.5;
+
+  background:
+    linear-gradient(
+      194deg,
+      rgba(244, 224, 255, 0.28) 0%,
+      rgba(176, 155, 218, 0.12) 34%,
+      transparent 70%
+    );
+
+  animation:
+    chapter-seven-memory-light-shift
+    11s ease-in-out infinite alternate;
+}
+
+@keyframes chapter-seven-memory-light-breathe {
+  0%,
+  100% {
+    opacity: 0.32;
+
+    transform:
+      translate3d(-3%, 0, 0)
+      rotate(-3deg)
+      scaleX(0.94);
+  }
+
+  45% {
+    opacity: 0.78;
+
+    transform:
+      translate3d(4%, -1%, 0)
+      rotate(2deg)
+      scaleX(1.08);
+  }
+
+  70% {
+    opacity: 0.54;
+
+    transform:
+      translate3d(1%, 0, 0)
+      rotate(0deg)
+      scaleX(1);
+  }
+}
+
+@keyframes chapter-seven-memory-light-shift {
+  from {
+    opacity: 0.24;
+
+    transform:
+      translate3d(-5%, 2%, 0)
+      rotate(3deg);
   }
 
   to {
     opacity: 0.62;
-    transform: translate3d(0.8%, -0.4%, 0);
+
+    transform:
+      translate3d(6%, -2%, 0)
+      rotate(-2deg);
   }
 }
 
-@keyframes chapter-six-ribbon-sway {
-  0%,
-  100% {
+.atmosphere--chapter-seven-memory-dust {
+  position: absolute;
+  inset: 0;
+
+  z-index: 4;
+
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.atmosphere--chapter-seven-memory-dust::before,
+.atmosphere--chapter-seven-memory-dust::after {
+  content: "";
+
+  position: absolute;
+
+  inset: -18%;
+
+  background-image:
+    radial-gradient(
+      circle,
+      rgba(241, 230, 190, 0.82)
+      0 1.4px,
+      transparent 2.4px
+    ),
+    radial-gradient(
+      circle,
+      rgba(204, 224, 255, 0.62)
+      0 1px,
+      transparent 2px
+    ),
+    radial-gradient(
+      circle,
+      rgba(232, 207, 255, 0.48)
+      0 1.2px,
+      transparent 2.2px
+    );
+
+  background-size:
+    150px 190px,
+    215px 245px,
+    115px 175px;
+
+  background-position:
+    20px 45px,
+    90px 130px,
+    55px 90px;
+
+  opacity: 0.18;
+
+  filter:
+    blur(0.2px)
+    drop-shadow(
+      0 0 5px
+      rgba(220, 229, 255, 0.2)
+    );
+
+  animation:
+    chapter-seven-memory-dust-drift
+    20s linear infinite;
+}
+
+.atmosphere--chapter-seven-memory-dust::after {
+  opacity: 0.1;
+
+  transform: scale(1.14);
+
+  animation-duration: 27s;
+  animation-delay: -9s;
+  animation-direction: reverse;
+}
+
+@keyframes chapter-seven-memory-dust-drift {
+  0% {
     transform:
-      rotate(-8deg)
-      translate3d(0, 0, 0)
-      scaleX(0.98);
+      translate3d(-3%, 8%, 0)
+      rotate(-1deg);
   }
 
   50% {
     transform:
-      rotate(-5deg)
-      translate3d(1.2%, -2px, 0)
-      scaleX(1.03);
+      translate3d(2%, -1%, 0)
+      rotate(1deg);
   }
-}
 
-@keyframes chapter-six-ribbon-sway-secondary {
-  from {
+  100% {
     transform:
-      rotate(12deg)
-      translate3d(-1%, 1px, 0);
-  }
-
-  to {
-    transform:
-      rotate(9deg)
-      translate3d(1%, -2px, 0);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .atmosphere--chapter-six-workshop-light::before,
-  .atmosphere--chapter-six-workshop-light::after,
-  .atmosphere--chapter-six-ribbon-drift::before,
-  .atmosphere--chapter-six-ribbon-drift::after {
-    animation: none;
+      translate3d(5%, -10%, 0)
+      rotate(2deg);
   }
 }
