@@ -54,30 +54,39 @@ const chapterNine = {
   },
 
   atmosphere: [
-    {
-      type:
-        "effect",
+  {
+    id:
+      "chapter-nine-garden-light",
 
-      className:
-        "atmosphere--chapter-nine-sunlight",
-    },
+    type:
+      "effect",
 
-    {
-      type:
-        "effect",
+    className:
+      "atmosphere--chapter-nine-garden-light",
+  },
 
-      className:
-        "atmosphere--chapter-nine-pollen",
-    },
+  {
+    id:
+      "chapter-nine-pollen",
 
-    {
-      type:
-        "effect",
+    type:
+      "effect",
 
-      className:
-        "atmosphere--chapter-nine-petals",
-    },
-  ],
+    className:
+      "atmosphere--chapter-nine-pollen",
+  },
+
+  {
+    id:
+      "chapter-nine-drifting-petals",
+
+    type:
+      "effect",
+
+    className:
+      "atmosphere--chapter-nine-drifting-petals",
+  },
+],
 
   sequence: [
     {

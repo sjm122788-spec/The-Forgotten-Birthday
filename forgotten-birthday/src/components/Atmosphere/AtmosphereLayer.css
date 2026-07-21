@@ -59,40 +59,12 @@
     transform: translate3d(10px, -18px, 0);
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .atmosphere--chapter-four-oven-glow::before,
-  .atmosphere--chapter-four-oven-glow::after,
-  .atmosphere--chapter-four-flour-dust::before,
-  .atmosphere--chapter-four-flour-dust::after,
-  .atmosphere--chapter-five-banner-light::before,
-  .atmosphere--chapter-five-banner-light::after,
-  .atmosphere--chapter-five-confetti::before,
-  .atmosphere--chapter-five-confetti::after,
-  .atmosphere--chapter-five-street-lamp-glow::before,
-  .atmosphere--chapter-five-street-lamp-glow::after,
-  .atmosphere--chapter-six-workshop-light::before,
-  .atmosphere--chapter-six-workshop-light::after,
-  .atmosphere--chapter-six-ribbon-drift::before,
-  .atmosphere--chapter-six-ribbon-drift::after,
-  .atmosphere--chapter-seven-memory-light::before,
-  .atmosphere--chapter-seven-memory-light::after,
-  .atmosphere--chapter-seven-memory-dust::before,
-  .atmosphere--chapter-seven-memory-dust::after,
-  .atmosphere--chapter-eight-clocklight::before,
-  .atmosphere--chapter-eight-clocklight::after,
-  .atmosphere--chapter-eight-dust::before,
-  .atmosphere--chapter-eight-dust::after,
-  .atmosphere--chapter-eight-pendulum::before,
-  .atmosphere--chapter-eight-pendulum::after,
-  .atmosphere--chapter-nine-garden-light::before,
-  .atmosphere--chapter-nine-garden-light::after,
-  .atmosphere--chapter-nine-drifting-petals::before,
-  .atmosphere--chapter-nine-drifting-petals::after,
-  .atmosphere--chapter-nine-pollen::before,
-  .atmosphere--chapter-nine-pollen::after {
-    animation: none;
-  }
-}
+/*@media (prefers-reduced-motion: reduce) {
+  .atmosphere-layer *,
+  .atmosphere-layer *::before,
+  .atmosphere-layer *::after {
+    animation: none !important;
+  }*/
 .atmosphere--chapter-two-fireflies {
   position: absolute;
   inset: 0;
@@ -1681,5 +1653,590 @@
   to {
     transform:
       translate3d(4%, -9%, 0);
+  }
+}
+.atmosphere--chapter-ten-window-light {
+  position: absolute;
+  inset: 0;
+
+  z-index: 2;
+
+  overflow: hidden;
+  pointer-events: none;
+
+  mix-blend-mode: screen;
+}
+
+.atmosphere--chapter-ten-window-light::before {
+  content: "";
+
+  position: absolute;
+
+  top: -24%;
+  left: -12%;
+
+  width: 88%;
+  height: 132%;
+
+  background:
+    linear-gradient(
+      132deg,
+      rgba(255, 241, 198, 0.44) 0%,
+      rgba(238, 196, 123, 0.2) 28%,
+      rgba(185, 131, 67, 0.06) 52%,
+      transparent 72%
+    );
+
+  filter:
+    blur(22px);
+
+  transform-origin:
+    top left;
+
+  animation:
+    chapter-ten-window-light-breathe
+    8.5s ease-in-out infinite;
+}
+
+.atmosphere--chapter-ten-window-light::after {
+  content: "";
+
+  position: absolute;
+
+  right: -8%;
+  bottom: -16%;
+
+  width: 68%;
+  height: 86%;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      ellipse,
+      rgba(255, 204, 126, 0.18) 0%,
+      rgba(151, 96, 46, 0.06) 46%,
+      transparent 74%
+    );
+
+  filter:
+    blur(30px);
+
+  animation:
+    chapter-ten-desk-glow
+    7s ease-in-out infinite;
+}
+
+@keyframes chapter-ten-window-light-breathe {
+  0%,
+  100% {
+    opacity: 0.38;
+
+    transform:
+      translate3d(-2%, 1%, 0)
+      rotate(-1deg)
+      scale(0.97);
+  }
+
+  50% {
+    opacity: 0.78;
+
+    transform:
+      translate3d(3%, -1%, 0)
+      rotate(1deg)
+      scale(1.05);
+  }
+}
+
+@keyframes chapter-ten-desk-glow {
+  0%,
+  100% {
+    opacity: 0.28;
+
+    transform:
+      scale(0.97);
+  }
+
+  50% {
+    opacity: 0.58;
+
+    transform:
+      scale(1.05);
+  }
+}
+
+.atmosphere--chapter-ten-invitation-layer {
+  position: absolute;
+
+  inset: -2%;
+
+  z-index: 4;
+
+  display: block;
+
+  width: 104%;
+  height: 104%;
+
+  object-fit: cover;
+
+  pointer-events: none;
+
+  transform-origin:
+    center center;
+
+  animation:
+    chapter-ten-invitation-layer-drift
+    12s ease-in-out infinite;
+}
+
+@keyframes chapter-ten-invitation-layer-drift {
+  0%,
+  100% {
+    transform:
+      translate3d(
+        -0.4%,
+        0.5%,
+        0
+      )
+      rotate(
+        -0.15deg
+      )
+      scale(
+        1.01
+      );
+  }
+
+  35% {
+    transform:
+      translate3d(
+        0.5%,
+        -0.8%,
+        0
+      )
+      rotate(
+        0.2deg
+      )
+      scale(
+        1.018
+      );
+  }
+
+  70% {
+    transform:
+      translate3d(
+        0.8%,
+        0.2%,
+        0
+      )
+      rotate(
+        -0.05deg
+      )
+      scale(
+        1.012
+      );
+  }
+}
+
+.atmosphere--chapter-ten-dust {
+  position: absolute;
+  inset: 0;
+
+  z-index: 3;
+
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.atmosphere--chapter-ten-dust::before,
+.atmosphere--chapter-ten-dust::after {
+  content: "";
+
+  position: absolute;
+
+  inset: -18%;
+
+  background-image:
+    radial-gradient(
+      circle,
+      rgba(255, 235, 193, 0.7)
+      0 1.2px,
+      transparent 2.2px
+    ),
+    radial-gradient(
+      circle,
+      rgba(238, 204, 154, 0.42)
+      0 0.9px,
+      transparent 1.9px
+    ),
+    radial-gradient(
+      circle,
+      rgba(255, 248, 224, 0.45)
+      0 1px,
+      transparent 2px
+    );
+
+  background-size:
+    150px 190px,
+    220px 260px,
+    118px 175px;
+
+  background-position:
+    18px 42px,
+    84px 126px,
+    54px 92px;
+
+  opacity: 0.16;
+
+  filter:
+    drop-shadow(
+      0 0 5px
+      rgba(255, 219, 155, 0.14)
+    );
+
+  animation:
+    chapter-ten-dust-drift
+    24s linear infinite;
+}
+
+.atmosphere--chapter-ten-dust::after {
+  opacity: 0.08;
+
+  transform:
+    scale(1.15);
+
+  animation-duration:
+    32s;
+
+  animation-delay:
+    -10s;
+
+  animation-direction:
+    reverse;
+}
+
+@keyframes chapter-ten-dust-drift {
+  0% {
+    transform:
+      translate3d(
+        -3%,
+        8%,
+        0
+      );
+  }
+
+  50% {
+    transform:
+      translate3d(
+        1%,
+        0,
+        0
+      );
+  }
+
+  100% {
+    transform:
+      translate3d(
+        5%,
+        -10%,
+        0
+      );
+  }
+}
+.atmosphere--chapter-eleven-moonlight {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+
+  overflow: hidden;
+  pointer-events: none;
+
+  mix-blend-mode: screen;
+}
+
+.atmosphere--chapter-eleven-moonlight::before {
+  content: "";
+
+  position: absolute;
+
+  top: -28%;
+  right: -8%;
+
+  width: 88%;
+  height: 110%;
+
+  background:
+    linear-gradient(
+      142deg,
+      rgba(176, 204, 255, 0.28) 0%,
+      rgba(132, 164, 222, 0.16) 28%,
+      rgba(78, 108, 170, 0.05) 52%,
+      transparent 74%
+    );
+
+  filter:
+    blur(30px);
+
+  transform-origin:
+    top right;
+
+  animation:
+    chapter-eleven-moonlight-drift
+    6s ease-in-out infinite;
+}
+
+.atmosphere--chapter-eleven-moonlight::after {
+  content: "";
+
+  position: absolute;
+
+  top: 2%;
+  right: 12%;
+
+  width: 36%;
+  height: 50%;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      ellipse,
+      rgba(207, 224, 255, 0.16) 0%,
+      rgba(142, 177, 231, 0.07) 46%,
+      transparent 74%
+    );
+
+  filter:
+    blur(26px);
+
+  animation:
+    chapter-eleven-moon-glow
+    6s ease-in-out infinite;
+}
+
+@keyframes chapter-eleven-moonlight-drift {
+  0%,
+  100% {
+    opacity: 0.38;
+
+    transform:
+      translate3d(1%, 0, 0)
+      rotate(-1deg)
+      scale(0.98);
+  }
+
+  50% {
+    opacity: 0.72;
+
+    transform:
+      translate3d(-2%, 1%, 0)
+      rotate(1deg)
+      scale(1.04);
+  }
+}
+
+@keyframes chapter-eleven-moon-glow {
+  0%,
+  100% {
+    opacity: 0.28;
+
+    transform:
+      scale(0.96);
+  }
+
+  50% {
+    opacity: 0.58;
+
+    transform:
+      scale(1.06);
+  }
+}
+
+.atmosphere--chapter-eleven-lantern-shimmer {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+
+  pointer-events: none;
+
+  mix-blend-mode: screen;
+}
+
+.atmosphere--chapter-eleven-lantern-shimmer::before {
+  content: "";
+
+  position: absolute;
+
+  left: 4%;
+  bottom: 18%;
+
+  width: 82%;
+  height: 48%;
+
+  background:
+    radial-gradient(
+      ellipse at 34% 48%,
+      rgba(255, 208, 129, 0.24) 0%,
+      rgba(255, 175, 83, 0.08) 35%,
+      transparent 68%
+    );
+
+  filter:
+    blur(24px);
+
+  animation:
+    chapter-eleven-lantern-breathe
+    6.5s ease-in-out infinite;
+}
+
+.atmosphere--chapter-eleven-lantern-shimmer::after {
+  content: "";
+
+  position: absolute;
+
+  left: 12%;
+  bottom: 24%;
+
+  width: 72%;
+  height: 36%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(255, 228, 174, 0.48)
+      0 1.2px,
+      transparent 2.2px
+    ),
+    radial-gradient(
+      circle,
+      rgba(255, 198, 110, 0.28)
+      0 1px,
+      transparent 2px
+    );
+
+  background-size:
+    104px 82px,
+    154px 126px;
+
+  opacity: 0.1;
+
+  filter:
+    drop-shadow(
+      0 0 6px
+      rgba(255, 192, 91, 0.22)
+    );
+
+  animation:
+    chapter-eleven-lantern-sparkle
+    9s ease-in-out infinite;
+}
+
+@keyframes chapter-eleven-lantern-breathe {
+  0%,
+  100% {
+    opacity: 0.34;
+
+    transform:
+      scale(0.98);
+  }
+
+  50% {
+    opacity: 0.66;
+
+    transform:
+      scale(1.035);
+  }
+}
+
+@keyframes chapter-eleven-lantern-sparkle {
+  0%,
+  100% {
+    opacity: 0.6;
+
+    transform:
+      translate3d(-0.5%, 0.4%, 0);
+  }
+
+  45% {
+    opacity: 0.7;
+
+    transform:
+      translate3d(0.6%, -0.5%, 0);
+  }
+
+  70% {
+    opacity: 0.8;
+
+    transform:
+      translate3d(0.2%, 0.2%, 0);
+  }
+}
+
+.atmosphere--chapter-eleven-mist {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.atmosphere--chapter-eleven-mist::before,
+.atmosphere--chapter-eleven-mist::after {
+  content: "";
+
+  position: absolute;
+
+  left: -14%;
+  bottom: -20%;
+
+  width: 128%;
+  height: 62%;
+
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(189, 205, 230, 0.12) 0%,
+      rgba(103, 123, 160, 0.06) 42%,
+      transparent 74%
+    );
+
+  filter:
+    blur(28px);
+
+  animation:
+    chapter-eleven-mist-drift
+    18s ease-in-out infinite;
+}
+
+.atmosphere--chapter-eleven-mist::after {
+  bottom: -12%;
+
+  opacity: 0.56;
+
+  transform:
+    scaleX(1.14);
+
+  animation-duration:
+    24s;
+
+  animation-delay:
+    -9s;
+
+  animation-direction:
+    reverse;
+}
+
+@keyframes chapter-eleven-mist-drift {
+  0%,
+  100% {
+    transform:
+      translate3d(-2%, 2%, 0)
+      scaleX(1.02);
+  }
+
+  50% {
+    transform:
+      translate3d(3%, -1%, 0)
+      scaleX(1.08);
   }
 }

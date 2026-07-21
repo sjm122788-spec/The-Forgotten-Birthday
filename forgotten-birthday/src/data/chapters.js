@@ -7,6 +7,8 @@ import chapterSix from "./chapterSix";
 import chapterSeven from "./chapterSeven";
 import chapterEight from "./chapterEight";
 import chapterNine from "./chapterNine";
+import chapterTen from "./chapterTen";
+import chapterEleven from "./chapterEleven";
 
 const chapters = [
   chapterOne,
@@ -18,6 +20,8 @@ const chapters = [
   chapterSeven,
   chapterEight,
   chapterNine,
+  chapterTen,
+  chapterEleven,
 ];
 
 const chapterById =

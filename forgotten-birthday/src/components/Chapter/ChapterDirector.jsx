@@ -14,6 +14,7 @@ import CooperativePuzzleCue from "../Puzzle/CooperativePuzzleCue";
 import RelicRevealCue from "../Relic/RelicRevealCue";
 import RhythmChallengeCue from "../Rhythm/RhythmChallengeCue";
 import GiftSelectionCue from "../GiftSelection/GiftSelectionCue";
+import FillTheSilenceCue from "../FillTheSilence/FillTheSilenceCue";
 
 import ProgressIllustrationCue from "../ProgressIllustration/ProgressIllustrationCue";
 
@@ -64,7 +65,48 @@ function ChapterDirector({
     currentCue,
     onCompleteChapter,
   ]);
+function handleFillTheSilenceComplete(
+  result,
+) {
+  saveCueResult(
+    currentCue.id,
+    result,
+  );
 
+  if (
+    result.narration
+  ) {
+    showOutcomeNarration({
+      outcomeId:
+        result.outcomeId ??
+        "silence-filled",
+
+      text:
+        result.narration,
+
+      resultData: {
+        fillTheSilenceCueId:
+          currentCue.id,
+
+        completed:
+          result.completed,
+
+        selectedOptionId:
+          result.selectedOptionId,
+
+        hidden:
+          true,
+
+        glory:
+          result.glory ?? 0,
+      },
+    });
+
+    return;
+  }
+
+  advanceCue();
+}
   function advanceCue() {
     setCurrentCueIndex(
       (currentIndex) => {
@@ -662,7 +704,20 @@ function ChapterDirector({
           }
         />
       );
-
+case "fillTheSilence":
+  return (
+    <FillTheSilenceCue
+      key={
+        currentCue.id
+      }
+      cue={
+        currentCue
+      }
+      onComplete={
+        handleFillTheSilenceComplete
+      }
+    />
+  );
     case "relicReveal":
       if (
         !relicConditionMet(
