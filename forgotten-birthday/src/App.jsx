@@ -4,6 +4,7 @@ import StorybookMap from "./components/Storybook/StorybookMap";
 import MemoryWindow from "./components/MemoryWindow/MemoryWindow";
 import ChapterScene from "./components/Chapter/ChapterScene";
 import QuietAfter from "./components/QuietAfter/QuietAfter";
+import FinaleScene from "./components/Finale/FinaleScene";
 
 import { chapters, chapterById } from "./data/chapters";
 
@@ -14,6 +15,7 @@ const SCREENS = {
   MEMORY_WINDOW: "memory-window",
   CHAPTER: "chapter",
   QUIET_AFTER: "quiet-after",
+  FINALE: "finale",
 };
 const DEV_MODE = import.meta.env.DEV;
 function App() {
@@ -60,6 +62,10 @@ function handleDevOpenQuietAfter() {
 
 function handleDevOpenMap() {
   setScreen(SCREENS.STORYBOOK);
+}
+
+function handleDevOpenFinale() {
+  setScreen(SCREENS.FINALE);
 }
   function handleSelectChapter(chapterId) {
     const nextChapter = chapterById[chapterId];
@@ -116,6 +122,12 @@ function handleDevOpenMap() {
       return;
     }
 
+    if (completedId === "chapter-11") {
+      setUnlockingChapterId(null);
+      setScreen(SCREENS.FINALE);
+      return;
+    }
+
     unlockNextChapter(completedId);
   }
 
@@ -150,6 +162,25 @@ function handleDevOpenMap() {
         return (
           <QuietAfter
             onComplete={handleQuietAfterComplete}
+          />
+        );
+
+      case SCREENS.FINALE:
+        return (
+          <FinaleScene
+            earnedRelics={
+              DEV_MODE
+                ? [
+                    "candle-of-first-light",
+                    "laughter-balloon",
+                    "ribbon-of-belonging",
+                    "pocket-watch-of-lost-time",
+                    "open-seal",
+                  ]
+                : []
+            }
+            glory={DEV_MODE ? 72 : 0}
+            maximumGlory={100}
           />
         );
 
@@ -191,6 +222,13 @@ function handleDevOpenMap() {
           onClick={handleDevOpenQuietAfter}
         >
           Quiet After
+        </button>
+
+        <button
+          type="button"
+          onClick={handleDevOpenFinale}
+        >
+          Finale
         </button>
 
         {chapters.map((chapter, index) => (

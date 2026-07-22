@@ -747,7 +747,7 @@ const chapterEleven = {
         true,
 
       nextChapterId:
-        "chapter-12",
+        "finale",
     },
   ],
 };

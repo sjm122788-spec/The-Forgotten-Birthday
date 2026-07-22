@@ -1,0 +1,451 @@
+.finale-scene {
+  --finale-dim-brightness: 0.72;
+  --finale-restored-brightness: 1;
+  --finale-dim-saturation: 0.78;
+  --finale-restored-saturation: 1;
+  --finale-glory-opacity: 0.5;
+  --finale-candle-opacity: 0.5;
+
+  min-height: 100vh;
+  overflow: hidden;
+  background: #08070a;
+}
+
+.finale-scene__artwork {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.finale-scene__base,
+.finale-scene__guest {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.finale-scene__base {
+  z-index: 1;
+  filter: brightness(var(--finale-dim-brightness)) saturate(var(--finale-dim-saturation));
+  transition: filter 2.4s ease;
+}
+
+.finale-scene--restored .finale-scene__base {
+  filter:
+    brightness(var(--finale-restored-brightness))
+    saturate(var(--finale-restored-saturation));
+}
+
+.finale-scene__glory {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(
+      circle at 51% 46%,
+      rgba(255, 229, 169, 0.62),
+      rgba(255, 189, 92, 0.16) 38%,
+      transparent 70%
+    );
+  mix-blend-mode: screen;
+  transition: opacity 2.4s ease;
+}
+
+.finale-scene--glory .finale-scene__glory,
+.finale-scene--restored .finale-scene__glory {
+  opacity: var(--finale-glory-opacity);
+}
+
+.finale-scene__candlelight {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0.28;
+  background:
+    radial-gradient(
+      circle at 50% 53%,
+      rgba(255, 216, 135, 0.46),
+      transparent 42%
+    );
+  mix-blend-mode: screen;
+  animation: finale-candle-breathe 4.8s ease-in-out infinite;
+}
+
+.finale-scene--restored .finale-scene__candlelight {
+  opacity: var(--finale-candle-opacity);
+}
+
+.finale-scene__doorway-shadow {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(
+      ellipse at 50% 38%,
+      transparent 0 18%,
+      rgba(5, 4, 7, 0.38) 54%,
+      rgba(5, 4, 7, 0.72) 100%
+    );
+  transition: opacity 1.8s ease;
+}
+
+.finale-scene--doorway .finale-scene__doorway-shadow,
+.finale-scene--invitation .finale-scene__doorway-shadow,
+.finale-scene--guest .finale-scene__doorway-shadow {
+  opacity: 0.62;
+}
+
+.finale-scene__guest {
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0;
+  filter: brightness(0.52);
+  transition:
+    opacity 2.2s ease,
+    filter 2.2s ease;
+}
+
+.finale-scene--guest-visible .finale-scene__guest {
+  opacity: 0.62;
+}
+
+.finale-scene--guest-seated .finale-scene__guest {
+  opacity: 1;
+  filter: brightness(1);
+}
+
+.finale-scene__relics {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  pointer-events: none;
+}
+
+.finale-relic {
+  position: absolute;
+  left: 50%;
+  bottom: -20%;
+  width: clamp(72px, 8vw, 144px);
+  max-height: 22vh;
+  object-fit: contain;
+  opacity: 0;
+  filter:
+    drop-shadow(0 0 14px rgba(255, 234, 180, 0.76))
+    drop-shadow(0 12px 20px rgba(0, 0, 0, 0.48));
+  transform: translate(-50%, 0) scale(0.72);
+}
+
+.finale-relic--returned {
+  animation: finale-relic-return 1.35s cubic-bezier(0.22, 0.72, 0.22, 1) both;
+}
+
+.finale-relic--candle {
+  --relic-x: -28vw;
+  --relic-y: -53vh;
+  --relic-rotation: -5deg;
+}
+
+.finale-relic--balloon {
+  --relic-x: 27vw;
+  --relic-y: -69vh;
+  --relic-rotation: 8deg;
+}
+
+.finale-relic--ribbon {
+  --relic-x: 17vw;
+  --relic-y: -42vh;
+  --relic-rotation: 4deg;
+}
+
+.finale-relic--watch {
+  --relic-x: -8vw;
+  --relic-y: -37vh;
+  --relic-rotation: -3deg;
+}
+
+.finale-relic--seal {
+  --relic-x: 31vw;
+  --relic-y: -34vh;
+  --relic-rotation: 3deg;
+}
+
+.finale-scene__confetti {
+  position: absolute;
+  inset: -20% 0 0;
+  z-index: 8;
+  pointer-events: none;
+  opacity: 0;
+  background-image:
+    radial-gradient(circle, rgba(255, 228, 158, 0.9) 0 2px, transparent 3px),
+    radial-gradient(circle, rgba(223, 179, 198, 0.82) 0 2px, transparent 3px),
+    radial-gradient(circle, rgba(178, 210, 207, 0.8) 0 2px, transparent 3px);
+  background-size: 105px 148px, 157px 201px, 211px 247px;
+}
+
+.finale-scene--confetti .finale-scene__confetti,
+.finale-scene--closing .finale-scene__confetti,
+.finale-scene--complete .finale-scene__confetti {
+  opacity: 0.76;
+  animation: finale-confetti-fall 7s linear infinite;
+}
+
+.finale-scene__interstitial {
+  position: absolute;
+  left: 50%;
+  bottom: 10%;
+  z-index: 15;
+  width: min(760px, calc(100% - 40px));
+  margin: 0;
+  transform: translateX(-50%);
+  color: rgba(255, 247, 226, 0.92);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.1rem, 2vw, 1.55rem);
+  line-height: 1.5;
+  text-align: center;
+  text-shadow: 0 3px 14px rgba(0, 0, 0, 0.92);
+}
+
+.finale-narration {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(76px, 11vh, 132px);
+  z-index: 20;
+  width: min(920px, calc(100% - 56px));
+  padding: 0;
+  transform: translateX(-50%);
+  text-align: center;
+  pointer-events: none;
+}
+
+.finale-narration p {
+  margin: 0;
+  color: #fffaf0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.3rem, 2.45vw, 2.15rem);
+  font-weight: 600;
+  line-height: 1.48;
+  text-wrap: balance;
+  text-shadow:
+    0 3px 5px rgba(0, 0, 0, 1),
+    0 0 18px rgba(0, 0, 0, 0.98),
+    0 0 36px rgba(0, 0, 0, 0.82);
+}
+
+.finale-narration__continue {
+  margin-top: 24px;
+  padding: 10px 26px;
+  border: 1px solid rgba(255, 244, 220, 0.58);
+  border-radius: 999px;
+  color: #fffaf0;
+  background: rgba(12, 10, 10, 0.34);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.42);
+  font: inherit;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 700;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.95);
+  cursor: pointer;
+  pointer-events: auto;
+  backdrop-filter: blur(2px);
+}
+
+.finale-narration__continue:hover {
+  background: rgba(12, 10, 10, 0.54);
+}
+
+.finale-glory-return {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 18;
+  display: grid;
+  justify-items: center;
+  width: min(700px, calc(100% - 48px));
+  transform: translate(-50%, -50%);
+  color: #fff8df;
+  text-align: center;
+  text-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.98),
+    0 0 24px rgba(0, 0, 0, 0.9);
+  animation: finale-glory-copy 2.4s ease both;
+}
+
+.finale-glory-return__label {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1rem, 1.8vw, 1.35rem);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.finale-glory-return__amount {
+  margin-top: 4px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(3.2rem, 9vw, 7rem);
+  font-weight: 500;
+  line-height: 1;
+}
+
+.finale-glory-return p {
+  margin: 14px 0 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.1rem, 2vw, 1.55rem);
+}
+
+.finale-scene--glory .finale-scene__base {
+  animation: finale-glory-restore 2.4s ease both;
+}
+
+.finale-scene--glory .finale-scene__glory {
+  animation: finale-glory-bloom 2.4s ease both;
+}
+
+.finale-ending {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-content: center;
+  padding: 32px;
+  color: #fff7e4;
+  background: rgba(5, 4, 7, 0.72);
+  text-align: center;
+  animation: finale-ending-arrive 2s ease both;
+}
+
+.finale-ending h1 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2.6rem, 7vw, 6rem);
+  font-weight: 500;
+}
+
+.finale-ending p {
+  margin: 18px 0 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1rem, 2vw, 1.45rem);
+}
+
+@keyframes finale-relic-return {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 0) scale(0.72) rotate(-8deg);
+  }
+
+  24% {
+    opacity: 1;
+  }
+
+  74% {
+    opacity: 1;
+    transform:
+      translate(calc(-50% + var(--relic-x)), var(--relic-y))
+      scale(1.06)
+      rotate(var(--relic-rotation));
+  }
+
+  100% {
+    opacity: 0.9;
+    transform:
+      translate(calc(-50% + var(--relic-x)), var(--relic-y))
+      scale(0.84)
+      rotate(var(--relic-rotation));
+  }
+}
+
+@keyframes finale-candle-breathe {
+  0%,
+  100% {
+    transform: scale(0.99);
+  }
+
+  50% {
+    transform: scale(1.025);
+  }
+}
+
+@keyframes finale-confetti-fall {
+  from {
+    transform: translateY(-14%);
+  }
+
+  to {
+    transform: translateY(20%);
+  }
+}
+
+@keyframes finale-ending-arrive {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .finale-scene__candlelight,
+  .finale-scene__confetti,
+  .finale-relic--returned,
+  .finale-ending {
+    animation: none;
+  }
+
+  .finale-relic--returned {
+    opacity: 0.9;
+    transform:
+      translate(calc(-50% + var(--relic-x)), var(--relic-y))
+      scale(0.84)
+      rotate(var(--relic-rotation));
+  }
+}
+
+@keyframes finale-glory-restore {
+  from {
+    filter:
+      brightness(var(--finale-dim-brightness))
+      saturate(var(--finale-dim-saturation));
+  }
+
+  to {
+    filter:
+      brightness(var(--finale-restored-brightness))
+      saturate(var(--finale-restored-saturation));
+  }
+}
+
+@keyframes finale-glory-bloom {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  to {
+    opacity: var(--finale-glory-opacity);
+    transform: scale(1.04);
+  }
+}
+
+@keyframes finale-glory-copy {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -44%) scale(0.94);
+  }
+
+  24%,
+  74% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -56%) scale(1.03);
+  }
+}
