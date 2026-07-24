@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 
 import StorybookMap from "./components/Storybook/StorybookMap";
-import MemoryWindow from "./components/MemoryWindow/MemoryWindow";
+import ChapterTransition from "./components/ChapterTransition/ChapterTransition";
 import ChapterScene from "./components/Chapter/ChapterScene";
 import QuietAfter from "./components/QuietAfter/QuietAfter";
 import FinaleScene from "./components/Finale/FinaleScene";
@@ -12,7 +12,6 @@ import "./App.css";
 
 const SCREENS = {
   STORYBOOK: "storybook",
-  MEMORY_WINDOW: "memory-window",
   CHAPTER: "chapter",
   QUIET_AFTER: "quiet-after",
   FINALE: "finale",
@@ -34,11 +33,17 @@ function App() {
   const [unlockingChapterId, setUnlockingChapterId] =
     useState(null);
 
-  const selectedChapter =
-    chapterById[selectedChapterId] ?? chapters[0];
+  const [transitionChapter, setTransitionChapter] =
+    useState(null);
 
-  const activeChapterId =
-    chapters[activeChapterIndex]?.id ?? null;
+  const [transitionOrigin, setTransitionOrigin] =
+    useState(null);
+
+  const selectedChapter =
+  chapterById[selectedChapterId] ?? chapters[0];
+
+const activeChapterId =
+  chapters[activeChapterIndex]?.id ?? null;
 
   const completedChapterIdSet = useMemo(
     () => new Set(completedChapterIds),
@@ -67,7 +72,7 @@ function handleDevOpenMap() {
 function handleDevOpenFinale() {
   setScreen(SCREENS.FINALE);
 }
-  function handleSelectChapter(chapterId) {
+  function handleSelectChapter(chapterId, origin) {
     const nextChapter = chapterById[chapterId];
 
     if (!nextChapter) {
@@ -81,9 +86,27 @@ function handleDevOpenFinale() {
       return;
     }
 
-    setSelectedChapterId(chapterId);
+    if (transitionChapter) {
+      return;
+    }
+
     setUnlockingChapterId(null);
-    setScreen(SCREENS.MEMORY_WINDOW);
+    setTransitionOrigin(origin ?? null);
+    setTransitionChapter(nextChapter);
+  }
+
+  function handleTransitionCoveredScreen() {
+    if (!transitionChapter) {
+      return;
+    }
+
+    setSelectedChapterId(transitionChapter.id);
+    setScreen(SCREENS.CHAPTER);
+  }
+
+  function handleTransitionFinished() {
+    setTransitionChapter(null);
+    setTransitionOrigin(null);
   }
 
   function markChapterComplete(chapterId) {
@@ -137,19 +160,6 @@ function handleDevOpenFinale() {
 
   function renderScreen() {
     switch (screen) {
-      case SCREENS.MEMORY_WINDOW:
-        return (
-          <MemoryWindow
-            chapter={selectedChapter}
-            onEnterChapter={() =>
-              setScreen(SCREENS.CHAPTER)
-            }
-            onBack={() =>
-              setScreen(SCREENS.STORYBOOK)
-            }
-          />
-        );
-
       case SCREENS.CHAPTER:
         return (
           <ChapterScene
@@ -203,6 +213,15 @@ function handleDevOpenFinale() {
   return (
   <div className="app">
     {renderScreen()}
+
+    {transitionChapter && (
+      <ChapterTransition
+        chapter={transitionChapter}
+        origin={transitionOrigin}
+        onCoveredScreen={handleTransitionCoveredScreen}
+        onFinished={handleTransitionFinished}
+      />
+    )}
 
     {DEV_MODE && (
       <aside className="dev-toolbar">

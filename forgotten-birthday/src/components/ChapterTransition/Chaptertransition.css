@@ -1,0 +1,281 @@
+/* =========================================================
+   CHAPTER TRANSITION OVERLAY
+
+   Fixed at the viewport level (not inside the storybook "book"
+   box) so it keeps playing uninterrupted while the parent swaps
+   the underlying screen from the map to the chapter scene.
+   ========================================================= */
+
+.chapter-transition-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+
+  display: grid;
+  place-items: center;
+
+  overflow: hidden;
+  pointer-events: none;
+
+  opacity: 1;
+  transition: opacity 420ms ease;
+}
+
+.chapter-transition-overlay--revealing {
+  opacity: 0;
+}
+
+/* ---------------------------------------------------------
+   The scene itself starts as a small dot pinned to the
+   chapter's map position (via CSS vars set inline), then
+   travels/grows/rotates to fill and overshoot the viewport.
+   --------------------------------------------------------- */
+
+.chapter-transition-scene {
+  position: absolute;
+
+  left: var(--transition-origin-x, 50%);
+  top: var(--transition-origin-y, 50%);
+
+  width: clamp(44px, 4vw, 62px);
+  aspect-ratio: 1;
+
+  overflow: visible;
+
+  transform:
+    translate(-50%, -50%)
+    scale(0.85)
+    rotate(0deg);
+
+  transform-origin: center;
+
+  will-change:
+    left,
+    top,
+    width,
+    transform;
+
+  animation:
+    chapterTransitionScale
+    4.2s
+    cubic-bezier(0.32, 0.04, 0.18, 1)
+    forwards;
+}
+
+.chapter-transition-window {
+  opacity: 0;
+
+  animation:
+    chapterWindowReveal
+    4.2s
+    ease
+    forwards;
+}
+
+.chapter-transition-ink {
+  opacity: 1;
+
+  animation:
+    chapterInkRecede
+    4.2s
+    ease
+    forwards;
+}
+
+.chapter-transition-cover {
+  fill: #0d0906;
+  opacity: 0;
+
+  animation:
+    chapterCoverGrow
+    4.2s
+    ease
+    forwards;
+}
+
+/* =========================================================
+   MAIN TIMELINE
+
+   0%   - 24%  swirl in place at the map marker (two rotations,
+               internal blob keeps morphing the whole time)
+   24%  - 55%  lift off and grow toward center
+   55%  - 75%  reach full-bleed (the "memory window" fills frame)
+   75%  - 100% overshoot further, simulating flying through it
+   ========================================================= */
+
+@keyframes chapterTransitionScale {
+  0% {
+    left: var(--transition-origin-x, 50%);
+    top: var(--transition-origin-y, 50%);
+
+    width: clamp(44px, 4vw, 62px);
+
+    transform:
+      translate(-50%, -50%)
+      scale(0.85)
+      rotate(0deg);
+  }
+
+  10% {
+    transform:
+      translate(-50%, -50%)
+      scale(1.05)
+      rotate(90deg);
+  }
+
+  24% {
+    left: var(--transition-origin-x, 50%);
+    top: var(--transition-origin-y, 50%);
+
+    width: clamp(50px, 4.6vw, 70px);
+
+    transform:
+      translate(-50%, -50%)
+      scale(0.95)
+      rotate(240deg);
+  }
+
+  34% {
+    left: 47%;
+    top: 48%;
+
+    width: min(160px, 18vw);
+
+    transform:
+      translate(-50%, -50%)
+      scale(1)
+      rotate(300deg);
+  }
+
+  55% {
+    left: 50%;
+    top: 50%;
+
+    width: min(60vw, 60vh);
+
+    transform:
+      translate(-50%, -50%)
+      scale(1)
+      rotate(350deg);
+  }
+
+  75% {
+    left: 50%;
+    top: 50%;
+
+    width: max(165vw, 165vh);
+
+    transform:
+      translate(-50%, -50%)
+      scale(1)
+      rotate(395deg);
+  }
+
+  100% {
+    left: 50%;
+    top: 50%;
+
+    width: max(165vw, 165vh);
+
+    transform:
+      translate(-50%, -50%)
+      scale(1.6)
+      rotate(410deg);
+  }
+}
+
+/* ---------------------------------------------------------
+   Memory window image: hidden/grayscale/dark while the ink
+   swirls over it, brightening and fully desaturating-back-in
+   as the ink recedes.
+   --------------------------------------------------------- */
+
+@keyframes chapterWindowReveal {
+  0%,
+  36% {
+    opacity: 0;
+    filter:
+      grayscale(1)
+      brightness(0.4);
+  }
+
+  55% {
+    opacity: 0.9;
+    filter:
+      grayscale(0.5)
+      brightness(0.7);
+  }
+
+  72% {
+    opacity: 1;
+    filter:
+      grayscale(0.1)
+      brightness(0.95);
+  }
+
+  85%,
+  100% {
+    opacity: 1;
+    filter:
+      grayscale(0)
+      brightness(1.1);
+  }
+}
+
+/* ---------------------------------------------------------
+   Ink recedes (fades) once the window has grown large enough
+   to be worth revealing.
+   --------------------------------------------------------- */
+
+@keyframes chapterInkRecede {
+  0%,
+  48% {
+    opacity: 1;
+  }
+
+  70% {
+    opacity: 0.1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------------
+   Full-viewport ink cover that finishes covering the screen right
+   before the parent swaps in the chapter scene underneath.
+   --------------------------------------------------------- */
+
+@keyframes chapterCoverGrow {
+  0%,
+  62% {
+    opacity: 0;
+  }
+
+  80% {
+    opacity: 0.55;
+  }
+
+  92%,
+  100% {
+    opacity: 1;
+  }
+}
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .chapter-transition-scene,
+  .chapter-transition-window,
+  .chapter-transition-ink,
+  .chapter-transition-cover {
+    animation-duration: 260ms;
+  }
+
+  .chapter-transition-overlay {
+    transition-duration: 120ms;
+  }
+}

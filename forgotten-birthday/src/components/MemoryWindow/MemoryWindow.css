@@ -1,68 +1,417 @@
+/* =========================================================
+   MEMORY WINDOW SCREEN
+   ========================================================= */
+
 .memory-window-screen {
   position: relative;
   min-height: 100vh;
+
   display: grid;
   place-items: center;
+
+  padding: 2rem;
+
   overflow: hidden;
+  isolation: isolate;
+
   background:
-    radial-gradient(circle at center, rgba(67, 48, 84, 0.35), transparent 42%),
-    #08070a;
+    radial-gradient(
+      circle at center,
+      rgba(89, 57, 26, 0.22),
+      transparent 55%
+    ),
+    #0d0a08;
+
   color: #f2e8d3;
 }
 
-.memory-window-stage {
+
+/* =========================================================
+   SHARED BOOK STAGE
+
+   The map, ink, and Memory Window all live inside this same
+   16:9 box so chapter map coordinates remain aligned.
+   ========================================================= */
+
+.memory-transition-book {
   position: relative;
-  width: min(620px, 78vw);
+
+  width: min(1400px, 90vw);
+  max-height: 90vh;
+  aspect-ratio: 16 / 9;
+
+  overflow: hidden;
+  border-radius: 16px;
+
+  box-shadow:
+    0 30px 90px rgba(0, 0, 0, 0.75),
+    0 0 45px rgba(112, 68, 25, 0.12);
+}
+
+
+/* =========================================================
+   SHARED LAYERS
+   ========================================================= */
+
+.memory-window-map-layer,
+.memory-window-effects-layer,
+.memory-window-stage {
+  position: absolute;
+  inset: 0;
+}
+
+
+/* =========================================================
+   LAYER 1: STORYBOOK MAP
+   ========================================================= */
+
+.memory-window-map-layer {
+  z-index: 0;
+  overflow: hidden;
+}
+
+.memory-window-map-image,
+.memory-window-map-placeholder {
+  width: 100%;
+  height: 100%;
+}
+
+.memory-window-map-image {
+  display: block;
+
+  object-fit: contain;
+  object-position: center;
+
+  user-select: none;
+  pointer-events: none;
+}
+
+.memory-window-map-placeholder {
   display: grid;
   place-items: center;
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(67, 48, 84, 0.35),
+      transparent 42%
+    ),
+    #08070a;
+
+  color: #f2e8d3;
+  font-family: Georgia, "Times New Roman", serif;
 }
+
+/*
+  Temporary dimming layer.
+
+  Later this can animate as the ink wakes and the Memory
+  Window begins to form.
+*/
+
+.memory-window-map-layer::after {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  background: rgba(8, 7, 10, 0.42);
+
+  pointer-events: none;
+}
+
+
+/* =========================================================
+   LAYER 2: INK TRANSITION
+   ========================================================= */
+
+.memory-window-effects-layer {
+  z-index: 1;
+
+  overflow: hidden;
+  pointer-events: none;
+}
+
+
+/* ---------------------------------------------------------
+   Traveling ink container
+
+   Begins at the selected chapter's mapPosition and moves
+   toward the center of the storybook.
+   --------------------------------------------------------- */
 
 .memory-window-ink {
   position: absolute;
-  width: 115%;
+
+  left: var(--memory-origin-x, 50%);
+  top: var(--memory-origin-y, 50%);
+
+  width: clamp(44px, 4vw, 62px);
   aspect-ratio: 1;
-  border-radius: 43% 57% 49% 51% / 48% 41% 59% 52%;
-  background:
-    radial-gradient(circle, #161019 0 38%, #08070a 70%);
-  filter: blur(14px);
-  opacity: 0.92;
+
+  display: grid;
+  place-items: center;
+
+  transform:
+    translate(-50%, -50%)
+    scale(0.88);
+
+  transform-origin: center;
+
+  animation:
+    memoryInkJourney
+    4.6s
+    cubic-bezier(0.42, 0, 0.2, 1)
+    forwards;
+
+  will-change:
+    left,
+    top,
+    width,
+    transform,
+    opacity;
 }
+
+
+/* ---------------------------------------------------------
+   Main organic ink body
+   --------------------------------------------------------- */
+
+.memory-window-ink-core {
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+
+  border-radius:
+    43% 57% 49% 51% /
+    48% 41% 59% 52%;
+
+  background:
+  radial-gradient(
+    ellipse at 48% 46%,
+    rgba(37, 26, 32, 0.98) 0%,
+    rgba(23, 16, 13, 0.96) 48%,
+    rgba(8, 7, 6, 0.72) 66%,
+    transparent 72%
+  );
+
+  filter:
+  blur(0.8px)
+  contrast(1.18);
+
+  opacity: 0.96;
+
+  animation:
+    memoryInkMorph
+    1.4s
+    ease-in-out
+    infinite;
+
+  will-change:
+    transform,
+    border-radius,
+    filter;
+}
+/* ---------------------------------------------------------
+   Curved orbiting ink wisps
+   --------------------------------------------------------- */
+
+.memory-window-ink-wisp {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+
+  width: 128%;
+  height: 42%;
+
+  border-radius:
+    70% 30% 68% 32% /
+    58% 46% 54% 42%;
+
+  background:
+    linear-gradient(
+      100deg,
+      transparent 4%,
+      rgba(16, 10, 9, 0.12) 18%,
+      rgba(23, 15, 13, 0.82) 48%,
+      rgba(12, 8, 7, 0.62) 70%,
+      transparent 94%
+    );
+
+  transform-origin: 0% 50%;
+
+  opacity: 0;
+
+  filter:
+    blur(1.3px)
+    contrast(1.15);
+
+  mix-blend-mode: multiply;
+
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.memory-window-ink-wisp--one {
+  animation:
+    memoryInkWispOne
+    4.6s
+    cubic-bezier(0.35, 0, 0.22, 1)
+    forwards;
+}
+
+.memory-window-ink-wisp--two {
+  width: 112%;
+  height: 32%;
+
+  animation:
+    memoryInkWispTwo
+    4.6s
+    cubic-bezier(0.35, 0, 0.22, 1)
+    forwards;
+}
+
+.memory-window-ink-wisp--three {
+  width: 92%;
+  height: 27%;
+
+  animation:
+    memoryInkWispThree
+    4.6s
+    cubic-bezier(0.35, 0, 0.22, 1)
+    forwards;
+}
+
+
+/* =========================================================
+   LAYER 3: MEMORY WINDOW
+   ========================================================= */
+
+.memory-window-stage {
+  z-index: 2;
+
+  display: grid;
+  place-items: center;
+
+  pointer-events: none;
+}
+
+
+/* ---------------------------------------------------------
+   Memory Window button
+
+   The artwork already contains its own Gothic shape, so
+   there is no CSS border or artificial clipping.
+   --------------------------------------------------------- */
 
 .memory-window-frame {
   position: relative;
-  z-index: 1;
-  width: min(340px, 60vw);
+
+  width: min(360px, 38vw);
   aspect-ratio: 2 / 3;
+
   padding: 0;
-  overflow: hidden;
+
+  overflow: visible;
+
+  border: 0;
+  border-radius: 0;
+
+  background: transparent;
+
+  pointer-events: auto;
   cursor: pointer;
-  border: 8px solid #30271f;
-  border-radius: 48% 48% 6px 6px / 18% 18% 6px 6px;
-  background: #19151a;
-  box-shadow:
-    0 0 40px rgba(198, 156, 92, 0.18),
-    0 20px 70px rgba(0, 0, 0, 0.7);
+
+  opacity: 0;
+
+  transform:
+    scale(0.72)
+    translateY(10px);
+
+  filter:
+    grayscale(1)
+    brightness(0.42)
+    blur(1px);
+
+  animation:
+    memoryWindowForm
+    2.5s
+    cubic-bezier(0.22, 0.8, 0.22, 1)
+    2.05s
+    forwards;
+
+  will-change:
+    transform,
+    opacity,
+    filter;
 }
 
-.memory-window-frame img {
+.memory-window-frame:hover {
+  filter:
+    grayscale(0)
+    brightness(1.06)
+    drop-shadow(
+      0 0 18px
+      rgba(210, 167, 95, 0.28)
+    );
+}
+
+.memory-window-frame:focus-visible {
+  outline: 2px solid rgba(242, 232, 211, 0.86);
+  outline-offset: 8px;
+}
+
+
+/* ---------------------------------------------------------
+   Memory Window image
+   --------------------------------------------------------- */
+
+.memory-window-image {
   width: 100%;
   height: 100%;
+
   display: block;
-  object-fit: cover;
+
+  object-fit: contain;
+  object-position: center;
+
+  user-select: none;
+  pointer-events: none;
+
+  filter:
+    drop-shadow(
+      0 18px 28px
+      rgba(0, 0, 0, 0.58)
+    );
 }
+
+
+/* ---------------------------------------------------------
+   Placeholder used when chapter art is missing
+   --------------------------------------------------------- */
 
 .memory-window-placeholder {
   width: 100%;
   height: 100%;
+
   display: grid;
   place-content: center;
+
   gap: 0.8rem;
   padding: 1rem;
+
   background:
-    linear-gradient(135deg, rgba(90, 68, 115, 0.8), rgba(196, 133, 64, 0.6)),
+    linear-gradient(
+      135deg,
+      rgba(90, 68, 115, 0.8),
+      rgba(196, 133, 64, 0.6)
+    ),
     #29212e;
+
   color: #fff3d7;
-  font-family: Georgia, serif;
+
+  font-family: Georgia, "Times New Roman", serif;
   text-align: center;
 }
 
@@ -70,6 +419,7 @@
   font-size: 0.8rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
+
   opacity: 0.7;
 }
 
@@ -77,15 +427,479 @@
   font-size: clamp(1.2rem, 4vw, 2rem);
 }
 
+
+/* =========================================================
+   LAYER 4: TEMPORARY CONTROLS
+   ========================================================= */
+
+.memory-window-controls {
+  position: absolute;
+  inset: 0;
+
+  z-index: 3;
+
+  pointer-events: none;
+}
+
 .memory-window-back {
   position: absolute;
+
   top: 1rem;
   left: 1rem;
+
+  pointer-events: auto;
 }
 
 .memory-window-instruction {
   position: absolute;
+
+  left: 50%;
   bottom: 1.5rem;
-  font-family: Georgia, serif;
+
+  width: max-content;
+  max-width: calc(100% - 2rem);
+
+  margin: 0;
+
+  transform: translateX(-50%);
+
+  font-family: Georgia, "Times New Roman", serif;
+  text-align: center;
+
   opacity: 0.65;
+}
+
+
+/* =========================================================
+   INK ANIMATIONS
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   Main ink movement
+
+   1. Wakes at the blot
+   2. Pulses
+   3. Travels toward the center
+   4. Expands behind the Memory Window
+   --------------------------------------------------------- */
+
+@keyframes memoryInkJourney {
+  0% {
+    left: var(--memory-origin-x, 50%);
+    top: var(--memory-origin-y, 50%);
+
+    width: clamp(42px, 3.8vw, 58px);
+
+    transform:
+      translate(-50%, -50%)
+      scale(0.88)
+      rotate(0deg);
+
+    opacity: 0.88;
+  }
+
+  14% {
+    transform:
+      translate(-50%, -50%)
+      scale(1.12)
+      rotate(-2deg);
+
+    opacity: 1;
+  }
+
+  26% {
+    transform:
+      translate(-50%, -50%)
+      scale(0.98)
+      rotate(2deg);
+  }
+
+  58% {
+    left: 44%;
+    top: 45%;
+
+    width: min(150px, 18vw);
+
+    transform:
+      translate(-50%, -50%)
+      scale(1)
+      rotate(8deg);
+
+    opacity: 0.96;
+  }
+
+  80% {
+    left: 50%;
+    top: 50%;
+
+    width: min(285px, 32vw);
+
+    transform:
+      translate(-50%, -50%)
+      scale(1.02)
+      rotate(15deg);
+
+    opacity: 0.86;
+  }
+
+  100% {
+    left: 50%;
+    top: 50%;
+
+    width: min(310px, 34vw);
+
+    transform:
+      translate(-50%, -50%)
+      scale(1)
+      rotate(18deg);
+
+    opacity: 0.52;
+  }
+}
+@keyframes memoryInkWispOne {
+  0%,
+  18% {
+    opacity: 0;
+
+    transform:
+      translate(0, -50%)
+      rotate(-35deg)
+      scaleX(0.1)
+      scaleY(0.7);
+  }
+
+  42% {
+    opacity: 0.8;
+
+    transform:
+      translate(0, -50%)
+      rotate(45deg)
+      scaleX(0.9)
+      scaleY(1);
+  }
+
+  72% {
+    opacity: 0.72;
+
+    transform:
+      translate(0, -50%)
+      rotate(205deg)
+      scaleX(1.05)
+      scaleY(0.82);
+  }
+
+  100% {
+    opacity: 0.28;
+
+    transform:
+      translate(0, -50%)
+      rotate(330deg)
+      scaleX(0.88)
+      scaleY(0.68);
+  }
+}
+
+@keyframes memoryInkWispTwo {
+  0%,
+  25% {
+    opacity: 0;
+
+    transform:
+      translate(0, -50%)
+      rotate(80deg)
+      scaleX(0.12)
+      scaleY(0.6);
+  }
+
+  48% {
+    opacity: 0.68;
+
+    transform:
+      translate(0, -50%)
+      rotate(-20deg)
+      scaleX(0.86)
+      scaleY(1);
+  }
+
+  76% {
+    opacity: 0.58;
+
+    transform:
+      translate(0, -50%)
+      rotate(-170deg)
+      scaleX(1.08)
+      scaleY(0.76);
+  }
+
+  100% {
+    opacity: 0.2;
+
+    transform:
+      translate(0, -50%)
+      rotate(-295deg)
+      scaleX(0.78)
+      scaleY(0.62);
+  }
+}
+
+@keyframes memoryInkWispThree {
+  0%,
+  32% {
+    opacity: 0;
+
+    transform:
+      translate(0, -50%)
+      rotate(-110deg)
+      scaleX(0.1)
+      scaleY(0.5);
+  }
+
+  55% {
+    opacity: 0.58;
+
+    transform:
+      translate(0, -50%)
+      rotate(15deg)
+      scaleX(0.88)
+      scaleY(0.9);
+  }
+
+  80% {
+    opacity: 0.45;
+
+    transform:
+      translate(0, -50%)
+      rotate(175deg)
+      scaleX(1)
+      scaleY(0.7);
+  }
+
+  100% {
+    opacity: 0.14;
+
+    transform:
+      translate(0, -50%)
+      rotate(290deg)
+      scaleX(0.7)
+      scaleY(0.55);
+  }
+}
+
+/* ---------------------------------------------------------
+   Organic breathing and shape changes
+   --------------------------------------------------------- */
+
+@keyframes memoryInkMorph {
+  0%,
+  100% {
+    border-radius:
+      43% 57% 49% 51% /
+      48% 41% 59% 52%;
+
+    transform: scale(0.97);
+  }
+
+  35% {
+    border-radius:
+      57% 43% 61% 39% /
+      39% 58% 42% 61%;
+
+    transform:
+      scale(1.04)
+      rotate(3deg);
+  }
+
+  68% {
+    border-radius:
+      46% 54% 38% 62% /
+      61% 44% 56% 39%;
+
+    transform:
+      scale(1)
+      rotate(-2deg);
+  }
+}
+
+
+/* ---------------------------------------------------------
+   First tendril
+   --------------------------------------------------------- */
+
+@keyframes memoryInkTendrilOne {
+  0%,
+  18% {
+    opacity: 0;
+
+    transform:
+      rotate(-24deg)
+      scaleX(0);
+  }
+
+  38% {
+    opacity: 0.9;
+
+    transform:
+      rotate(-24deg)
+      scaleX(1.7);
+  }
+
+  66% {
+    opacity: 0.65;
+
+    transform:
+      rotate(-5deg)
+      scaleX(2.2);
+  }
+
+  100% {
+    opacity: 0;
+
+    transform:
+      rotate(20deg)
+      scaleX(1.1);
+  }
+}
+
+
+/* ---------------------------------------------------------
+   Second tendril
+   --------------------------------------------------------- */
+
+@keyframes memoryInkTendrilTwo {
+  0%,
+  24% {
+    opacity: 0;
+
+    transform:
+      rotate(31deg)
+      scaleX(0);
+  }
+
+  46% {
+    opacity: 0.82;
+
+    transform:
+      rotate(31deg)
+      scaleX(1.5);
+  }
+
+  72% {
+    opacity: 0.55;
+
+    transform:
+      rotate(48deg)
+      scaleX(2);
+  }
+
+  100% {
+    opacity: 0;
+
+    transform:
+      rotate(64deg)
+      scaleX(1);
+  }
+}
+
+
+/* =========================================================
+   MEMORY WINDOW FORMATION
+   ========================================================= */
+
+@keyframes memoryWindowForm {
+  0% {
+    opacity: 0;
+
+    transform:
+      scale(0.72)
+      translateY(10px);
+
+    filter:
+      grayscale(1)
+      brightness(0.42)
+      blur(1px);
+  }
+
+  38% {
+    opacity: 0.8;
+
+    transform:
+      scale(0.9)
+      translateY(4px);
+
+    filter:
+      grayscale(0.85)
+      brightness(0.65)
+      blur(0.4px);
+  }
+
+  72% {
+    opacity: 1;
+
+    transform:
+      scale(1.03)
+      translateY(0);
+
+    filter:
+      grayscale(0.28)
+      brightness(0.88)
+      blur(0);
+  }
+
+  100% {
+    opacity: 1;
+
+    transform:
+      scale(1)
+      translateY(0);
+
+    filter:
+      grayscale(0)
+      brightness(1)
+      blur(0);
+  }
+}
+
+
+/* =========================================================
+   SMALLER SCREENS
+   ========================================================= */
+
+@media (max-width: 600px) {
+  .memory-window-screen {
+    padding: 1rem;
+  }
+
+  .memory-transition-book {
+    width: 96vw;
+  }
+
+  .memory-window-frame {
+    width: min(290px, 58vw);
+  }
+
+  .memory-window-instruction {
+    bottom: 1rem;
+
+    font-size: 0.9rem;
+  }
+
+  .memory-window-back {
+    top: 0.75rem;
+    left: 0.75rem;
+  }
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .memory-window-ink,
+  .memory-window-ink-core,
+  .memory-window-ink-wisp,
+  .memory-window-frame {
+    animation-duration: 180ms;
+    animation-delay: 0ms;
+  }
 }

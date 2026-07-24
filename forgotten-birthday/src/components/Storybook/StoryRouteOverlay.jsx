@@ -79,14 +79,22 @@ function StoryRouteOverlay({
     return "hidden";
   }
 
-  function handleSelect(chapter) {
+  function handleSelect(chapter, event) {
     const state = getMapState(chapter);
 
     if (!devMode && state !== "active") {
       return;
     }
 
-    onSelectChapter?.(chapter.id);
+    const markerRect =
+      event.currentTarget.getBoundingClientRect();
+
+    const origin = {
+      x: markerRect.left + markerRect.width / 2,
+      y: markerRect.top + markerRect.height / 2,
+    };
+
+    onSelectChapter?.(chapter.id, origin);
   }
 
   return (
@@ -217,7 +225,7 @@ function StoryRouteOverlay({
             aria-label={`Enter ${chapter.title}`}
             aria-disabled={!devMode && !isActive}
             disabled={!devMode && !isActive}
-            onClick={() => handleSelect(chapter)}
+            onClick={(event) => handleSelect(chapter, event)}
           >
             {isActive && (
               <span
