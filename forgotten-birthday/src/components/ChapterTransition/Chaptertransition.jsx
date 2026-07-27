@@ -13,12 +13,15 @@ import "./ChapterTransition.css";
     2. Expands that ink outward from the map into a full-bleed
        Memory Window, revealing chapter.memoryWindowImage through
        an animated blob mask
-    3. Keeps scaling past full-bleed ("flying through" the window)
-       while a dark ink cover grows to fully cover the viewport
-    4. Fires onCoveredScreen() the moment the screen is fully covered,
-       so the parent can swap the underlying screen to ChapterScene
-       with an invisible cut
-    5. Fades the whole overlay out to reveal the chapter scene, then
+    3. Holds there so the window is actually visible for a beat,
+       instead of rushing past it
+    4. Cracks - a quick fracture flash across the window, then the
+       artwork breaks apart
+    5. Fades to solid black
+    6. Fires onCoveredScreen() once the screen is fully black, so the
+       parent can swap the underlying screen to ChapterScene with an
+       invisible cut
+    7. Fades the whole overlay out to reveal the chapter scene, then
        calls onFinished() so the parent can unmount this component
 
   It is rendered as a fixed, viewport-level overlay by App.jsx (not
@@ -46,11 +49,12 @@ function seedForChapter(chapterId) {
 }
 
 // Keep in sync with the "100%" mark of chapterTransitionScale in the CSS.
-const TOTAL_DURATION_MS = 4200;
-// Fire the screen swap once the cover has fully covered the
-// viewport (see chapterCoverGrow keyframes), but comfortably before
-// the animation technically ends, so there is zero visible gap.
-const COVER_FIRE_AT_MS = 3700;
+const TOTAL_DURATION_MS = 6400;
+// Fire the screen swap once the cover has faded to fully solid black
+// (see chapterCoverGrow keyframes, which reach opacity 1 at 88%), but
+// comfortably before the animation technically ends, so there is
+// zero visible gap.
+const COVER_FIRE_AT_MS = 5650;
 
 // Mirrors the CSS media-query shortening under prefers-reduced-motion,
 // so the JS-driven screen swap/reveal don't leave the viewport frozen
@@ -259,10 +263,24 @@ function ChapterTransition({
           filter={`url(#${filterId})`}
         />
 
-        {/* Full-bleed rect that finishes covering the viewport right
-            before the underlying screen swaps, so the cut is hidden
-            inside the ink instead of being a visible pop. This is a
-            dark ink cover, not a bright flash. */}
+        {/* Crack: a quick fracture flash across the window right as
+            the hold ends, just before everything gives way to black. */}
+        <g
+          className="chapter-transition-crack"
+          fill="none"
+          stroke="#e3bc7c"
+          strokeWidth="1.4"
+          strokeLinecap="round"
+          filter={`url(#${filterId})`}
+        >
+          <path d="M62,8 L58,52 L78,68 L66,96 L74,146" />
+          <path d="M18,70 L56,64 L58,90 L34,112" />
+          <path d="M120,20 L92,58 L132,86 L110,120 L124,148" />
+        </g>
+
+        {/* Full-bleed rect that fades the whole scene to solid black
+            right after the crack, hiding the underlying screen swap
+            inside it instead of a visible pop. */}
         <rect
           className="chapter-transition-cover"
           x="-40"

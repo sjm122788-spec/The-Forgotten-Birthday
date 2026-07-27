@@ -28,7 +28,7 @@
 /* ---------------------------------------------------------
    The scene itself starts as a small dot pinned to the
    chapter's map position (via CSS vars set inline), then
-   travels/grows/rotates to fill and overshoot the viewport.
+   travels/grows/rotates to fill the viewport and hold there.
    --------------------------------------------------------- */
 
 .chapter-transition-scene {
@@ -57,7 +57,7 @@
 
   animation:
     chapterTransitionScale
-    4.2s
+    6.4s
     cubic-bezier(0.32, 0.04, 0.18, 1)
     forwards;
 }
@@ -67,7 +67,7 @@
 
   animation:
     chapterWindowReveal
-    4.2s
+    6.4s
     ease
     forwards;
 }
@@ -77,18 +77,31 @@
 
   animation:
     chapterInkRecede
-    4.2s
+    6.4s
+    ease
+    forwards;
+}
+
+.chapter-transition-crack {
+  opacity: 0;
+
+  filter:
+    drop-shadow(0 0 3px rgba(227, 188, 124, 0.75));
+
+  animation:
+    chapterCrackFlash
+    6.4s
     ease
     forwards;
 }
 
 .chapter-transition-cover {
-  fill: #0d0906;
+  fill: #000;
   opacity: 0;
 
   animation:
     chapterCoverGrow
-    4.2s
+    6.4s
     ease
     forwards;
 }
@@ -96,11 +109,14 @@
 /* =========================================================
    MAIN TIMELINE
 
-   0%   - 24%  swirl in place at the map marker (two rotations,
+   0%   - 15%  swirl in place at the map marker (two rotations,
                internal blob keeps morphing the whole time)
-   24%  - 55%  lift off and grow toward center
-   55%  - 75%  reach full-bleed (the "memory window" fills frame)
-   75%  - 100% overshoot further, simulating flying through it
+   15%  - 49%  lift off and grow toward center, reaching full-bleed
+   49%  - 72%  HOLD - the memory window sits fully revealed so it
+               can actually be seen, not just flown past
+   72%  - 84%  crack - a quick fracture flash + a small shake
+   84%  - 100% fade to solid black (screen swap happens once black
+               is fully opaque, then the whole overlay fades away)
    ========================================================= */
 
 @keyframes chapterTransitionScale {
@@ -116,14 +132,14 @@
       rotate(0deg);
   }
 
-  10% {
+  6% {
     transform:
       translate(-50%, -50%)
       scale(1.05)
       rotate(90deg);
   }
 
-  24% {
+  15% {
     left: var(--transition-origin-x, 50%);
     top: var(--transition-origin-y, 50%);
 
@@ -135,7 +151,7 @@
       rotate(240deg);
   }
 
-  34% {
+  22% {
     left: 47%;
     top: 48%;
 
@@ -147,7 +163,7 @@
       rotate(300deg);
   }
 
-  55% {
+  36% {
     left: 50%;
     top: 50%;
 
@@ -159,7 +175,8 @@
       rotate(350deg);
   }
 
-  75% {
+  49%,
+  72% {
     left: 50%;
     top: 50%;
 
@@ -171,6 +188,21 @@
       rotate(395deg);
   }
 
+  76% {
+    /* Small shake right as the crack hits. */
+    transform:
+      translate(-50%, -50%)
+      scale(1.015)
+      rotate(399deg);
+  }
+
+  80% {
+    transform:
+      translate(-50%, -50%)
+      scale(1)
+      rotate(396deg);
+  }
+
   100% {
     left: 50%;
     top: 50%;
@@ -179,85 +211,140 @@
 
     transform:
       translate(-50%, -50%)
-      scale(1.6)
-      rotate(410deg);
+      scale(1)
+      rotate(400deg);
   }
 }
 
 /* ---------------------------------------------------------
    Memory window image: hidden/grayscale/dark while the ink
    swirls over it, brightening and fully desaturating-back-in
-   as the ink recedes.
+   as the ink recedes, holding bright and visible, then a brief
+   flash-brighten at the crack before it gives way to black.
    --------------------------------------------------------- */
 
 @keyframes chapterWindowReveal {
   0%,
-  36% {
+  22% {
     opacity: 0;
     filter:
       grayscale(1)
       brightness(0.4);
   }
 
-  55% {
+  36% {
     opacity: 0.9;
     filter:
       grayscale(0.5)
       brightness(0.7);
   }
 
-  72% {
+  49% {
     opacity: 1;
     filter:
       grayscale(0.1)
       brightness(0.95);
   }
 
-  85%,
-  100% {
+  64%,
+  72% {
+    /* Hold - fully revealed, easy to actually look at. */
     opacity: 1;
     filter:
       grayscale(0)
-      brightness(1.1);
+      brightness(1.08);
+  }
+
+  76% {
+    /* Flash as the crack hits. */
+    opacity: 1;
+    filter:
+      grayscale(0)
+      brightness(1.65);
+  }
+
+  84% {
+    /* Breaking apart. */
+    opacity: 0.45;
+    filter:
+      grayscale(0.3)
+      brightness(0.5);
+  }
+
+  92%,
+  100% {
+    opacity: 0;
+    filter:
+      grayscale(0.6)
+      brightness(0.2);
   }
 }
 
 /* ---------------------------------------------------------
    Ink recedes (fades) once the window has grown large enough
-   to be worth revealing.
+   to be worth revealing, and stays gone through the hold.
    --------------------------------------------------------- */
 
 @keyframes chapterInkRecede {
   0%,
-  48% {
+  28% {
     opacity: 1;
   }
 
-  70% {
+  45% {
     opacity: 0.1;
   }
 
+  49%,
   100% {
     opacity: 0;
   }
 }
 
 /* ---------------------------------------------------------
-   Full-viewport ink cover that finishes covering the screen right
-   before the parent swaps in the chapter scene underneath.
+   Crack: invisible through the swirl/expand/hold, then a quick
+   fracture flash right as the hold ends, fading out again as
+   black takes over.
+   --------------------------------------------------------- */
+
+@keyframes chapterCrackFlash {
+  0%,
+  73% {
+    opacity: 0;
+  }
+
+  76% {
+    opacity: 1;
+  }
+
+  84% {
+    opacity: 0.6;
+  }
+
+  90%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------------
+   Solid black cover: stays invisible through the hold, then
+   rushes in right after the crack, finishing at full opacity
+   comfortably before the animation's 100% mark (see
+   COVER_FIRE_AT_MS in the JS, which is timed to this).
    --------------------------------------------------------- */
 
 @keyframes chapterCoverGrow {
   0%,
-  62% {
+  74% {
     opacity: 0;
   }
 
   80% {
-    opacity: 0.55;
+    opacity: 0.35;
   }
 
-  92%,
+  88%,
   100% {
     opacity: 1;
   }
@@ -271,6 +358,7 @@
   .chapter-transition-scene,
   .chapter-transition-window,
   .chapter-transition-ink,
+  .chapter-transition-crack,
   .chapter-transition-cover {
     animation-duration: 260ms;
   }
