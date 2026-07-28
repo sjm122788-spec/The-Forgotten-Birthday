@@ -265,7 +265,7 @@ async function getSessionPlayers(sessionId) {
     .from("players")
     .select("*")
     .eq("session_id", sessionId)
-    .order("created_at", { ascending: true });
+    .order("joined_at", { ascending: true });
 
   if (error) {
     throw error;

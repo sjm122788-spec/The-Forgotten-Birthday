@@ -342,20 +342,19 @@ function App() {
       setMultiplayerSession(nextSession);
     });
 
-    const playersChannel = subscribeToSessionPlayers(multiplayerSession.id, (playerPayload) => {
-      const nextPlayers = Array.isArray(playerPayload)
-        ? playerPayload
-        : playerPayload?.new
-          ? playerPayload.new
-          : playerPayload
-            ? [playerPayload]
-            : [];
+    const playersChannel = subscribeToSessionPlayers(
+  multiplayerSession.id,
+  async () => {
+    try {
+      const guestRows = await getSessionPlayers(multiplayerSession.id);
 
-      if (Array.isArray(nextPlayers)) {
-        setMultiplayerGuests(nextPlayers);
-        setPlayers(nextPlayers);
-      }
-    });
+      setMultiplayerGuests(guestRows);
+      setPlayers(guestRows);
+    } catch (error) {
+      console.error("Unable to refresh guest list", error);
+    }
+  },
+);
 
     sessionChannelRef.current = sessionChannel;
     playersChannelRef.current = playersChannel;
