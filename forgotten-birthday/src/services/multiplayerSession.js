@@ -379,7 +379,7 @@ function leaveChannel(channel) {
 }
 
 export {
-  clearStoredMultiplayerIdentity,
+  clearStoredMultiplayerIdentity as clearMultiplayerIdentity,
   createGameSession,
   findSessionByRoomCode,
   generateRoomCode,
