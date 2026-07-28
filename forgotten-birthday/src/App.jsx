@@ -596,11 +596,14 @@ function App() {
       setPlayers(guestRows);
       setShowResumeScreen(false);
     } catch (error) {
-      console.error("Unable to join the multiplayer room", error);
-      setMultiplayerError("We could not join that room. Please try again.");
-    } finally {
-      setMultiplayerBusy(false);
-    }
+  console.error("Unable to join the multiplayer room", error);
+
+  setMultiplayerError(
+    error?.message
+      ? `Join failed: ${error.message}`
+      : "We could not join that room. Please try again.",
+  );
+}
   }
 
   async function handleStartStory() {
