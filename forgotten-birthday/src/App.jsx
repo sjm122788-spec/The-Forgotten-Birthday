@@ -11,6 +11,10 @@ import ChapterScene from "./components/Chapter/ChapterScene";
 import QuietAfter from "./components/QuietAfter/QuietAfter";
 import FinaleScene from "./components/Finale/FinaleScene";
 import Prologue from "./components/prologue/Prologue";
+import RoleSelect from "./components/Multiplayer/RoleSelect";
+import HostLobby from "./components/Multiplayer/HostLobby";
+import GuestJoin from "./components/Multiplayer/GuestJoin";
+import GuestWaiting from "./components/Multiplayer/GuestWaiting";
 
 import { chapters, chapterById } from "./data/chapters";
 import {
@@ -18,6 +22,21 @@ import {
   loadGame,
   saveGame,
 } from "./services/gamePersistence";
+import {
+  clearMultiplayerIdentity,
+  createGameSession,
+  findSessionByRoomCode,
+  getGameSession,
+  getSessionPlayers,
+  getStoredMultiplayerIdentity,
+  joinGameSession,
+  leaveChannel,
+  setStoredMultiplayerIdentity,
+  startGameSession,
+  subscribeToGameSession,
+  subscribeToSessionPlayers,
+  updateGameSessionState,
+} from "./services/multiplayerSession";
 
 import "./App.css";
 
@@ -183,6 +202,14 @@ function App() {
   const [chapterState, setChapterState] = useState(initialAppState.chapterState);
   const [progression, setProgression] = useState(initialAppState.progression);
 
+  const [multiplayerRole, setMultiplayerRole] = useState(null);
+  const [multiplayerSession, setMultiplayerSession] = useState(null);
+  const [multiplayerPlayer, setMultiplayerPlayer] = useState(null);
+  const [multiplayerGuests, setMultiplayerGuests] = useState([]);
+  const [multiplayerLoading, setMultiplayerLoading] = useState(true);
+  const [multiplayerBusy, setMultiplayerBusy] = useState(false);
+  const [multiplayerError, setMultiplayerError] = useState("");
+
   const selectedChapter = chapterById[selectedChapterId] ?? chapters[0];
   const activeChapterId = chapters[activeChapterIndex]?.id ?? null;
 
@@ -192,6 +219,216 @@ function App() {
   );
 
   const hasSavedStateRef = useRef(false);
+  const lastHostSyncRef = useRef(null);
+  const sessionChannelRef = useRef(null);
+  const playersChannelRef = useRef(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function restoreMultiplayerSession() {
+      const storedIdentity = getStoredMultiplayerIdentity();
+
+      if (!storedIdentity?.sessionId) {
+        if (!cancelled) {
+          setMultiplayerLoading(false);
+          setShowResumeScreen(false);
+          setMultiplayerRole(null);
+        }
+        return;
+      }
+
+      try {
+        const session = await getGameSession(storedIdentity.sessionId);
+
+        if (!session || cancelled) {
+          return;
+        }
+
+        if (storedIdentity.role === "host") {
+          setMultiplayerRole("host");
+          setMultiplayerSession(session);
+          setMultiplayerPlayer(null);
+          setMultiplayerError("");
+          setShowResumeScreen(false);
+
+          const guestRows = await getSessionPlayers(session.id);
+          if (!cancelled) {
+            setMultiplayerGuests(guestRows);
+            setPlayers(guestRows);
+          }
+        } else if (storedIdentity.role === "guest") {
+          setMultiplayerRole("guest");
+          setMultiplayerSession(session);
+          setMultiplayerPlayer({
+            id: storedIdentity.playerId,
+            name: storedIdentity.playerName || "Guest",
+            role: "guest",
+          });
+          setMultiplayerError("");
+          setShowResumeScreen(false);
+
+          const guestRows = await getSessionPlayers(session.id);
+          if (!cancelled) {
+            setMultiplayerGuests(guestRows);
+            setPlayers(guestRows);
+          }
+        } else {
+          if (!cancelled) {
+            clearMultiplayerIdentity();
+            setMultiplayerRole(null);
+            setMultiplayerSession(null);
+            setMultiplayerPlayer(null);
+            setMultiplayerGuests([]);
+          }
+        }
+      } catch (error) {
+        console.error("Unable to restore multiplayer session", error);
+
+        if (!cancelled) {
+          setMultiplayerError("We could not reopen that room. Please start again.");
+          clearMultiplayerIdentity();
+          setMultiplayerRole(null);
+          setMultiplayerSession(null);
+          setMultiplayerPlayer(null);
+          setMultiplayerGuests([]);
+          setShowResumeScreen(false);
+        }
+      } finally {
+        if (!cancelled) {
+          setMultiplayerLoading(false);
+        }
+      }
+    }
+
+    restoreMultiplayerSession();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!multiplayerSession?.id) {
+      if (sessionChannelRef.current) {
+        leaveChannel(sessionChannelRef.current);
+        sessionChannelRef.current = null;
+      }
+
+      if (playersChannelRef.current) {
+        leaveChannel(playersChannelRef.current);
+        playersChannelRef.current = null;
+      }
+
+      return undefined;
+    }
+
+    if (sessionChannelRef.current) {
+      leaveChannel(sessionChannelRef.current);
+      sessionChannelRef.current = null;
+    }
+
+    if (playersChannelRef.current) {
+      leaveChannel(playersChannelRef.current);
+      playersChannelRef.current = null;
+    }
+
+    const sessionChannel = subscribeToGameSession(multiplayerSession.id, (sessionPayload) => {
+      const nextSession = sessionPayload?.new ?? sessionPayload;
+      if (!nextSession) {
+        return;
+      }
+
+      setMultiplayerSession(nextSession);
+    });
+
+    const playersChannel = subscribeToSessionPlayers(multiplayerSession.id, (playerPayload) => {
+      const nextPlayers = Array.isArray(playerPayload)
+        ? playerPayload
+        : playerPayload?.new
+          ? playerPayload.new
+          : playerPayload
+            ? [playerPayload]
+            : [];
+
+      if (Array.isArray(nextPlayers)) {
+        setMultiplayerGuests(nextPlayers);
+        setPlayers(nextPlayers);
+      }
+    });
+
+    sessionChannelRef.current = sessionChannel;
+    playersChannelRef.current = playersChannel;
+
+    return () => {
+      if (sessionChannelRef.current) {
+        leaveChannel(sessionChannelRef.current);
+        sessionChannelRef.current = null;
+      }
+
+      if (playersChannelRef.current) {
+        leaveChannel(playersChannelRef.current);
+        playersChannelRef.current = null;
+      }
+    };
+  }, [multiplayerSession?.id]);
+
+  useEffect(() => {
+    if (multiplayerRole !== "host" || !multiplayerSession?.id || multiplayerSession.status !== "playing") {
+      return;
+    }
+
+    const storedIdentity = getStoredMultiplayerIdentity();
+
+    const nextHostState = {
+      current_screen: screen,
+      current_chapter_id: screen === SCREENS.CHAPTER ? selectedChapterId : null,
+      game_state: {
+        completedChapterIds,
+        activeChapterIndex,
+        unlockingChapterId,
+        glory,
+        relics,
+        players: players.map((player) => ({
+          id: player.id,
+          name: player.name,
+          role: player.role ?? "guest",
+        })),
+      },
+    };
+
+    const serializedState = JSON.stringify(nextHostState);
+
+    if (lastHostSyncRef.current === serializedState) {
+      return;
+    }
+
+    lastHostSyncRef.current = serializedState;
+
+    void updateGameSessionState(
+      multiplayerSession.id,
+      {
+        current_screen: nextHostState.current_screen,
+        current_chapter_id: nextHostState.current_chapter_id,
+        game_state: nextHostState.game_state,
+      },
+      storedIdentity?.hostToken,
+    ).catch((error) => {
+      console.error("Unable to sync the host session state", error);
+    });
+  }, [
+    activeChapterIndex,
+    completedChapterIds,
+    glory,
+    multiplayerRole,
+    multiplayerSession?.id,
+    multiplayerSession?.status,
+    players,
+    relics,
+    screen,
+    selectedChapterId,
+    unlockingChapterId,
+  ]);
 
   useEffect(() => {
     if (!hasSavedStateRef.current) {
@@ -275,6 +512,123 @@ function App() {
     setChapterState({});
     setProgression({});
     clearGame();
+  }
+
+  function resetMultiplayerState() {
+    setMultiplayerRole(null);
+    setMultiplayerSession(null);
+    setMultiplayerPlayer(null);
+    setMultiplayerGuests([]);
+    setMultiplayerBusy(false);
+    setMultiplayerError("");
+    clearMultiplayerIdentity();
+  }
+
+  async function handleCreateRoom() {
+    setMultiplayerBusy(true);
+    setMultiplayerError("");
+
+    try {
+      const session = await createGameSession();
+      setStoredMultiplayerIdentity({
+        role: "host",
+        sessionId: session.id,
+        roomCode: session.room_code,
+        hostToken: session.host_token,
+      });
+
+      setMultiplayerRole("host");
+      setMultiplayerSession(session);
+      setMultiplayerPlayer(null);
+      setMultiplayerGuests([]);
+      setShowResumeScreen(false);
+    } catch (error) {
+      console.error("Unable to create a multiplayer room", error);
+      setMultiplayerError("The room could not be created. Please try again.");
+    } finally {
+      setMultiplayerBusy(false);
+    }
+  }
+
+  async function handleJoinGuest({ roomCode, name }) {
+    const normalizedRoomCode = String(roomCode ?? "").trim().toUpperCase();
+    const trimmedName = String(name ?? "").trim();
+
+    if (!normalizedRoomCode) {
+      setMultiplayerError("Please enter the room code.");
+      return;
+    }
+
+    if (!trimmedName) {
+      setMultiplayerError("Please enter your name.");
+      return;
+    }
+
+    setMultiplayerBusy(true);
+    setMultiplayerError("");
+
+    try {
+      const session = await findSessionByRoomCode(normalizedRoomCode);
+
+      if (!session) {
+        setMultiplayerError("No room was found for that code.");
+        return;
+      }
+
+      if (session.status !== "lobby") {
+        setMultiplayerError("The story is already underway. Please wait for the host.");
+        return;
+      }
+
+      const player = await joinGameSession({ sessionId: session.id, name: trimmedName });
+      setStoredMultiplayerIdentity({
+        role: "guest",
+        sessionId: session.id,
+        roomCode: session.room_code,
+        playerId: player.id,
+        playerName: player.name,
+      });
+
+      const guestRows = await getSessionPlayers(session.id);
+      setMultiplayerRole("guest");
+      setMultiplayerSession(session);
+      setMultiplayerPlayer(player);
+      setMultiplayerGuests(guestRows);
+      setPlayers(guestRows);
+      setShowResumeScreen(false);
+    } catch (error) {
+      console.error("Unable to join the multiplayer room", error);
+      setMultiplayerError("We could not join that room. Please try again.");
+    } finally {
+      setMultiplayerBusy(false);
+    }
+  }
+
+  async function handleStartStory() {
+    if (!multiplayerSession?.id || multiplayerGuests.length === 0) {
+      return;
+    }
+
+    setMultiplayerBusy(true);
+    setMultiplayerError("");
+
+    try {
+      const nextSession = await startGameSession(multiplayerSession.id);
+      setMultiplayerSession(nextSession);
+      setScreen(SCREENS.PROLOGUE);
+      setShowResumeScreen(false);
+      setTransitionChapter(null);
+      setTransitionOrigin(null);
+    } catch (error) {
+      console.error("Unable to start the story", error);
+      setMultiplayerError("The story could not be started. Please try again.");
+    } finally {
+      setMultiplayerBusy(false);
+    }
+  }
+
+  function handleLeaveRoom() {
+    resetMultiplayerState();
   }
 
   function handleDevOpenChapter(chapterId) {
@@ -425,24 +779,24 @@ function App() {
   }
 
   function renderScreen() {
-  switch (screen) {
-    case SCREENS.PROLOGUE:
-      return (
-        <Prologue
-          connectedGuests={players.length}
-          requiredGuests={6}
-          devMode={DEV_MODE}
-          onComplete={handlePrologueComplete}
-        />
-      );
+    switch (screen) {
+      case SCREENS.PROLOGUE:
+        return (
+          <Prologue
+            connectedGuests={players.length}
+            requiredGuests={0}
+            devMode={DEV_MODE || multiplayerRole === "host"}
+            onComplete={handlePrologueComplete}
+          />
+        );
 
-    case SCREENS.CHAPTER:
-      return (
-        <ChapterScene
-          chapter={selectedChapter}
-          onCompleteChapter={handleCompleteChapter}
-        />
-      );
+      case SCREENS.CHAPTER:
+        return (
+          <ChapterScene
+            chapter={selectedChapter}
+            onCompleteChapter={handleCompleteChapter}
+          />
+        );
 
       case SCREENS.QUIET_AFTER:
         return <QuietAfter onComplete={handleQuietAfterComplete} />;
@@ -450,13 +804,17 @@ function App() {
       case SCREENS.FINALE:
         return (
           <FinaleScene
-            earnedRelics={DEV_MODE && relics.length === 0 ? [
-              "candle-of-first-light",
-              "laughter-balloon",
-              "ribbon-of-belonging",
-              "pocket-watch-of-lost-time",
-              "open-seal",
-            ] : relics}
+            earnedRelics={
+              DEV_MODE && relics.length === 0
+                ? [
+                    "candle-of-first-light",
+                    "laughter-balloon",
+                    "ribbon-of-belonging",
+                    "pocket-watch-of-lost-time",
+                    "open-seal",
+                  ]
+                : relics
+            }
             glory={DEV_MODE && glory === 0 ? 72 : glory}
             maximumGlory={100}
           />
@@ -474,6 +832,69 @@ function App() {
           />
         );
     }
+  }
+
+  if (multiplayerLoading) {
+    return (
+      <div className="app">
+        <main className="resume-screen">
+          <div className="resume-screen__card">
+            <p className="resume-screen__eyebrow">The room is waking</p>
+            <h1 className="resume-screen__title">Checking the circle</h1>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (!multiplayerRole && !multiplayerSession) {
+    return (
+      <RoleSelect
+        onHostCreate={handleCreateRoom}
+        onJoinGuest={() => {
+          setMultiplayerRole("guest");
+          setMultiplayerError("");
+        }}
+        loading={multiplayerBusy}
+        error={multiplayerError}
+      />
+    );
+  }
+
+  if (multiplayerRole === "guest" && !multiplayerSession) {
+    return (
+      <GuestJoin
+        onJoin={handleJoinGuest}
+        onBack={handleLeaveRoom}
+        loading={multiplayerBusy}
+        error={multiplayerError}
+      />
+    );
+  }
+
+  if (multiplayerRole === "host" && multiplayerSession?.status === "lobby") {
+    return (
+      <HostLobby
+        roomCode={multiplayerSession.room_code}
+        guests={multiplayerGuests}
+        loading={multiplayerBusy}
+        error={multiplayerError}
+        onStartStory={handleStartStory}
+        onLeaveRoom={handleLeaveRoom}
+      />
+    );
+  }
+
+  if (multiplayerRole === "guest") {
+    return (
+      <GuestWaiting
+        roomCode={multiplayerSession?.room_code ?? ""}
+        playerName={multiplayerPlayer?.name ?? "Guest"}
+        guestCount={multiplayerGuests.length}
+        started={multiplayerSession?.status === "playing"}
+        onLeaveRoom={handleLeaveRoom}
+      />
+    );
   }
 
   if (showResumeScreen) {
@@ -502,29 +923,29 @@ function App() {
   }
 
   return (
-  <div className="app">
-    {renderScreen()}
+    <div className="app">
+      {renderScreen()}
 
-    {transitionChapter && (
-      <ChapterTransition
-        chapter={transitionChapter}
-        origin={transitionOrigin}
-        onCoveredScreen={handleTransitionCoveredScreen}
-        onFinished={handleTransitionFinished}
-      />
-    )}
+      {transitionChapter && (
+        <ChapterTransition
+          chapter={transitionChapter}
+          origin={transitionOrigin}
+          onCoveredScreen={handleTransitionCoveredScreen}
+          onFinished={handleTransitionFinished}
+        />
+      )}
 
       {DEV_MODE && (
         <aside className="dev-toolbar">
           <span className="dev-toolbar__label">Dev</span>
 
-<button type="button" onClick={handleDevOpenPrologue}>
-  Prologue
-</button>
+          <button type="button" onClick={handleDevOpenPrologue}>
+            Prologue
+          </button>
 
-<button type="button" onClick={handleDevOpenMap}>
-  Map
-</button>
+          <button type="button" onClick={handleDevOpenMap}>
+            Map
+          </button>
 
           <button type="button" onClick={handleDevOpenQuietAfter}>
             Quiet After
