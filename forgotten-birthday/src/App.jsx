@@ -6,7 +6,7 @@ import {
 } from "react";
 
 import StorybookMap from "./components/Storybook/StorybookMap";
-import ChapterTransition from "./components/ChapterTransition/ChapterTransition123";
+import ChapterTransition from "./components/ChapterTransition/ChapterTransition";
 import ChapterScene from "./components/Chapter/ChapterScene";
 import QuietAfter from "./components/QuietAfter/QuietAfter";
 import FinaleScene from "./components/Finale/FinaleScene";
