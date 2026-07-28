@@ -1,0 +1,973 @@
+.prologue {
+  --retro-cream: #ead9ac;
+  --retro-gold: #b8893d;
+  --retro-brown: #4f301d;
+  --retro-purple: #93809f;
+  --retro-black: #07080a;
+
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  overflow: hidden;
+  background: var(--retro-black);
+  color: var(--retro-cream);
+  font-family: "Courier New", monospace;
+  image-rendering: pixelated;
+}
+
+.prologue button {
+  font: inherit;
+}
+
+.prologue img {
+  image-rendering: pixelated;
+  user-select: none;
+}
+
+/* --------------------------------------------------
+   CRT overlay
+-------------------------------------------------- */
+
+.prologue-crt {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0.25;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.04) 0,
+      rgba(255, 255, 255, 0.04) 1px,
+      transparent 1px,
+      transparent 4px
+    ),
+    radial-gradient(
+      circle at center,
+      transparent 55%,
+      rgba(0, 0, 0, 0.6) 100%
+    );
+}
+
+/* --------------------------------------------------
+   Shared prompt
+-------------------------------------------------- */
+
+.prologue-prompt {
+  border: 0;
+  padding: 0.8rem 1.25rem;
+  background: transparent;
+  color: var(--retro-cream);
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: clamp(0.9rem, 1.5vw, 1.4rem);
+  text-shadow: 0 0 10px rgba(234, 217, 172, 0.35);
+}
+
+.prologue-prompt:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.prologue-prompt--pulse:not(:disabled) {
+  animation: retroPromptPulse 1.15s steps(2, end) infinite;
+}
+
+@keyframes retroPromptPulse {
+  0%,
+  42% {
+    opacity: 1;
+  }
+
+  43%,
+  100% {
+    opacity: 0.25;
+  }
+}
+
+/* --------------------------------------------------
+   Title screen
+-------------------------------------------------- */
+
+.prologue-title {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 1.25rem;
+  background:
+    radial-gradient(
+      circle at 50% 42%,
+      rgba(96, 67, 43, 0.25),
+      transparent 42%
+    ),
+    #07080a;
+}
+
+.prologue-title__logo {
+  width: min(84vw, 1000px);
+  max-height: 46vh;
+  object-fit: contain;
+  animation: titleArrival 1.4s steps(8, end) both;
+}
+
+.prologue-title__subtext {
+  margin: 0;
+  color: var(--retro-purple);
+  font-size: clamp(0.72rem, 1vw, 1rem);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+@keyframes titleArrival {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+    filter: brightness(0);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+    filter: brightness(1);
+  }
+}
+
+/* --------------------------------------------------
+   Waiting room
+-------------------------------------------------- */
+
+.prologue-waiting {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: #050608;
+}
+
+.prologue-waiting__image {
+  position: absolute;
+  inset: 0;
+
+  width: 90%;
+  height: 90%;
+
+  object-fit: cover;
+  object-position: center;
+
+  image-rendering: pixelated;
+}
+
+.prologue-waiting__overlay {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(1rem, 5vh, 4rem);
+  z-index: 110;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+.prologue-waiting__count {
+  margin: 0;
+  color: var(--retro-gold);
+  font-size: clamp(0.72rem, 1.3vw, 1.2rem);
+  letter-spacing: 0.12em;
+  text-shadow: 0 2px #000;
+}
+
+/* --------------------------------------------------
+   Scrolling world
+-------------------------------------------------- */
+
+.retro-world,
+.retro-world__viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.retro-world__viewport {
+  background: #08090b;
+}
+
+.retro-world__layer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 500%;
+  will-change: transform;
+  background-position: left center;
+  background-repeat: repeat-x;
+  background-size: auto 100%;
+  image-rendering: pixelated;
+}
+
+.retro-world__layer--sky {
+  z-index: 1;
+}
+
+.retro-world__layer--landscape {
+  z-index: 2;
+}
+
+.retro-world__layer--path {
+  z-index: 3;
+}
+
+.retro-world__track {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 4;
+  will-change: transform;
+}
+
+.retro-object {
+  position: absolute;
+  z-index: 8;
+  transform-origin: center bottom;
+  pointer-events: none;
+}
+
+.retro-object__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 8px 5px rgba(0, 0, 0, 0.45));
+}
+
+/*
+ * Small variations stop every object from feeling
+ * perfectly frozen without requiring more assets.
+ */
+
+.retro-object--balloon {
+  animation: retroBalloonFloat 2.8s steps(5, end) infinite;
+}
+
+.retro-object--glory-candle {
+  animation: retroCandleBreathe 1.5s steps(4, end) infinite;
+}
+
+.retro-object--chair-one,
+.retro-object--chair-two {
+  filter: brightness(0.8);
+}
+
+@keyframes retroBalloonFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+@keyframes retroCandleBreathe {
+  0%,
+  100% {
+    filter: brightness(0.92);
+  }
+
+  50% {
+    filter: brightness(1.15);
+  }
+}
+
+.retro-player {
+  position: absolute;
+  z-index: 20;
+  bottom: 100px;
+  width: 82px;
+  height: auto;
+  transform-origin: center bottom;
+  filter: drop-shadow(0 8px 4px rgba(0, 0, 0, 0.45));
+}
+
+.retro-player--left {
+  transform: scaleX(-1);
+}
+
+.retro-player--right {
+  transform: scaleX(1);
+}
+
+.retro-player--walking {
+  animation: playerWalkBob 340ms steps(2, end) infinite;
+}
+
+@keyframes playerWalkBob {
+  0%,
+  100% {
+    margin-bottom: 0;
+  }
+
+  50% {
+    margin-bottom: 2px;
+  }
+}
+
+.retro-world__vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.1),
+      transparent 24%,
+      transparent 70%,
+      rgba(0, 0, 0, 0.45)
+    ),
+    radial-gradient(
+      ellipse at center,
+      transparent 54%,
+      rgba(0, 0, 0, 0.58) 100%
+    );
+}
+
+/* --------------------------------------------------
+   Interaction prompt
+-------------------------------------------------- */
+
+.retro-interact {
+  position: absolute;
+  left: 50%;
+  bottom: 21%;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  border: 0;
+  padding: 0.55rem 0.9rem;
+  transform: translateX(-50%);
+  background: rgba(5, 6, 8, 0.8);
+  color: var(--retro-cream);
+  cursor: pointer;
+  letter-spacing: 0.12em;
+  animation: interactFloat 900ms steps(3, end) infinite;
+}
+
+.retro-interact img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+}
+
+@keyframes interactFloat {
+  0%,
+  100% {
+    transform: translate(-50%, 0);
+  }
+
+  50% {
+    transform: translate(-50%, -5px);
+  }
+}
+
+/* --------------------------------------------------
+   Dialogue
+-------------------------------------------------- */
+
+.retro-dialogue {
+  position: absolute;
+  left: 50%;
+  bottom: 6%;
+  z-index: 200;
+  width: min(82vw, 850px);
+  padding: clamp(1rem, 2vw, 1.6rem);
+  transform: translateX(-50%);
+  border: 3px solid var(--retro-gold);
+  box-shadow:
+    0 0 0 4px #17110c,
+    0 12px 40px rgba(0, 0, 0, 0.75);
+  background: rgba(7, 8, 10, 0.96);
+}
+
+.retro-dialogue__eyebrow {
+  margin: 0 0 0.65rem;
+  color: var(--retro-gold);
+  font-size: 0.8rem;
+  letter-spacing: 0.18em;
+}
+
+.retro-dialogue__text {
+  margin: 0;
+  color: var(--retro-cream);
+  font-size: clamp(1rem, 1.8vw, 1.35rem);
+  line-height: 1.5;
+}
+
+.retro-dialogue__subtext {
+  margin: 0.6rem 0 0;
+  color: var(--retro-purple);
+  line-height: 1.5;
+}
+
+.retro-dialogue__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 1.15rem;
+}
+
+.retro-dialogue__options button,
+.retro-dialogue__continue {
+  border: 1px solid var(--retro-gold);
+  padding: 0.65rem 0.9rem;
+  background: #19110c;
+  color: var(--retro-cream);
+  cursor: pointer;
+}
+
+.retro-dialogue__continue {
+  display: block;
+  margin: 1rem 0 0 auto;
+}
+
+/* --------------------------------------------------
+   Glory
+-------------------------------------------------- */
+
+.glory-word {
+  position: absolute;
+  inset: 0;
+  z-index: 160;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  color: #f8dc84;
+  font-size: clamp(3rem, 10vw, 8rem);
+  font-weight: bold;
+  letter-spacing: 0.2em;
+  text-indent: 0.2em;
+  text-shadow:
+    0 0 8px rgba(255, 217, 112, 0.8),
+    0 0 24px rgba(255, 188, 65, 0.7);
+  animation: gloryWordReveal 2.4s steps(10, end) both;
+}
+
+@keyframes gloryWordReveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+    filter: blur(8px);
+  }
+
+  35% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+
+  75% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+.glory-particles {
+  position: absolute;
+  inset: 28% 30%;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.glory-particles span {
+  --angle: calc(var(--particle-index) * 22.5deg);
+
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  background: #f6d371;
+  box-shadow: 0 0 10px #ffc957;
+  animation: gloryParticle 2s ease-out infinite;
+  animation-delay: calc(var(--particle-index) * -110ms);
+}
+
+@keyframes gloryParticle {
+  from {
+    opacity: 1;
+    transform:
+      rotate(var(--angle))
+      translateX(10px)
+      scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform:
+      rotate(var(--angle))
+      translateX(160px)
+      scale(0);
+  }
+}
+
+/* --------------------------------------------------
+   Temporary TV controls
+-------------------------------------------------- */
+
+.retro-controls {
+  position: absolute;
+  right: 1.1rem;
+  bottom: 1rem;
+  z-index: 130;
+  display: flex;
+  gap: 0.6rem;
+  opacity: 0.5;
+}
+
+.retro-controls button {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border: 1px solid rgba(234, 217, 172, 0.35);
+  background: rgba(0, 0, 0, 0.55);
+  cursor: pointer;
+}
+
+.retro-controls img {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+}
+
+.retro-controls__interact {
+  width: 74px !important;
+}
+
+/* --------------------------------------------------
+   Book
+-------------------------------------------------- */
+
+.retro-book-scene {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 2rem;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(115, 72, 32, 0.22),
+      transparent 32%
+    ),
+    #07080a;
+}
+
+.retro-book-scene__book {
+  position: relative;
+  z-index: 10;
+  width: min(34vw, 440px);
+  max-height: 55vh;
+  object-fit: contain;
+}
+
+.retro-book-scene__book--opening {
+  animation: bookOpening 850ms steps(8, end) both;
+}
+
+.retro-book-scene__book--glowing {
+  animation: bookGlow 1.4s ease-in-out infinite alternate;
+}
+
+@keyframes bookOpening {
+  from {
+    transform: scale(0.92);
+    filter: brightness(0.65);
+  }
+
+  to {
+    transform: scale(1.08);
+    filter: brightness(1.4);
+  }
+}
+
+@keyframes bookGlow {
+  from {
+    transform: scale(1.04);
+    filter:
+      brightness(1.1)
+      drop-shadow(0 0 12px rgba(244, 211, 126, 0.55));
+  }
+
+  to {
+    transform: scale(1.12);
+    filter:
+      brightness(1.6)
+      drop-shadow(0 0 46px rgba(244, 211, 126, 0.95));
+  }
+}
+
+/* --------------------------------------------------
+   Ink transition
+-------------------------------------------------- */
+
+.book-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  overflow: hidden;
+  pointer-events: none;
+  background: transparent;
+}
+
+/* ----------------------------------------
+   Book light
+---------------------------------------- */
+
+.book-transition__white-flare {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 20vmin;
+  height: 20vmin;
+  border-radius: 50%;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.2);
+  background: rgba(255, 238, 191, 0.98);
+  box-shadow:
+    0 0 40px rgba(255, 221, 148, 0.9),
+    0 0 120px rgba(255, 212, 122, 0.8),
+    0 0 240px rgba(255, 231, 178, 0.7);
+}
+
+.book-transition--light .book-transition__white-flare {
+  animation: prologueFlare 1.25s ease-in forwards;
+}
+
+@keyframes prologueFlare {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2);
+  }
+
+  35% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(12);
+  }
+}
+
+/* ----------------------------------------
+   Pixel breakup
+---------------------------------------- */
+
+.book-transition__pixel-noise {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.book-transition__pixel-noise span {
+  --column: calc(var(--pixel-index) % 8);
+  --row: calc(var(--pixel-index) / 8);
+
+  position: absolute;
+  left: calc((var(--column) / 8) * 100%);
+  top: calc((var(--row) / 6) * 100%);
+  width: 13vw;
+  height: 18vh;
+  background: rgba(12, 10, 13, 0.85);
+  transform: scale(0);
+}
+
+.book-transition--dissolve .book-transition__pixel-noise {
+  opacity: 1;
+}
+
+.book-transition--dissolve .book-transition__pixel-noise span {
+  animation: pixelCollapse 1.5s steps(6, end) forwards;
+  animation-delay: calc(var(--pixel-index) * 14ms);
+}
+
+@keyframes pixelCollapse {
+  0% {
+    opacity: 0;
+    transform: scale(0.2) rotate(0);
+  }
+
+  35% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1.6) rotate(8deg);
+  }
+}
+
+/* ----------------------------------------
+   Ink swirl
+---------------------------------------- */
+
+.book-transition__ink {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 38vmin;
+  height: 38vmin;
+  opacity: 0;
+  object-fit: contain;
+  transform: translate(-50%, -50%) scale(0.3) rotate(0);
+  filter: contrast(1.25);
+}
+
+.book-transition--dissolve .book-transition__ink {
+  animation: inkSwirlIn 1.8s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+@keyframes inkSwirlIn {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.3) rotate(0);
+  }
+
+  18% {
+    opacity: 0.9;
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(9) rotate(180deg);
+  }
+}
+
+/* ----------------------------------------
+   Full black breath
+---------------------------------------- */
+
+.book-transition__blackout {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: #020203;
+}
+
+.book-transition--black .book-transition__blackout {
+  opacity: 1;
+  transition: opacity 300ms ease;
+}
+
+/* ----------------------------------------
+   Storybook reveal
+---------------------------------------- */
+
+.book-transition__paper {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(238, 224, 188, 0.25),
+      transparent 62%
+    ),
+    rgba(23, 18, 15, 0.5);
+  mix-blend-mode: screen;
+}
+
+.book-transition__veil {
+  position: absolute;
+  inset: 0;
+  opacity: 1;
+  backdrop-filter: blur(14px) grayscale(1) brightness(0.35);
+  background: rgba(0, 0, 0, 0.88);
+}
+
+.book-transition--reveal .book-transition__blackout {
+  animation: blackLift 2.8s ease-out forwards;
+}
+
+.book-transition--reveal .book-transition__paper {
+  animation: paperBloom 2.8s ease-out forwards;
+}
+
+.book-transition--reveal .book-transition__veil {
+  animation: storybookReveal 2.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes blackLift {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes paperBloom {
+  0% {
+    opacity: 0;
+  }
+
+  45% {
+    opacity: 0.45;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes storybookReveal {
+  0% {
+    opacity: 1;
+    backdrop-filter: blur(14px) grayscale(1) brightness(0.25);
+    background: rgba(0, 0, 0, 0.92);
+  }
+
+  45% {
+    opacity: 0.7;
+    backdrop-filter: blur(8px) grayscale(0.75) brightness(0.55);
+    background: rgba(0, 0, 0, 0.45);
+  }
+
+  100% {
+    opacity: 0;
+    backdrop-filter: blur(0) grayscale(0) brightness(1);
+    background: rgba(0, 0, 0, 0);
+  }
+}
+
+.book-transition--finished {
+  opacity: 0;
+}
+
+/* --------------------------------------------------
+   Smaller screens
+-------------------------------------------------- */
+
+@media (max-width: 800px) {
+  .retro-player {
+    bottom: 15%;
+  }
+
+  .retro-controls {
+    opacity: 0.85;
+  }
+
+  .retro-dialogue {
+    bottom: 14%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prologue *,
+  .prologue *::before,
+  .prologue *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+.retro-movement-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 28px;
+  z-index: 125;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transform: translateX(-50%);
+  padding: 8px 14px;
+  border: 1px solid rgba(234, 217, 172, 0.35);
+  background: rgba(5, 6, 8, 0.82);
+  color: var(--retro-cream);
+  letter-spacing: 0.12em;
+  font-size: 0.78rem;
+  pointer-events: none;
+}
+
+.retro-movement-hint img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+}
+.book-transition__invited {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+
+  display: grid;
+  place-items: center;
+
+  opacity: 0;
+  color: #f3dfb0;
+
+  font-size: clamp(2rem, 7vw, 6rem);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-indent: 0.18em;
+
+  text-shadow:
+    0 0 12px rgba(243, 223, 176, 0.45),
+    0 0 34px rgba(184, 137, 61, 0.35);
+
+  pointer-events: none;
+}
+
+.book-transition--black .book-transition__invited {
+  animation: invitedReveal 1.2s ease-in-out forwards;
+}
+
+.book-transition--reveal .book-transition__invited {
+  opacity: 1;
+  animation: invitedFadeAway 1.6s ease-in forwards;
+}
+
+@keyframes invitedReveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.94);
+    filter: blur(8px);
+  }
+
+  40% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes invitedFadeAway {
+  from {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(1.04);
+    filter: blur(5px);
+  }
+}

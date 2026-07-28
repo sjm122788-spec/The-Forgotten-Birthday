@@ -10,6 +10,7 @@ import ChapterTransition from "./components/ChapterTransition/ChapterTransition"
 import ChapterScene from "./components/Chapter/ChapterScene";
 import QuietAfter from "./components/QuietAfter/QuietAfter";
 import FinaleScene from "./components/Finale/FinaleScene";
+import Prologue from "./components/prologue/Prologue";
 
 import { chapters, chapterById } from "./data/chapters";
 import {
@@ -21,7 +22,9 @@ import {
 import "./App.css";
 
 const SCREENS = {
+  PROLOGUE: "prologue",
   STORYBOOK: "storybook",
+  MEMORY_WINDOW: "memory-window",
   CHAPTER: "chapter",
   QUIET_AFTER: "quiet-after",
   FINALE: "finale",
@@ -34,7 +37,7 @@ function isObject(value) {
 
 function createFreshState() {
   return {
-    screen: SCREENS.STORYBOOK,
+    screen: SCREENS.PROLOGUE,
     selectedChapterId: chapters[0]?.id ?? "chapter-01",
     completedChapterIds: [],
     activeChapterIndex: 0,
@@ -54,6 +57,10 @@ function normalizeScreen(screen, chapterId, transitionChapter) {
     return SCREENS.CHAPTER;
   }
 
+  if (screen === SCREENS.PROLOGUE || screen === "prologue") {
+    return SCREENS.PROLOGUE;
+  }
+
   if (
     screen === SCREENS.CHAPTER ||
     screen === "chapter" ||
@@ -62,8 +69,7 @@ function normalizeScreen(screen, chapterId, transitionChapter) {
     screen === "transition" ||
     screen === "chapter-entry" ||
     screen === "chapter-entry-animation" ||
-    screen === "chapter-exit-animation" ||
-    screen === "prologue"
+    screen === "chapter-exit-animation"
   ) {
     return SCREENS.CHAPTER;
   }
@@ -198,7 +204,7 @@ function App() {
     }
 
     const isFreshState =
-      screen === SCREENS.STORYBOOK &&
+      screen === SCREENS.PROLOGUE &&
       selectedChapterId === (chapters[0]?.id ?? "chapter-01") &&
       completedChapterIds.length === 0 &&
       activeChapterIndex === 0 &&
@@ -253,7 +259,7 @@ function App() {
   ]);
 
   function resetToFreshState() {
-    setScreen(SCREENS.STORYBOOK);
+    setScreen(SCREENS.PROLOGUE);
     setSelectedChapterId(chapters[0]?.id ?? "chapter-01");
     setCompletedChapterIds([]);
     setActiveChapterIndex(0);
@@ -290,6 +296,16 @@ function App() {
   }
 
   function handleDevOpenMap() {
+    setScreen(SCREENS.STORYBOOK);
+    setShowResumeScreen(false);
+  }
+
+  function handleDevOpenPrologue() {
+    setScreen(SCREENS.PROLOGUE);
+    setShowResumeScreen(false);
+  }
+
+  function handlePrologueComplete() {
     setScreen(SCREENS.STORYBOOK);
     setShowResumeScreen(false);
   }
@@ -409,14 +425,24 @@ function App() {
   }
 
   function renderScreen() {
-    switch (screen) {
-      case SCREENS.CHAPTER:
-        return (
-          <ChapterScene
-            chapter={selectedChapter}
-            onCompleteChapter={handleCompleteChapter}
-          />
-        );
+  switch (screen) {
+    case SCREENS.PROLOGUE:
+      return (
+        <Prologue
+          connectedGuests={players.length}
+          requiredGuests={6}
+          devMode={DEV_MODE}
+          onComplete={handlePrologueComplete}
+        />
+      );
+
+    case SCREENS.CHAPTER:
+      return (
+        <ChapterScene
+          chapter={selectedChapter}
+          onCompleteChapter={handleCompleteChapter}
+        />
+      );
 
       case SCREENS.QUIET_AFTER:
         return <QuietAfter onComplete={handleQuietAfterComplete} />;
@@ -476,25 +502,29 @@ function App() {
   }
 
   return (
-    <div className="app">
-      {renderScreen()}
+  <div className="app">
+    {renderScreen()}
 
-      {transitionChapter && (
-        <ChapterTransition
-          chapter={transitionChapter}
-          origin={transitionOrigin}
-          onCoveredScreen={handleTransitionCoveredScreen}
-          onFinished={handleTransitionFinished}
-        />
-      )}
+    {transitionChapter && (
+      <ChapterTransition
+        chapter={transitionChapter}
+        origin={transitionOrigin}
+        onCoveredScreen={handleTransitionCoveredScreen}
+        onFinished={handleTransitionFinished}
+      />
+    )}
 
       {DEV_MODE && (
         <aside className="dev-toolbar">
           <span className="dev-toolbar__label">Dev</span>
 
-          <button type="button" onClick={handleDevOpenMap}>
-            Map
-          </button>
+<button type="button" onClick={handleDevOpenPrologue}>
+  Prologue
+</button>
+
+<button type="button" onClick={handleDevOpenMap}>
+  Map
+</button>
 
           <button type="button" onClick={handleDevOpenQuietAfter}>
             Quiet After

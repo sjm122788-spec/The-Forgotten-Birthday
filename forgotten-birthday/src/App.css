@@ -1,14 +1,16 @@
 .app {
   min-height: 100vh;
 }
-.dev-toolbar {
-  position: fixed;
+.dev-toolbar{
+    position:fixed;
 
-  left: 14px;
-  right: 14px;
-  bottom: 14px;
+    top:20px;
+    right:20px;
 
-  z-index: 9999;
+    bottom:auto;
+    left:auto;
+
+    z-index:9999;
 
   display: flex;
   align-items: center;
