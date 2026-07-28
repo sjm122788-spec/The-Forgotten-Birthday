@@ -1,5 +1,5 @@
 import chapterOne from "./chapterOne";
-import chapterTwo from "./chapterTwo123";
+import chapterTwo from "./chapterTwo";
 import chapterThree from "./chapterThree";
 import chapterFour from "./chapterFour";
 import chapterFive from "./chapterFive";
