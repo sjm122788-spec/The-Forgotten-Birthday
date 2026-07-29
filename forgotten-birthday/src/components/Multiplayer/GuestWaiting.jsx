@@ -12,33 +12,40 @@ export default function GuestWaiting({
   onSubmitPrompt,
   promptError = "",
   onLeaveRoom,
-}) {
-  const isTargeted =
-    started &&
-    activePrompt?.status === "awaiting-response" &&
-    activePrompt?.targetPlayerIds?.includes(playerId);
+}) {const hasActivePrompt =
+  started &&
+  activePrompt?.status === "awaiting-response";
 
-  if (isTargeted) {
-    if (activePrompt.type === "observation") {
-      return (
-        <GuestObservation
-          key={activePrompt.id}
-          prompt={activePrompt}
-          onSubmit={onSubmitPrompt}
-          error={promptError}
-        />
-      );
-    }
+const isObservationPrompt =
+  hasActivePrompt &&
+  activePrompt?.type === "observation";
 
-    return (
-      <GuestPrompt
-        key={activePrompt.id}
-        prompt={activePrompt}
-        onSubmit={onSubmitPrompt}
-        error={promptError}
-      />
-    );
-  }
+const isTargetedPrompt =
+  hasActivePrompt &&
+  activePrompt?.type !== "observation" &&
+  activePrompt?.targetPlayerIds?.includes(playerId);
+
+if (isObservationPrompt) {
+  return (
+    <GuestObservation
+      key={activePrompt.id}
+      prompt={activePrompt}
+      onSubmit={onSubmitPrompt}
+      error={promptError}
+    />
+  );
+}
+
+if (isTargetedPrompt) {
+  return (
+    <GuestPrompt
+      key={activePrompt.id}
+      prompt={activePrompt}
+      onSubmit={onSubmitPrompt}
+      error={promptError}
+    />
+  );
+}
 
   return (
     <main className="multiplayer-guest-waiting">
