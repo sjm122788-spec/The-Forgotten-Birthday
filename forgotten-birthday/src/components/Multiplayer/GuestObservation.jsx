@@ -27,16 +27,18 @@ export default function GuestObservation({ prompt, onSubmit, error = "" }) {
     setLocalError("");
 
     try {
-      await onSubmit({
-        promptId: prompt.id,
-        cueId: prompt.cueId,
-        responseType: "observation",
-        responseData: {
-          clueId: clue.id,
-          label: clue.label,
-        },
-      });
-    } catch (submitError) {
+  await onSubmit({
+    promptId: prompt.id,
+    cueId: prompt.cueId,
+    responseType: "observation",
+    responseData: {
+      clueId: clue.id,
+      label: clue.label,
+    },
+  });
+
+  setSubmittingClueId(null);
+} catch (submitError) {
       console.error("Unable to submit observation clue", submitError);
       setLocalError("That clue did not reach the story. Tap it again.");
       setSubmittingClueId(null);

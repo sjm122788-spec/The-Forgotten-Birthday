@@ -412,14 +412,9 @@ function handleFillTheSilenceComplete(
     const acceptedResponses = [];
 
     for (const response of multiplayer?.responses ?? []) {
-      if (
-        response.prompt_id !== activePrompt.id ||
-        handledObservationResponseIdsRef.current.has(response.id)
-      ) {
-        continue;
-      }
-
-      handledObservationResponseIdsRef.current.add(response.id);
+      if (response.prompt_id !== activePrompt.id) {
+  continue;
+}
 
       const clueId = response.response_data?.clueId;
 
