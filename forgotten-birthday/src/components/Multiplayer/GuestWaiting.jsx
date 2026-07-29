@@ -1,5 +1,5 @@
-import GuestPrompt from "./GuestPrompt";
 import GuestObservation from "./GuestObservation";
+import GuestPrompt from "./GuestPrompt";
 import "./GuestWaiting.css";
 
 export default function GuestWaiting({
@@ -13,26 +13,23 @@ export default function GuestWaiting({
   promptError = "",
   onLeaveRoom,
 }) {
-  const isObservationPrompt =
-    started && activePrompt?.type === "observation";
-
-  if (isObservationPrompt) {
-    return (
-      <GuestObservation
-        key={activePrompt.id}
-        prompt={activePrompt}
-        onSubmit={onSubmitPrompt}
-        error={promptError}
-      />
-    );
-  }
-
   const isTargeted =
     started &&
     activePrompt?.status === "awaiting-response" &&
     activePrompt?.targetPlayerIds?.includes(playerId);
 
   if (isTargeted) {
+    if (activePrompt.type === "observation") {
+      return (
+        <GuestObservation
+          key={activePrompt.id}
+          prompt={activePrompt}
+          onSubmit={onSubmitPrompt}
+          error={promptError}
+        />
+      );
+    }
+
     return (
       <GuestPrompt
         key={activePrompt.id}

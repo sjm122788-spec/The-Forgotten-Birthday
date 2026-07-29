@@ -40,13 +40,18 @@ function ChapterDirector({
     setCueResults,
   ] = useState({});
 
-  const [foundClueIds, setFoundClueIds] = useState([]);
+  const [
+    phoneObservationFoundClueIds,
+    setPhoneObservationFoundClueIds,
+  ] = useState([]);
 
   const currentCue =
     sequence[currentCueIndex];
 
   const publishingCueIdRef = useRef(null);
   const handledPromptIdsRef = useRef(new Set());
+  const handledObservationResponseIdsRef = useRef(new Set());
+  const processingObservationRef = useRef(false);
 
   const isPhoneIndividualDecision =
     multiplayer?.enabled &&
@@ -69,8 +74,16 @@ function ChapterDirector({
     setCurrentCueIndex(0);
     setDecisionOutcome(null);
     setCueResults({});
-    setFoundClueIds([]);
+    setPhoneObservationFoundClueIds([]);
+    handledObservationResponseIdsRef.current.clear();
+    processingObservationRef.current = false;
   }, [sequence]);
+
+  useEffect(() => {
+    setPhoneObservationFoundClueIds([]);
+    handledObservationResponseIdsRef.current.clear();
+    processingObservationRef.current = false;
+  }, [currentCue?.id]);
 
   useEffect(() => {
     if (
@@ -82,201 +95,6 @@ function ChapterDirector({
   }, [
     currentCue,
     onCompleteChapter,
-  ]);
-
-  useEffect(() => {
-    if (!isPhoneObservation) {
-      return;
-    }
-
-    const activePrompt = multiplayer?.activePrompt;
-
-    if (
-      !activePrompt ||
-      activePrompt.cueId !== currentCue?.id
-    ) {
-      return;
-    }
-
-    const nextFoundClueIds = Array.isArray(
-      activePrompt.payload?.foundClueIds,
-    )
-      ? [...new Set(activePrompt.payload.foundClueIds)]
-      : [];
-
-    setFoundClueIds(nextFoundClueIds);
-  }, [
-    isPhoneObservation,
-    currentCue?.id,
-    multiplayer?.activePrompt,
-  ]);
-
-  useEffect(() => {
-    if (!isPhoneObservation) {
-      return;
-    }
-
-    const activePrompt = multiplayer?.activePrompt;
-    const existingFoundClueIds = new Set(
-      Array.isArray(activePrompt?.payload?.foundClueIds)
-        ? activePrompt.payload.foundClueIds
-        : [],
-    );
-    const desiredFoundClueIds = new Set(foundClueIds);
-
-    const promptMatches =
-      activePrompt?.cueId === currentCue?.id &&
-      activePrompt?.type === currentCue?.type &&
-      existingFoundClueIds.size === desiredFoundClueIds.size &&
-      [...existingFoundClueIds].every((clueId) =>
-        desiredFoundClueIds.has(clueId),
-      );
-
-    if (promptMatches) {
-      return;
-    }
-
-    if (publishingCueIdRef.current === currentCue?.id) {
-      return;
-    }
-
-    publishingCueIdRef.current = currentCue?.id;
-
-    const promptId =
-      globalThis.crypto?.randomUUID?.() ??
-      `${currentCue?.id}-${Date.now()}`;
-
-    const prompt = {
-      id: promptId,
-      cueId: currentCue?.id,
-      type: currentCue?.type,
-      status: "awaiting-response",
-      targetPlayerIds: (multiplayer?.guests ?? []).map((guest) => guest.id),
-      targetPlayerNames: (multiplayer?.guests ?? []).map(
-        (guest) => guest.name,
-      ),
-      payload: {
-        eyebrow: currentCue.eyebrow,
-        title: currentCue.title,
-        prompt: currentCue.prompt,
-        instructions: currentCue.instructions,
-        image: currentCue.image,
-        imageAlt: currentCue.imageAlt,
-        clues: Array.isArray(currentCue.clues)
-          ? currentCue.clues.map((clue) => ({
-              id: clue.id,
-              label: clue.label,
-              hiddenLabel: clue.hiddenLabel,
-              x: clue.x,
-              y: clue.y,
-              width: clue.width,
-              height: clue.height,
-            }))
-          : [],
-        foundClueIds: [...desiredFoundClueIds],
-      },
-      createdAt: new Date().toISOString(),
-    };
-
-    Promise.resolve(multiplayer.publishPrompt?.(prompt))
-      .catch((error) => {
-        console.error("Unable to publish observation prompt", error);
-      })
-      .finally(() => {
-        if (publishingCueIdRef.current === currentCue?.id) {
-          publishingCueIdRef.current = null;
-        }
-      });
-  }, [
-    currentCue,
-    isPhoneObservation,
-    multiplayer?.activePrompt,
-    multiplayer?.guests,
-    multiplayer?.publishPrompt,
-    foundClueIds,
-  ]);
-
-  useEffect(() => {
-    if (!isPhoneObservation) {
-      return;
-    }
-
-    const activePrompt = multiplayer?.activePrompt;
-
-    if (
-      !activePrompt ||
-      activePrompt.cueId !== currentCue?.id
-    ) {
-      return;
-    }
-
-    const responses = Array.isArray(multiplayer?.responses)
-      ? multiplayer.responses
-      : [];
-
-    if (responses.length === 0) {
-      return;
-    }
-
-    const alreadyFound = new Set(foundClueIds);
-    const newDiscoveries = [];
-
-    for (const response of responses) {
-      const clueId = response?.response_data?.clueId;
-      const playerId = response?.player_id;
-
-      if (!clueId || typeof clueId !== "string") {
-        continue;
-      }
-
-      if (alreadyFound.has(clueId)) {
-        continue;
-      }
-
-      alreadyFound.add(clueId);
-      newDiscoveries.push({ clueId, playerId });
-    }
-
-    if (newDiscoveries.length === 0) {
-      return;
-    }
-
-    const nextFoundClueIds = [...foundClueIds, ...newDiscoveries.map((item) => item.clueId)];
-    setFoundClueIds(nextFoundClueIds);
-
-    newDiscoveries.forEach((discovery) => {
-      if (discovery?.playerId) {
-        multiplayer?.awardPlayerGlory?.(discovery.playerId, 1);
-      }
-    });
-
-    const allCluesCount = Array.isArray(currentCue?.clues)
-      ? currentCue.clues.length
-      : 0;
-
-    if (nextFoundClueIds.length === allCluesCount && allCluesCount > 0) {
-      Promise.resolve(multiplayer.clearPrompt?.(activePrompt.id))
-        .catch((error) => {
-          console.error("Unable to clear observation prompt", error);
-        })
-        .finally(() => {
-          handleObservationComplete({
-            cueId: currentCue.id,
-            foundClueIds: nextFoundClueIds,
-            missedClueIds: [],
-            foundAllClues: true,
-            foundCount: nextFoundClueIds.length,
-            totalClues: allCluesCount,
-          });
-        });
-    }
-  }, [
-    currentCue,
-    foundClueIds,
-    isPhoneObservation,
-    multiplayer?.activePrompt,
-    multiplayer?.responses,
-    multiplayer?.clearPrompt,
   ]);
 function handleFillTheSilenceComplete(
   result,
@@ -518,6 +336,169 @@ function handleFillTheSilenceComplete(
     multiplayer?.responses,
     multiplayer?.publishPrompt,
     multiplayer?.clearPrompt,
+  ]);
+
+  useEffect(() => {
+    if (!isPhoneObservation) {
+      return;
+    }
+
+    const guests = multiplayer?.guests ?? [];
+    const activePrompt = multiplayer?.activePrompt ?? null;
+
+    if (guests.length === 0) {
+      return;
+    }
+
+    if (!activePrompt || activePrompt.cueId !== currentCue.id) {
+      if (publishingCueIdRef.current === currentCue.id) {
+        return;
+      }
+
+      const promptId =
+        globalThis.crypto?.randomUUID?.() ??
+        `${currentCue.id}-${Date.now()}`;
+
+      publishingCueIdRef.current = currentCue.id;
+
+      Promise.resolve(
+        multiplayer.publishPrompt?.({
+          id: promptId,
+          cueId: currentCue.id,
+          type: "observation",
+          status: "awaiting-response",
+          targetPlayerIds: guests.map((guest) => guest.id),
+          targetPlayerNames: guests.map((guest) => guest.name),
+          payload: {
+            eyebrow: currentCue.eyebrow ?? "Shared Observation",
+            title: currentCue.title,
+            instructions: currentCue.instructions,
+            image: currentCue.image,
+            imageAlt: currentCue.imageAlt,
+            foundClueIds: phoneObservationFoundClueIds,
+            clues: (currentCue.clues ?? []).map((clue) => ({
+              id: clue.id,
+              label: clue.label,
+              hiddenLabel: clue.hiddenLabel,
+              x: clue.x,
+              y: clue.y,
+              width: clue.width,
+              height: clue.height,
+            })),
+          },
+          createdAt: new Date().toISOString(),
+        }),
+      )
+        .catch((error) => {
+          console.error("Unable to publish observation prompt", error);
+        })
+        .finally(() => {
+          if (publishingCueIdRef.current === currentCue.id) {
+            publishingCueIdRef.current = null;
+          }
+        });
+
+      return;
+    }
+
+    if (processingObservationRef.current) {
+      return;
+    }
+
+    const validClueIds = new Set(
+      (currentCue.clues ?? []).map((clue) => clue.id),
+    );
+    const alreadyFound = new Set(phoneObservationFoundClueIds);
+    const acceptedResponses = [];
+
+    for (const response of multiplayer?.responses ?? []) {
+      if (
+        response.prompt_id !== activePrompt.id ||
+        handledObservationResponseIdsRef.current.has(response.id)
+      ) {
+        continue;
+      }
+
+      handledObservationResponseIdsRef.current.add(response.id);
+
+      const clueId = response.response_data?.clueId;
+
+      if (!validClueIds.has(clueId) || alreadyFound.has(clueId)) {
+        continue;
+      }
+
+      alreadyFound.add(clueId);
+      acceptedResponses.push({ response, clueId });
+    }
+
+    if (acceptedResponses.length === 0) {
+      return;
+    }
+
+    processingObservationRef.current = true;
+
+    const nextFoundClueIds = Array.from(alreadyFound);
+    setPhoneObservationFoundClueIds(nextFoundClueIds);
+
+    acceptedResponses.forEach(({ response }) => {
+      multiplayer.awardPlayerGlory?.(response.player_id, 1);
+    });
+
+    const allCluesFound =
+      (currentCue.clues ?? []).length > 0 &&
+      nextFoundClueIds.length >= (currentCue.clues ?? []).length;
+
+    if (allCluesFound) {
+      Promise.resolve(multiplayer.clearPrompt?.(activePrompt.id))
+        .catch((error) => {
+          console.error("Unable to clear observation prompt", error);
+        })
+        .finally(() => {
+          processingObservationRef.current = false;
+          handleObservationComplete({
+            cueId: currentCue.id,
+            foundClueIds: nextFoundClueIds,
+            missedClueIds: [],
+            foundAllClues: true,
+            foundCount: nextFoundClueIds.length,
+            totalClues: (currentCue.clues ?? []).length,
+          });
+        });
+
+      return;
+    }
+
+    const nextPromptId =
+      globalThis.crypto?.randomUUID?.() ??
+      `${currentCue.id}-${Date.now()}`;
+
+    Promise.resolve(
+      multiplayer.publishPrompt?.({
+        ...activePrompt,
+        id: nextPromptId,
+        payload: {
+          ...(activePrompt.payload ?? {}),
+          foundClueIds: nextFoundClueIds,
+        },
+        createdAt: new Date().toISOString(),
+      }),
+    )
+      .catch((error) => {
+        console.error("Unable to refresh observation prompt", error);
+      })
+      .finally(() => {
+        processingObservationRef.current = false;
+      });
+  }, [
+    currentCue,
+    isPhoneObservation,
+    multiplayer?.activePrompt,
+    multiplayer?.awardPlayerGlory,
+    multiplayer?.clearPrompt,
+    multiplayer?.guests,
+    multiplayer?.publishPrompt,
+    multiplayer?.responses,
+    phoneObservationFoundClueIds,
   ]);
 
   useEffect(() => {
@@ -891,6 +872,30 @@ function handleFillTheSilenceComplete(
           handleOutcomeComplete
         }
       />
+    );
+  }
+
+  if (isPhoneObservation) {
+    const totalClues = currentCue.clues?.length ?? 0;
+    const foundCount = phoneObservationFoundClueIds.length;
+
+    return (
+      <section className="observation-cue">
+        <header className="observation-cue__header">
+          <p className="observation-cue__eyebrow">Shared Observation</p>
+          <h2 className="observation-cue__title">{currentCue.title}</h2>
+          <p className="observation-cue__instructions">
+            Everyone, check your phone and search the room together.
+          </p>
+        </header>
+
+        <div className="observation-cue__clue-panel">
+          <h3>{foundCount} of {totalClues} clues found</h3>
+          <p className="observation-cue__progress">
+            The story will continue when the room has revealed everything.
+          </p>
+        </div>
+      </section>
     );
   }
 

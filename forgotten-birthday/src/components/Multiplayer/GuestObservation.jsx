@@ -1,59 +1,78 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
 import "./GuestObservation.css";
 
 export default function GuestObservation({ prompt, onSubmit, error = "" }) {
-  const [submittingClueIds, setSubmittingClueIds] = useState([]);
+  const [submittingClueId, setSubmittingClueId] = useState(null);
+  const [localError, setLocalError] = useState("");
 
-  const clues = Array.isArray(prompt?.payload?.clues) ? prompt.payload.clues : [];
-  const foundClueIds = useMemo(
-    () => new Set(Array.isArray(prompt?.payload?.foundClueIds) ? prompt.payload.foundClueIds : []),
-    [prompt],
+  const clues = prompt?.payload?.clues ?? [];
+  const foundClueIds = prompt?.payload?.foundClueIds ?? [];
+  const foundClueIdSet = useMemo(
+    () => new Set(foundClueIds),
+    [foundClueIds],
   );
 
-  const foundCount = clues.filter((clue) => foundClueIds.has(clue.id)).length;
-  const remainingClues = clues.filter((clue) => !foundClueIds.has(clue.id));
+  useEffect(() => {
+    setSubmittingClueId(null);
+    setLocalError("");
+  }, [prompt?.id]);
 
-  async function handleHotspotClick(clueId) {
-    if (!clueId || foundClueIds.has(clueId) || submittingClueIds.includes(clueId)) {
+  async function handleClueClick(clue) {
+    if (!clue?.id || submittingClueId || foundClueIdSet.has(clue.id)) {
       return;
     }
 
-    setSubmittingClueIds((current) => [...current, clueId]);
+    setSubmittingClueId(clue.id);
+    setLocalError("");
 
     try {
       await onSubmit({
         promptId: prompt.id,
         cueId: prompt.cueId,
-        responseType: prompt.type,
-        responseData: { clueId },
+        responseType: "observation",
+        responseData: {
+          clueId: clue.id,
+          label: clue.label,
+        },
       });
-    } finally {
-      setSubmittingClueIds((current) => current.filter((id) => id !== clueId));
+    } catch (submitError) {
+      console.error("Unable to submit observation clue", submitError);
+      setLocalError("That clue did not reach the story. Tap it again.");
+      setSubmittingClueId(null);
     }
   }
+
+  const allCluesFound = clues.length > 0 && foundClueIds.length >= clues.length;
 
   return (
     <main className="guest-observation">
       <section className="guest-observation__card">
-        <p className="guest-observation__eyebrow">Observe the scene</p>
-        <h1 className="guest-observation__title">{prompt.payload?.title ?? "Look carefully"}</h1>
-        {prompt.payload?.instructions ? (
-          <p className="guest-observation__copy">{prompt.payload.instructions}</p>
-        ) : (
-          <p className="guest-observation__copy">Tap any hotspot to share what you found.</p>
-        )}
+        <header className="guest-observation__header">
+          <p className="guest-observation__eyebrow">
+            {prompt?.payload?.eyebrow ?? "Shared Observation"}
+          </p>
+          <h1 className="guest-observation__title">
+            {prompt?.payload?.title ?? "Look Carefully"}
+          </h1>
+          {prompt?.payload?.instructions && (
+            <p className="guest-observation__instructions">
+              {prompt.payload.instructions}
+            </p>
+          )}
+        </header>
 
         <div className="guest-observation__scene">
           <img
             className="guest-observation__image"
-            src={prompt.payload?.image}
-            alt={prompt.payload?.imageAlt ?? "Observation scene"}
+            src={prompt?.payload?.image}
+            alt={prompt?.payload?.imageAlt ?? "Observation scene"}
             draggable="false"
           />
 
           {clues.map((clue) => {
-            const isFound = foundClueIds.has(clue.id);
-            const isSubmitting = submittingClueIds.includes(clue.id);
+            const isFound = foundClueIdSet.has(clue.id);
+            const isSubmitting = submittingClueId === clue.id;
 
             return (
               <button
@@ -62,6 +81,7 @@ export default function GuestObservation({ prompt, onSubmit, error = "" }) {
                 className={[
                   "guest-observation__hotspot",
                   isFound ? "guest-observation__hotspot--found" : "",
+                  isSubmitting ? "guest-observation__hotspot--submitting" : "",
                 ]
                   .filter(Boolean)
                   .join(" ")}
@@ -71,34 +91,35 @@ export default function GuestObservation({ prompt, onSubmit, error = "" }) {
                   width: `${clue.width ?? 8}%`,
                   height: `${clue.height ?? 8}%`,
                 }}
-                aria-label={
-                  isFound
-                    ? `${clue.label} found`
-                    : `Submit ${clue.label}`
-                }
-                disabled={isFound || isSubmitting}
-                onClick={() => handleHotspotClick(clue.id)}
+                aria-label={isFound ? `${clue.label} found` : "Search this area"}
+                disabled={isFound || Boolean(submittingClueId) || allCluesFound}
+                onClick={() => handleClueClick(clue)}
               >
-                {isFound && <span>✓</span>}
-                {isSubmitting && <span>...</span>}
+                {isFound && <span className="guest-observation__found-marker">✓</span>}
+                {isSubmitting && !isFound && (
+                  <span className="guest-observation__submitting-marker">…</span>
+                )}
               </button>
             );
           })}
         </div>
 
-        <aside className="guest-observation__panel">
-          <div className="guest-observation__status">
-            <span>{foundCount}</span>
-            <span>of</span>
-            <span>{clues.length}</span>
-          </div>
-          <p className="guest-observation__hint">
-            {remainingClues.length > 0
-              ? `Find ${remainingClues.length} more clue${remainingClues.length === 1 ? "" : "s"}.`
-              : "Waiting for the host to continue the story."}
+        <div className="guest-observation__status">
+          <p>
+            <strong>{foundClueIds.length}</strong> of <strong>{clues.length}</strong> clues found
           </p>
-          {error && <p className="guest-observation__error">{error}</p>}
-        </aside>
+          <p>
+            {allCluesFound
+              ? "All clues have been found. Return to the television."
+              : submittingClueId
+                ? "The story is checking your discovery..."
+                : "Tap anything that seems to remember more than it should."}
+          </p>
+        </div>
+
+        {(error || localError) && (
+          <p className="guest-observation__error">{localError || error}</p>
+        )}
       </section>
     </main>
   );
