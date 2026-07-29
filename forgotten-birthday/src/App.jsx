@@ -747,52 +747,58 @@ function App() {
   }
 
   async function handlePublishPhonePrompt(activePrompt) {
-    if (!multiplayerSession?.id || multiplayerRole !== "host") {
-      return null;
-    }
-
-    const nextGameState = {
-      ...(multiplayerSession.game_state ?? {}),
-      activePrompt,
-    };
-
-    const updatedSession = await updateGameSessionState(
-      multiplayerSession.id,
-      { game_state: nextGameState },
-    );
-
-    setMultiplayerSession(updatedSession);
-    setActivePromptResponses([]);
-
-    return updatedSession;
+  if (!multiplayerSession?.id || multiplayerRole !== "host") {
+    return null;
   }
+
+  const storedIdentity = getStoredMultiplayerIdentity();
+
+  const nextGameState = {
+    ...(multiplayerSession.game_state ?? {}),
+    activePrompt,
+  };
+
+  const updatedSession = await updateGameSessionState(
+    multiplayerSession.id,
+    { game_state: nextGameState },
+    storedIdentity?.hostToken,
+  );
+
+  setMultiplayerSession(updatedSession);
+  setActivePromptResponses([]);
+
+  return updatedSession;
+}
 
   async function handleClearPhonePrompt(promptId) {
-    if (!multiplayerSession?.id || multiplayerRole !== "host") {
-      return null;
-    }
-
-    const currentPrompt = multiplayerSession.game_state?.activePrompt;
-
-    if (promptId && currentPrompt?.id && currentPrompt.id !== promptId) {
-      return multiplayerSession;
-    }
-
-    const nextGameState = {
-      ...(multiplayerSession.game_state ?? {}),
-      activePrompt: null,
-    };
-
-    const updatedSession = await updateGameSessionState(
-      multiplayerSession.id,
-      { game_state: nextGameState },
-    );
-
-    setMultiplayerSession(updatedSession);
-    setActivePromptResponses([]);
-
-    return updatedSession;
+  if (!multiplayerSession?.id || multiplayerRole !== "host") {
+    return null;
   }
+
+  const currentPrompt = multiplayerSession.game_state?.activePrompt;
+
+  if (promptId && currentPrompt?.id && currentPrompt.id !== promptId) {
+    return multiplayerSession;
+  }
+
+  const storedIdentity = getStoredMultiplayerIdentity();
+
+  const nextGameState = {
+    ...(multiplayerSession.game_state ?? {}),
+    activePrompt: null,
+  };
+
+  const updatedSession = await updateGameSessionState(
+    multiplayerSession.id,
+    { game_state: nextGameState },
+    storedIdentity?.hostToken,
+  );
+
+  setMultiplayerSession(updatedSession);
+  setActivePromptResponses([]);
+
+  return updatedSession;
+}
 
   async function handleSubmitGuestPrompt({
     promptId,
