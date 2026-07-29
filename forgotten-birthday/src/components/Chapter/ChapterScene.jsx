@@ -9,6 +9,7 @@ import "./ChapterScene.css";
 function ChapterScene({
   chapter,
   onCompleteChapter,
+  multiplayer,
 }) {
   const [
     activeVisualLayer,
@@ -77,6 +78,7 @@ function ChapterScene({
           onCompleteChapter={
             onCompleteChapter
           }
+          multiplayer={multiplayer}
         />
       </div>
     </main>

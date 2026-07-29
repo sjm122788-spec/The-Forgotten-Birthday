@@ -33,6 +33,9 @@ import {
   leaveChannel,
   setStoredMultiplayerIdentity,
   startGameSession,
+  submitPlayerResponse,
+  getPromptResponses,
+  subscribeToPromptResponses,
   subscribeToGameSession,
   subscribeToSessionPlayers,
   updateGameSessionState,
@@ -209,6 +212,8 @@ function App() {
   const [multiplayerLoading, setMultiplayerLoading] = useState(true);
   const [multiplayerBusy, setMultiplayerBusy] = useState(false);
   const [multiplayerError, setMultiplayerError] = useState("");
+  const [activePromptResponses, setActivePromptResponses] = useState([]);
+  const [guestPromptError, setGuestPromptError] = useState("");
 
   const selectedChapter = chapterById[selectedChapterId] ?? chapters[0];
   const activeChapterId = chapters[activeChapterIndex]?.id ?? null;
@@ -222,6 +227,7 @@ function App() {
   const lastHostSyncRef = useRef(null);
   const sessionChannelRef = useRef(null);
   const playersChannelRef = useRef(null);
+  const responsesChannelRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -320,6 +326,11 @@ function App() {
         playersChannelRef.current = null;
       }
 
+      if (responsesChannelRef.current) {
+        leaveChannel(responsesChannelRef.current);
+        responsesChannelRef.current = null;
+      }
+
       return undefined;
     }
 
@@ -333,6 +344,11 @@ function App() {
       playersChannelRef.current = null;
     }
 
+    if (responsesChannelRef.current) {
+      leaveChannel(responsesChannelRef.current);
+      responsesChannelRef.current = null;
+    }
+
     const sessionChannel = subscribeToGameSession(multiplayerSession.id, (sessionPayload) => {
       const nextSession = sessionPayload?.new ?? sessionPayload;
       if (!nextSession) {
@@ -343,21 +359,44 @@ function App() {
     });
 
     const playersChannel = subscribeToSessionPlayers(
-  multiplayerSession.id,
-  async () => {
-    try {
-      const guestRows = await getSessionPlayers(multiplayerSession.id);
+      multiplayerSession.id,
+      async () => {
+        try {
+          const guestRows = await getSessionPlayers(multiplayerSession.id);
 
-      setMultiplayerGuests(guestRows);
-      setPlayers(guestRows);
-    } catch (error) {
-      console.error("Unable to refresh guest list", error);
-    }
-  },
-);
+          setMultiplayerGuests(guestRows);
+          setPlayers(guestRows);
+        } catch (error) {
+          console.error("Unable to refresh guest list", error);
+        }
+      },
+    );
+
+    const responsesChannel = subscribeToPromptResponses(
+      multiplayerSession.id,
+      (payload) => {
+        const nextResponse = payload?.new;
+        const oldResponse = payload?.old;
+
+        if (nextResponse?.id) {
+          setActivePromptResponses((currentResponses) => [
+            ...currentResponses.filter((item) => item.id !== nextResponse.id),
+            nextResponse,
+          ]);
+          return;
+        }
+
+        if (oldResponse?.id) {
+          setActivePromptResponses((currentResponses) =>
+            currentResponses.filter((item) => item.id !== oldResponse.id),
+          );
+        }
+      },
+    );
 
     sessionChannelRef.current = sessionChannel;
     playersChannelRef.current = playersChannel;
+    responsesChannelRef.current = responsesChannel;
 
     return () => {
       if (sessionChannelRef.current) {
@@ -369,8 +408,45 @@ function App() {
         leaveChannel(playersChannelRef.current);
         playersChannelRef.current = null;
       }
+
+      if (responsesChannelRef.current) {
+        leaveChannel(responsesChannelRef.current);
+        responsesChannelRef.current = null;
+      }
     };
   }, [multiplayerSession?.id]);
+
+  useEffect(() => {
+    const activePromptId = multiplayerSession?.game_state?.activePrompt?.id;
+
+    if (multiplayerRole !== "host" || !multiplayerSession?.id || !activePromptId) {
+      setActivePromptResponses([]);
+      return;
+    }
+
+    let cancelled = false;
+
+    void getPromptResponses({
+      sessionId: multiplayerSession.id,
+      promptId: activePromptId,
+    })
+      .then((responses) => {
+        if (!cancelled) {
+          setActivePromptResponses(responses);
+        }
+      })
+      .catch((error) => {
+        console.error("Unable to load phone responses", error);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    multiplayerRole,
+    multiplayerSession?.id,
+    multiplayerSession?.game_state?.activePrompt?.id,
+  ]);
 
   useEffect(() => {
     if (multiplayerRole !== "host" || !multiplayerSession?.id || multiplayerSession.status !== "playing") {
@@ -383,6 +459,7 @@ function App() {
       current_screen: screen,
       current_chapter_id: screen === SCREENS.CHAPTER ? selectedChapterId : null,
       game_state: {
+        ...(multiplayerSession?.game_state ?? {}),
         completedChapterIds,
         activeChapterIndex,
         unlockingChapterId,
@@ -520,6 +597,8 @@ function App() {
     setMultiplayerGuests([]);
     setMultiplayerBusy(false);
     setMultiplayerError("");
+    setActivePromptResponses([]);
+    setGuestPromptError("");
     clearMultiplayerIdentity();
   }
 
@@ -626,6 +705,82 @@ function App() {
       setMultiplayerError("The story could not be started. Please try again.");
     } finally {
       setMultiplayerBusy(false);
+    }
+  }
+
+  async function handlePublishPhonePrompt(activePrompt) {
+    if (!multiplayerSession?.id || multiplayerRole !== "host") {
+      return null;
+    }
+
+    const nextGameState = {
+      ...(multiplayerSession.game_state ?? {}),
+      activePrompt,
+    };
+
+    const updatedSession = await updateGameSessionState(
+      multiplayerSession.id,
+      { game_state: nextGameState },
+    );
+
+    setMultiplayerSession(updatedSession);
+    setActivePromptResponses([]);
+
+    return updatedSession;
+  }
+
+  async function handleClearPhonePrompt(promptId) {
+    if (!multiplayerSession?.id || multiplayerRole !== "host") {
+      return null;
+    }
+
+    const currentPrompt = multiplayerSession.game_state?.activePrompt;
+
+    if (promptId && currentPrompt?.id && currentPrompt.id !== promptId) {
+      return multiplayerSession;
+    }
+
+    const nextGameState = {
+      ...(multiplayerSession.game_state ?? {}),
+      activePrompt: null,
+    };
+
+    const updatedSession = await updateGameSessionState(
+      multiplayerSession.id,
+      { game_state: nextGameState },
+    );
+
+    setMultiplayerSession(updatedSession);
+    setActivePromptResponses([]);
+
+    return updatedSession;
+  }
+
+  async function handleSubmitGuestPrompt({
+    promptId,
+    cueId,
+    responseType,
+    responseData,
+  }) {
+    if (!multiplayerSession?.id || !multiplayerPlayer?.id) {
+      throw new Error("Your guest seat could not be found.");
+    }
+
+    setGuestPromptError("");
+
+    try {
+      return await submitPlayerResponse({
+        sessionId: multiplayerSession.id,
+        playerId: multiplayerPlayer.id,
+        promptId,
+        cueId,
+        responseType,
+        responseData,
+      });
+    } catch (error) {
+      console.error("Unable to submit guest response", error);
+      setGuestPromptError("Your choice did not reach the story. Please try again.");
+      throw error;
     }
   }
 
@@ -797,6 +952,18 @@ function App() {
           <ChapterScene
             chapter={selectedChapter}
             onCompleteChapter={handleCompleteChapter}
+            multiplayer={{
+              enabled:
+                multiplayerRole === "host" &&
+                multiplayerSession?.status === "playing",
+              sessionId: multiplayerSession?.id ?? null,
+              guests: multiplayerGuests,
+              activePrompt:
+                multiplayerSession?.game_state?.activePrompt ?? null,
+              responses: activePromptResponses,
+              publishPrompt: handlePublishPhonePrompt,
+              clearPrompt: handleClearPhonePrompt,
+            }}
           />
         );
 
@@ -891,9 +1058,13 @@ function App() {
     return (
       <GuestWaiting
         roomCode={multiplayerSession?.room_code ?? ""}
+        playerId={multiplayerPlayer?.id ?? null}
         playerName={multiplayerPlayer?.name ?? "Guest"}
         guestCount={multiplayerGuests.length}
         started={multiplayerSession?.status === "playing"}
+        activePrompt={multiplayerSession?.game_state?.activePrompt ?? null}
+        onSubmitPrompt={handleSubmitGuestPrompt}
+        promptError={guestPromptError}
         onLeaveRoom={handleLeaveRoom}
       />
     );

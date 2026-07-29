@@ -1,0 +1,102 @@
+.guest-prompt {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: radial-gradient(circle at top, rgba(75, 54, 31, 0.28), transparent 42%),
+    linear-gradient(145deg, #090706, #17100c);
+}
+
+.guest-prompt__card {
+  width: min(100%, 560px);
+  padding: 30px 24px;
+  border: 1px solid rgba(255, 223, 180, 0.3);
+  border-radius: 24px;
+  background: rgba(10, 7, 6, 0.96);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+}
+
+.guest-prompt__card--submitted {
+  text-align: center;
+}
+
+.guest-prompt__eyebrow {
+  margin: 0 0 10px;
+  color: rgba(255, 223, 180, 0.72);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.guest-prompt__title {
+  margin: 0 0 14px;
+  color: #f7e6c8;
+  font-size: clamp(1.8rem, 8vw, 2.5rem);
+}
+
+.guest-prompt__copy,
+.guest-prompt__instructions {
+  color: rgba(247, 230, 200, 0.84);
+  line-height: 1.6;
+}
+
+.guest-prompt__instructions {
+  color: rgba(247, 230, 200, 0.62);
+}
+
+.guest-prompt__form,
+.guest-prompt__options {
+  display: grid;
+  gap: 14px;
+}
+
+.guest-prompt__option {
+  display: block;
+  padding: 16px;
+  border: 1px solid rgba(255, 223, 180, 0.2);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+}
+
+.guest-prompt__option--selected {
+  border-color: rgba(255, 223, 180, 0.68);
+  background: rgba(255, 223, 180, 0.12);
+}
+
+.guest-prompt__option input {
+  position: absolute;
+  opacity: 0;
+}
+
+.guest-prompt__option-copy {
+  display: grid;
+  gap: 6px;
+  color: #f7e6c8;
+}
+
+.guest-prompt__option-copy span {
+  color: rgba(247, 230, 200, 0.68);
+  line-height: 1.45;
+}
+
+.guest-prompt button {
+  border: 1px solid rgba(255, 223, 180, 0.35);
+  border-radius: 999px;
+  padding: 14px 18px;
+  color: #17100c;
+  background: #f7e6c8;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.guest-prompt button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.guest-prompt__error {
+  margin: 0;
+  color: #ffd0c5;
+}

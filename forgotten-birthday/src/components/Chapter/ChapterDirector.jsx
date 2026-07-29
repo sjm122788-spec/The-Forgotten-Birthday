@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -22,6 +23,7 @@ function ChapterDirector({
   sequence = [],
   onVisualStateChange,
   onCompleteChapter,
+  multiplayer,
 }) {
   const [
     currentCueIndex,
@@ -40,6 +42,14 @@ function ChapterDirector({
 
   const currentCue =
     sequence[currentCueIndex];
+
+  const publishingCueIdRef = useRef(null);
+  const handledPromptIdsRef = useRef(new Set());
+
+  const isPhoneIndividualDecision =
+    multiplayer?.enabled &&
+    currentCue?.type === "individualDecision" &&
+    currentCue?.audience === "selectedGuest";
 
   const TIER_RANK = {
     failure: 0,
@@ -207,6 +217,105 @@ function handleFillTheSilenceComplete(
 
     return true;
   }
+
+  useEffect(() => {
+    if (!isPhoneIndividualDecision) {
+      return;
+    }
+
+    const guests = multiplayer?.guests ?? [];
+    const activePrompt = multiplayer?.activePrompt ?? null;
+
+    if (guests.length === 0) {
+      return;
+    }
+
+    if (!activePrompt || activePrompt.cueId !== currentCue.id) {
+      if (publishingCueIdRef.current === currentCue.id) {
+        return;
+      }
+
+      const selectedGuest = guests[0];
+      const promptId =
+        globalThis.crypto?.randomUUID?.() ??
+        `${currentCue.id}-${Date.now()}`;
+
+      publishingCueIdRef.current = currentCue.id;
+
+      Promise.resolve(
+        multiplayer.publishPrompt?.({
+          id: promptId,
+          cueId: currentCue.id,
+          type: currentCue.type,
+          status: "awaiting-response",
+          targetPlayerIds: [selectedGuest.id],
+          targetPlayerNames: [selectedGuest.name],
+          payload: {
+            eyebrow: currentCue.eyebrow,
+            title: currentCue.title,
+            prompt: currentCue.prompt,
+            instructions: currentCue.instructions,
+            confirmLabel: currentCue.confirmLabel,
+            options: (currentCue.options ?? []).map((option) => ({
+              id: option.id,
+              label: option.label,
+              description: option.description ?? "",
+            })),
+          },
+          createdAt: new Date().toISOString(),
+        }),
+      )
+        .catch((error) => {
+          console.error("Unable to publish phone prompt", error);
+        })
+        .finally(() => {
+          if (publishingCueIdRef.current === currentCue.id) {
+            publishingCueIdRef.current = null;
+          }
+        });
+
+      return;
+    }
+
+    const response = (multiplayer?.responses ?? []).find(
+      (item) =>
+        item.prompt_id === activePrompt.id &&
+        activePrompt.targetPlayerIds?.includes(item.player_id),
+    );
+
+    if (!response || handledPromptIdsRef.current.has(activePrompt.id)) {
+      return;
+    }
+
+    const optionId = response.response_data?.optionId;
+    const selectedOption = (currentCue.options ?? []).find(
+      (option) => option.id === optionId,
+    );
+
+    if (!selectedOption) {
+      console.warn("Phone response did not match a cue option", response);
+      return;
+    }
+
+    handledPromptIdsRef.current.add(activePrompt.id);
+
+    Promise.resolve(multiplayer.clearPrompt?.(activePrompt.id))
+      .catch((error) => {
+        console.error("Unable to clear phone prompt", error);
+      })
+      .finally(() => {
+        handleIndividualDecision(selectedOption);
+      });
+  }, [
+    currentCue,
+    isPhoneIndividualDecision,
+    multiplayer?.activePrompt,
+    multiplayer?.enabled,
+    multiplayer?.guests,
+    multiplayer?.responses,
+    multiplayer?.publishPrompt,
+    multiplayer?.clearPrompt,
+  ]);
 
   useEffect(() => {
     if (
@@ -579,6 +688,29 @@ function handleFillTheSilenceComplete(
           handleOutcomeComplete
         }
       />
+    );
+  }
+
+  if (isPhoneIndividualDecision) {
+    const targetName =
+      multiplayer?.activePrompt?.cueId === currentCue.id
+        ? multiplayer.activePrompt.targetPlayerNames?.[0]
+        : null;
+
+    return (
+      <section className="individual-decision">
+        <div className="individual-decision__card">
+          <header className="individual-decision__header">
+            <p className="individual-decision__eyebrow">A Guest Has Been Chosen</p>
+            <h2 className="individual-decision__title">
+              {targetName ? `${targetName}, check your phone.` : "Choosing a Guest..."}
+            </h2>
+          </header>
+          <p className="individual-decision__instructions">
+            The story will continue when their choice is made.
+          </p>
+        </div>
+      </section>
     );
   }
 

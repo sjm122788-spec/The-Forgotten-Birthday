@@ -96,6 +96,7 @@ atmosphere: [
     {
       id: "torn-wish-choice",
       type: "individualDecision",
+      audience: "selectedGuest",
 
       eyebrow: "A Choice for One Guest",
       title: "The Torn Wish",

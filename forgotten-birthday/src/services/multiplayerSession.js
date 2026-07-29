@@ -319,6 +319,96 @@ async function updateGameSessionState(sessionId, updates = {}) {
   return data;
 }
 
+async function submitPlayerResponse({
+  sessionId,
+  playerId,
+  promptId,
+  cueId,
+  responseType,
+  responseData,
+}) {
+  if (!sessionId) {
+    throw new Error("A session is required to submit a response.");
+  }
+
+  if (!playerId) {
+    throw new Error("A player is required to submit a response.");
+  }
+
+  if (!promptId) {
+    throw new Error("A prompt is required to submit a response.");
+  }
+
+  const { data, error } = await supabase
+    .from("player_responses")
+    .upsert(
+      {
+        session_id: sessionId,
+        player_id: playerId,
+        prompt_id: promptId,
+        cue_id: cueId,
+        response_type: responseType,
+        response_data: responseData ?? {},
+        submitted_at: new Date().toISOString(),
+      },
+      {
+        onConflict: "session_id,player_id,prompt_id",
+      },
+    )
+    .select()
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+async function getPromptResponses({ sessionId, promptId }) {
+  if (!sessionId || !promptId) {
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from("player_responses")
+    .select("*")
+    .eq("session_id", sessionId)
+    .eq("prompt_id", promptId)
+    .order("submitted_at", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return Array.isArray(data) ? data : [];
+}
+
+function subscribeToPromptResponses(sessionId, callback) {
+  if (!sessionId) {
+    return null;
+  }
+
+  const channel = supabase.channel(`game-session-responses-${sessionId}`);
+
+  channel.on(
+    "postgres_changes",
+    {
+      event: "*",
+      schema: "public",
+      table: "player_responses",
+      filter: `session_id=eq.${sessionId}`,
+    },
+    (payload) => {
+      callback?.(payload);
+    },
+  );
+
+  channel.subscribe();
+
+  return channel;
+}
+
 function subscribeToGameSession(sessionId, callback) {
   if (!sessionId) {
     return null;
@@ -391,6 +481,9 @@ export {
   normalizeRoomCode,
   setStoredMultiplayerIdentity,
   startGameSession,
+  submitPlayerResponse,
+  getPromptResponses,
+  subscribeToPromptResponses,
   subscribeToGameSession,
   subscribeToSessionPlayers,
   updateGameSessionState,
