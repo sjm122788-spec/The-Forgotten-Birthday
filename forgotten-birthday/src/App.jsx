@@ -71,6 +71,7 @@ function createFreshState() {
     secretChoices: {},
     chapterState: {},
     progression: {},
+    playerProgress: {},
   };
 }
 
@@ -170,6 +171,9 @@ function getInitialAppState() {
       ? savedGame.chapterState
       : {},
     progression,
+    playerProgress: isObject(savedGame.playerProgress)
+      ? savedGame.playerProgress
+      : {},
     showResumeScreen: true,
   };
 }
@@ -204,6 +208,9 @@ function App() {
   );
   const [chapterState, setChapterState] = useState(initialAppState.chapterState);
   const [progression, setProgression] = useState(initialAppState.progression);
+  const [playerProgress, setPlayerProgress] = useState(
+    initialAppState.playerProgress,
+  );
 
   const [multiplayerRole, setMultiplayerRole] = useState(null);
   const [multiplayerSession, setMultiplayerSession] = useState(null);
@@ -228,6 +235,31 @@ function App() {
   const sessionChannelRef = useRef(null);
   const playersChannelRef = useRef(null);
   const responsesChannelRef = useRef(null);
+
+  useEffect(() => {
+    if (players.length === 0) {
+      return;
+    }
+
+    setPlayerProgress((currentProgress) => {
+      let changed = false;
+      const nextProgress = { ...currentProgress };
+
+      players.forEach((player) => {
+        if (!player?.id || nextProgress[player.id]) {
+          return;
+        }
+
+        nextProgress[player.id] = {
+          glory: 0,
+          relics: [],
+        };
+        changed = true;
+      });
+
+      return changed ? nextProgress : currentProgress;
+    });
+  }, [players]);
 
   useEffect(() => {
     let cancelled = false;
@@ -465,6 +497,7 @@ function App() {
         unlockingChapterId,
         glory,
         relics,
+        playerProgress,
         players: players.map((player) => ({
           id: player.id,
           name: player.name,
@@ -500,6 +533,7 @@ function App() {
     multiplayerSession?.id,
     multiplayerSession?.status,
     players,
+    playerProgress,
     relics,
     screen,
     selectedChapterId,
@@ -528,7 +562,8 @@ function App() {
       Object.keys(decisions).length === 0 &&
       Object.keys(secretChoices).length === 0 &&
       Object.keys(chapterState).length === 0 &&
-      Object.keys(progression).length === 0;
+      Object.keys(progression).length === 0 &&
+      Object.keys(playerProgress).length === 0;
 
     if (isFreshState) {
       return;
@@ -547,6 +582,7 @@ function App() {
       chapterState,
       decisions,
       secretChoices,
+      playerProgress,
       progression: {
         activeChapterIndex,
         unlockingChapterId,
@@ -562,6 +598,7 @@ function App() {
     glory,
     players,
     progression,
+    playerProgress,
     relics,
     screen,
     secretChoices,
@@ -587,6 +624,7 @@ function App() {
     setSecretChoices({});
     setChapterState({});
     setProgression({});
+    setPlayerProgress({});
     clearGame();
   }
 
@@ -784,6 +822,68 @@ function App() {
     }
   }
 
+  function handleAwardPlayerGlory(playerId, amount = 0) {
+    const normalizedAmount = Number(amount);
+
+    if (!playerId || !Number.isFinite(normalizedAmount) || normalizedAmount === 0) {
+      return;
+    }
+
+    setPlayerProgress((currentProgress) => {
+      const currentPlayer = currentProgress[playerId] ?? {
+        glory: 0,
+        relics: [],
+      };
+
+      return {
+        ...currentProgress,
+        [playerId]: {
+          ...currentPlayer,
+          glory: Math.max(0, (currentPlayer.glory ?? 0) + normalizedAmount),
+          relics: Array.isArray(currentPlayer.relics)
+            ? currentPlayer.relics
+            : [],
+        },
+      };
+    });
+
+    setGlory((currentGlory) => Math.max(0, currentGlory + normalizedAmount));
+  }
+
+  function handleAwardPlayerRelic(playerId, relicId) {
+    if (!playerId || !relicId) {
+      return;
+    }
+
+    setPlayerProgress((currentProgress) => {
+      const currentPlayer = currentProgress[playerId] ?? {
+        glory: 0,
+        relics: [],
+      };
+      const currentRelics = Array.isArray(currentPlayer.relics)
+        ? currentPlayer.relics
+        : [];
+
+      if (currentRelics.includes(relicId)) {
+        return currentProgress;
+      }
+
+      return {
+        ...currentProgress,
+        [playerId]: {
+          ...currentPlayer,
+          relics: [...currentRelics, relicId],
+        },
+      };
+    });
+
+    setRelics((currentRelics) =>
+      currentRelics.includes(relicId)
+        ? currentRelics
+        : [...currentRelics, relicId],
+    );
+  }
+
   function handleLeaveRoom() {
     resetMultiplayerState();
   }
@@ -963,6 +1063,9 @@ function App() {
               responses: activePromptResponses,
               publishPrompt: handlePublishPhonePrompt,
               clearPrompt: handleClearPhonePrompt,
+              playerProgress,
+              awardPlayerGlory: handleAwardPlayerGlory,
+              awardPlayerRelic: handleAwardPlayerRelic,
             }}
           />
         );

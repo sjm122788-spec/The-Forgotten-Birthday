@@ -1,0 +1,123 @@
+.guest-observation {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: radial-gradient(circle at top, rgba(255,255,255,0.04), transparent 30%),
+    linear-gradient(180deg, #0d121c 0%, #0e131d 100%);
+  color: #f6f2ea;
+}
+
+.guest-observation__card {
+  width: min(760px, 100%);
+  display: grid;
+  gap: 1rem;
+  padding: 1.5rem;
+  border: 1px solid rgba(246, 242, 234, 0.12);
+  border-radius: 1rem;
+  background: rgba(12, 16, 24, 0.92);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.32);
+}
+
+.guest-observation__eyebrow {
+  margin: 0;
+  color: #d2c9bd;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+.guest-observation__title {
+  margin: 0;
+  font-size: clamp(2rem, 2.5vw, 2.6rem);
+  line-height: 1.05;
+}
+
+.guest-observation__copy,
+.guest-observation__hint,
+.guest-observation__error {
+  margin: 0;
+  color: #d2c9bd;
+}
+
+.guest-observation__scene {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  background: #11161f;
+  min-height: 320px;
+}
+
+.guest-observation__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 1rem;
+}
+
+.guest-observation__hotspot {
+  position: absolute;
+  border: 1px solid rgba(246, 242, 234, 0.35);
+  background: rgba(255, 255, 255, 0.04);
+  color: #f6f2ea;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.guest-observation__hotspot:hover:not(:disabled) {
+  transform: scale(1.04);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.guest-observation__hotspot:disabled {
+  opacity: 0.75;
+  cursor: default;
+}
+
+.guest-observation__hotspot--found {
+  background: rgba(72, 180, 97, 0.26);
+  border-color: rgba(72, 180, 97, 0.8);
+}
+
+.guest-observation__panel {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  background: rgba(20, 26, 35, 0.92);
+}
+
+.guest-observation__status {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.guest-observation__status span {
+  display: inline-block;
+}
+
+.guest-observation__hint {
+  color: #b7ae9b;
+}
+
+.guest-observation__error {
+  color: #f6b4b4;
+}
+
+@media (max-width: 720px) {
+  .guest-observation__card {
+    padding: 1rem;
+  }
+
+  .guest-observation__scene {
+    min-height: 240px;
+  }
+}

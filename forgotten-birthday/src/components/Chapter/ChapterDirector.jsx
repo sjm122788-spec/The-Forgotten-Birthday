@@ -40,6 +40,8 @@ function ChapterDirector({
     setCueResults,
   ] = useState({});
 
+  const [foundClueIds, setFoundClueIds] = useState([]);
+
   const currentCue =
     sequence[currentCueIndex];
 
@@ -50,6 +52,11 @@ function ChapterDirector({
     multiplayer?.enabled &&
     currentCue?.type === "individualDecision" &&
     currentCue?.audience === "selectedGuest";
+
+  const isPhoneObservation =
+    multiplayer?.enabled &&
+    currentCue?.type === "observation" &&
+    currentCue?.audience === "allGuests";
 
   const TIER_RANK = {
     failure: 0,
@@ -62,6 +69,7 @@ function ChapterDirector({
     setCurrentCueIndex(0);
     setDecisionOutcome(null);
     setCueResults({});
+    setFoundClueIds([]);
   }, [sequence]);
 
   useEffect(() => {
@@ -74,6 +82,201 @@ function ChapterDirector({
   }, [
     currentCue,
     onCompleteChapter,
+  ]);
+
+  useEffect(() => {
+    if (!isPhoneObservation) {
+      return;
+    }
+
+    const activePrompt = multiplayer?.activePrompt;
+
+    if (
+      !activePrompt ||
+      activePrompt.cueId !== currentCue?.id
+    ) {
+      return;
+    }
+
+    const nextFoundClueIds = Array.isArray(
+      activePrompt.payload?.foundClueIds,
+    )
+      ? [...new Set(activePrompt.payload.foundClueIds)]
+      : [];
+
+    setFoundClueIds(nextFoundClueIds);
+  }, [
+    isPhoneObservation,
+    currentCue?.id,
+    multiplayer?.activePrompt,
+  ]);
+
+  useEffect(() => {
+    if (!isPhoneObservation) {
+      return;
+    }
+
+    const activePrompt = multiplayer?.activePrompt;
+    const existingFoundClueIds = new Set(
+      Array.isArray(activePrompt?.payload?.foundClueIds)
+        ? activePrompt.payload.foundClueIds
+        : [],
+    );
+    const desiredFoundClueIds = new Set(foundClueIds);
+
+    const promptMatches =
+      activePrompt?.cueId === currentCue?.id &&
+      activePrompt?.type === currentCue?.type &&
+      existingFoundClueIds.size === desiredFoundClueIds.size &&
+      [...existingFoundClueIds].every((clueId) =>
+        desiredFoundClueIds.has(clueId),
+      );
+
+    if (promptMatches) {
+      return;
+    }
+
+    if (publishingCueIdRef.current === currentCue?.id) {
+      return;
+    }
+
+    publishingCueIdRef.current = currentCue?.id;
+
+    const promptId =
+      globalThis.crypto?.randomUUID?.() ??
+      `${currentCue?.id}-${Date.now()}`;
+
+    const prompt = {
+      id: promptId,
+      cueId: currentCue?.id,
+      type: currentCue?.type,
+      status: "awaiting-response",
+      targetPlayerIds: (multiplayer?.guests ?? []).map((guest) => guest.id),
+      targetPlayerNames: (multiplayer?.guests ?? []).map(
+        (guest) => guest.name,
+      ),
+      payload: {
+        eyebrow: currentCue.eyebrow,
+        title: currentCue.title,
+        prompt: currentCue.prompt,
+        instructions: currentCue.instructions,
+        image: currentCue.image,
+        imageAlt: currentCue.imageAlt,
+        clues: Array.isArray(currentCue.clues)
+          ? currentCue.clues.map((clue) => ({
+              id: clue.id,
+              label: clue.label,
+              hiddenLabel: clue.hiddenLabel,
+              x: clue.x,
+              y: clue.y,
+              width: clue.width,
+              height: clue.height,
+            }))
+          : [],
+        foundClueIds: [...desiredFoundClueIds],
+      },
+      createdAt: new Date().toISOString(),
+    };
+
+    Promise.resolve(multiplayer.publishPrompt?.(prompt))
+      .catch((error) => {
+        console.error("Unable to publish observation prompt", error);
+      })
+      .finally(() => {
+        if (publishingCueIdRef.current === currentCue?.id) {
+          publishingCueIdRef.current = null;
+        }
+      });
+  }, [
+    currentCue,
+    isPhoneObservation,
+    multiplayer?.activePrompt,
+    multiplayer?.guests,
+    multiplayer?.publishPrompt,
+    foundClueIds,
+  ]);
+
+  useEffect(() => {
+    if (!isPhoneObservation) {
+      return;
+    }
+
+    const activePrompt = multiplayer?.activePrompt;
+
+    if (
+      !activePrompt ||
+      activePrompt.cueId !== currentCue?.id
+    ) {
+      return;
+    }
+
+    const responses = Array.isArray(multiplayer?.responses)
+      ? multiplayer.responses
+      : [];
+
+    if (responses.length === 0) {
+      return;
+    }
+
+    const alreadyFound = new Set(foundClueIds);
+    const newDiscoveries = [];
+
+    for (const response of responses) {
+      const clueId = response?.response_data?.clueId;
+      const playerId = response?.player_id;
+
+      if (!clueId || typeof clueId !== "string") {
+        continue;
+      }
+
+      if (alreadyFound.has(clueId)) {
+        continue;
+      }
+
+      alreadyFound.add(clueId);
+      newDiscoveries.push({ clueId, playerId });
+    }
+
+    if (newDiscoveries.length === 0) {
+      return;
+    }
+
+    const nextFoundClueIds = [...foundClueIds, ...newDiscoveries.map((item) => item.clueId)];
+    setFoundClueIds(nextFoundClueIds);
+
+    newDiscoveries.forEach((discovery) => {
+      if (discovery?.playerId) {
+        multiplayer?.awardPlayerGlory?.(discovery.playerId, 1);
+      }
+    });
+
+    const allCluesCount = Array.isArray(currentCue?.clues)
+      ? currentCue.clues.length
+      : 0;
+
+    if (nextFoundClueIds.length === allCluesCount && allCluesCount > 0) {
+      Promise.resolve(multiplayer.clearPrompt?.(activePrompt.id))
+        .catch((error) => {
+          console.error("Unable to clear observation prompt", error);
+        })
+        .finally(() => {
+          handleObservationComplete({
+            cueId: currentCue.id,
+            foundClueIds: nextFoundClueIds,
+            missedClueIds: [],
+            foundAllClues: true,
+            foundCount: nextFoundClueIds.length,
+            totalClues: allCluesCount,
+          });
+        });
+    }
+  }, [
+    currentCue,
+    foundClueIds,
+    isPhoneObservation,
+    multiplayer?.activePrompt,
+    multiplayer?.responses,
+    multiplayer?.clearPrompt,
   ]);
 function handleFillTheSilenceComplete(
   result,
