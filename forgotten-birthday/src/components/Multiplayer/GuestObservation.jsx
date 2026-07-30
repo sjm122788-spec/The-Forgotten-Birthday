@@ -7,7 +7,11 @@ export default function GuestObservation({ prompt, onSubmit, error = "" }) {
   const [localError, setLocalError] = useState("");
 
   const clues = prompt?.payload?.clues ?? [];
-  const foundClueIds = prompt?.payload?.foundClueIds ?? [];
+  const foundClueIds =
+    prompt?.sharedState?.foundClueIds ??
+    prompt?.payload?.foundClueIds ??
+    [];
+
   const foundClueIdSet = useMemo(
     () => new Set(foundClueIds),
     [foundClueIds],
@@ -18,6 +22,12 @@ export default function GuestObservation({ prompt, onSubmit, error = "" }) {
     setLocalError("");
   }, [prompt?.id]);
 
+  useEffect(() => {
+    if (submittingClueId && foundClueIdSet.has(submittingClueId)) {
+      setSubmittingClueId(null);
+    }
+  }, [foundClueIdSet, submittingClueId]);
+
   async function handleClueClick(clue) {
     if (!clue?.id || submittingClueId || foundClueIdSet.has(clue.id)) {
       return;
@@ -27,25 +37,25 @@ export default function GuestObservation({ prompt, onSubmit, error = "" }) {
     setLocalError("");
 
     try {
-  await onSubmit({
-    promptId: prompt.id,
-    cueId: prompt.cueId,
-    responseType: "observation",
-    responseData: {
-      clueId: clue.id,
-      label: clue.label,
-    },
-  });
-
-  setSubmittingClueId(null);
-} catch (submitError) {
+      await onSubmit({
+        promptId: prompt.id,
+        cueId: prompt.cueId,
+        responseType: "observation",
+        responseKey: clue.id,
+        responseData: {
+          clueId: clue.id,
+          label: clue.label,
+        },
+      });
+    } catch (submitError) {
       console.error("Unable to submit observation clue", submitError);
       setLocalError("That clue did not reach the story. Tap it again.");
       setSubmittingClueId(null);
     }
   }
 
-  const allCluesFound = clues.length > 0 && foundClueIds.length >= clues.length;
+  const allCluesFound =
+    clues.length > 0 && foundClueIds.length >= clues.length;
 
   return (
     <main className="guest-observation">
@@ -97,7 +107,9 @@ export default function GuestObservation({ prompt, onSubmit, error = "" }) {
                 disabled={isFound || Boolean(submittingClueId) || allCluesFound}
                 onClick={() => handleClueClick(clue)}
               >
-                {isFound && <span className="guest-observation__found-marker">✓</span>}
+                {isFound && (
+                  <span className="guest-observation__found-marker">✓</span>
+                )}
                 {isSubmitting && !isFound && (
                   <span className="guest-observation__submitting-marker">…</span>
                 )}
@@ -108,7 +120,8 @@ export default function GuestObservation({ prompt, onSubmit, error = "" }) {
 
         <div className="guest-observation__status">
           <p>
-            <strong>{foundClueIds.length}</strong> of <strong>{clues.length}</strong> clues found
+            <strong>{foundClueIds.length}</strong> of{" "}
+            <strong>{clues.length}</strong> clues found
           </p>
           <p>
             {allCluesFound

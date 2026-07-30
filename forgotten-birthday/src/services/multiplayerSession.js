@@ -11,10 +11,6 @@ const STORAGE_KEYS = {
   playerName: "forgottenBirthday.playerName",
 };
 
-function isObject(value) {
-  return value !== null && typeof value === "object" && !Array.isArray(value);
-}
-
 function safeLocalStorage() {
   if (typeof window === "undefined" || !window.localStorage) {
     return null;
@@ -148,11 +144,9 @@ function generateRoomCode() {
       code += chars[Math.floor(Math.random() * chars.length)];
     }
 
-    if (!/^[A-Z0-9]{6}$/.test(code)) {
-      continue;
+    if (/^[A-Z0-9]{6}$/.test(code)) {
+      return code;
     }
-
-    return code;
   }
 
   return "BIRTHD";
@@ -171,7 +165,9 @@ async function createGameSession() {
         host_token: hostToken,
         status: "lobby",
         current_screen: "lobby",
+        current_chapter_id: null,
         game_state: {},
+        active_prompt: null,
       })
       .select()
       .single();
@@ -274,7 +270,7 @@ async function getSessionPlayers(sessionId) {
   return Array.isArray(data) ? data : [];
 }
 
-async function startGameSession(sessionId, hostToken) {
+async function startGameSession(sessionId) {
   if (!sessionId) {
     throw new Error("A session is required to start.");
   }
@@ -284,6 +280,8 @@ async function startGameSession(sessionId, hostToken) {
     .update({
       status: "playing",
       current_screen: "prologue",
+      current_chapter_id: null,
+      active_prompt: null,
       updated_at: new Date().toISOString(),
     })
     .eq("id", sessionId)
@@ -302,10 +300,15 @@ async function updateGameSessionState(sessionId, updates = {}) {
     return null;
   }
 
+  const safeUpdates = { ...updates };
+
+  // Phone prompts are intentionally isolated from durable story state.
+  delete safeUpdates.active_prompt;
+
   const { data, error } = await supabase
     .from("game_sessions")
     .update({
-      ...updates,
+      ...safeUpdates,
       updated_at: new Date().toISOString(),
     })
     .eq("id", sessionId)
@@ -319,12 +322,101 @@ async function updateGameSessionState(sessionId, updates = {}) {
   return data;
 }
 
+async function setActivePrompt(sessionId, prompt) {
+  if (!sessionId) {
+    throw new Error("A session is required to open a phone prompt.");
+  }
+
+  if (!prompt?.id || !prompt?.cueId || !prompt?.chapterId) {
+    throw new Error("A phone prompt requires an id, cueId, and chapterId.");
+  }
+
+  const nextPrompt = {
+    ...prompt,
+    status: prompt.status ?? "open",
+    updatedAt: new Date().toISOString(),
+  };
+
+  const { data, error } = await supabase
+    .from("game_sessions")
+    .update({
+      active_prompt: nextPrompt,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", sessionId)
+    .select()
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+async function updateActivePrompt(sessionId, promptId, nextPrompt) {
+  if (!sessionId || !promptId) {
+    return getGameSession(sessionId);
+  }
+
+  const guardedPrompt = {
+    ...nextPrompt,
+    id: promptId,
+    status: nextPrompt?.status ?? "open",
+    updatedAt: new Date().toISOString(),
+  };
+
+  const { data, error } = await supabase
+    .from("game_sessions")
+    .update({
+      active_prompt: guardedPrompt,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", sessionId)
+    .eq("active_prompt->>id", promptId)
+    .select()
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data ?? getGameSession(sessionId);
+}
+
+async function clearActivePrompt(sessionId, promptId = null) {
+  if (!sessionId) {
+    return null;
+  }
+
+  let query = supabase
+    .from("game_sessions")
+    .update({
+      active_prompt: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", sessionId);
+
+  if (promptId) {
+    query = query.eq("active_prompt->>id", promptId);
+  }
+
+  const { data, error } = await query.select().maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data ?? getGameSession(sessionId);
+}
+
 async function submitPlayerResponse({
   sessionId,
   playerId,
   promptId,
   cueId,
   responseType,
+  responseKey = "final",
   responseData,
 }) {
   if (!sessionId) {
@@ -339,6 +431,8 @@ async function submitPlayerResponse({
     throw new Error("A prompt is required to submit a response.");
   }
 
+  const normalizedResponseKey = String(responseKey || "final");
+
   const { data, error } = await supabase
     .from("player_responses")
     .upsert(
@@ -348,11 +442,12 @@ async function submitPlayerResponse({
         prompt_id: promptId,
         cue_id: cueId,
         response_type: responseType,
+        response_key: normalizedResponseKey,
         response_data: responseData ?? {},
         submitted_at: new Date().toISOString(),
       },
       {
-        onConflict: "session_id,player_id,prompt_id",
+        onConflict: "session_id,player_id,prompt_id,response_key",
       },
     )
     .select()
@@ -425,8 +520,7 @@ function subscribeToGameSession(sessionId, callback) {
       filter: `id=eq.${sessionId}`,
     },
     (payload) => {
-      const nextSession = payload?.new ?? payload;
-      callback?.(nextSession);
+      callback?.(payload?.new ?? payload);
     },
   );
 
@@ -470,22 +564,25 @@ function leaveChannel(channel) {
 
 export {
   clearStoredMultiplayerIdentity as clearMultiplayerIdentity,
+  clearActivePrompt,
   createGameSession,
   findSessionByRoomCode,
   generateRoomCode,
   getGameSession,
+  getPromptResponses,
   getSessionPlayers,
   getStoredMultiplayerIdentity,
   joinGameSession,
   leaveChannel,
   normalizeRoomCode,
+  setActivePrompt,
   setStoredMultiplayerIdentity,
   startGameSession,
   submitPlayerResponse,
-  getPromptResponses,
-  subscribeToPromptResponses,
   subscribeToGameSession,
+  subscribeToPromptResponses,
   subscribeToSessionPlayers,
+  updateActivePrompt,
   updateGameSessionState,
 };
 

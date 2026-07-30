@@ -75,6 +75,7 @@ function ChapterDirector({
     setDecisionOutcome(null);
     setCueResults({});
     setPhoneObservationFoundClueIds([]);
+    handledPromptIdsRef.current.clear();
     handledObservationResponseIdsRef.current.clear();
     processingObservationRef.current = false;
   }, [sequence]);
@@ -84,6 +85,69 @@ function ChapterDirector({
     handledObservationResponseIdsRef.current.clear();
     processingObservationRef.current = false;
   }, [currentCue?.id]);
+
+  useEffect(() => {
+    if (!isPhoneObservation) {
+      return;
+    }
+
+    const activePrompt = multiplayer?.activePrompt;
+
+    if (
+      activePrompt?.cueId !== currentCue?.id ||
+      activePrompt?.chapterId !== multiplayer?.chapterId
+    ) {
+      return;
+    }
+
+    const sharedFoundClueIds = Array.isArray(
+      activePrompt?.sharedState?.foundClueIds,
+    )
+      ? activePrompt.sharedState.foundClueIds
+      : [];
+
+    setPhoneObservationFoundClueIds((currentIds) => {
+      if (
+        currentIds.length === sharedFoundClueIds.length &&
+        currentIds.every((clueId, index) => clueId === sharedFoundClueIds[index])
+      ) {
+        return currentIds;
+      }
+
+      return sharedFoundClueIds;
+    });
+  }, [
+    currentCue?.id,
+    isPhoneObservation,
+    multiplayer?.activePrompt,
+    multiplayer?.chapterId,
+  ]);
+
+  useEffect(() => {
+    const activePrompt = multiplayer?.activePrompt;
+
+    if (!multiplayer?.enabled || !activePrompt?.id) {
+      return;
+    }
+
+    const promptBelongsToCurrentCue =
+      activePrompt.chapterId === multiplayer?.chapterId &&
+      activePrompt.cueId === currentCue?.id;
+
+    if (promptBelongsToCurrentCue) {
+      return;
+    }
+
+    Promise.resolve(multiplayer.clearPrompt?.(activePrompt.id)).catch((error) => {
+      console.error("Unable to clear a stale phone prompt", error);
+    });
+  }, [
+    currentCue?.id,
+    multiplayer?.activePrompt,
+    multiplayer?.chapterId,
+    multiplayer?.clearPrompt,
+    multiplayer?.enabled,
+  ]);
 
   useEffect(() => {
     if (
@@ -267,8 +331,9 @@ function handleFillTheSilenceComplete(
         multiplayer.publishPrompt?.({
           id: promptId,
           cueId: currentCue.id,
+          chapterId: multiplayer.chapterId,
           type: currentCue.type,
-          status: "awaiting-response",
+          status: "open",
           targetPlayerIds: [selectedGuest.id],
           targetPlayerNames: [selectedGuest.name],
           payload: {
@@ -331,6 +396,7 @@ function handleFillTheSilenceComplete(
     currentCue,
     isPhoneIndividualDecision,
     multiplayer?.activePrompt,
+    multiplayer?.chapterId,
     multiplayer?.enabled,
     multiplayer?.guests,
     multiplayer?.responses,
@@ -365,8 +431,9 @@ function handleFillTheSilenceComplete(
         multiplayer.publishPrompt?.({
           id: promptId,
           cueId: currentCue.id,
+          chapterId: multiplayer.chapterId,
           type: "observation",
-          status: "awaiting-response",
+          status: "open",
           targetPlayerIds: guests.map((guest) => guest.id),
           targetPlayerNames: guests.map((guest) => guest.name),
           payload: {
@@ -375,7 +442,6 @@ function handleFillTheSilenceComplete(
             instructions: currentCue.instructions,
             image: currentCue.image,
             imageAlt: currentCue.imageAlt,
-            foundClueIds: phoneObservationFoundClueIds,
             clues: (currentCue.clues ?? []).map((clue) => ({
               id: clue.id,
               label: clue.label,
@@ -385,6 +451,9 @@ function handleFillTheSilenceComplete(
               width: clue.width,
               height: clue.height,
             })),
+          },
+          sharedState: {
+            foundClueIds: [],
           },
           createdAt: new Date().toISOString(),
         }),
@@ -463,23 +532,16 @@ function handleFillTheSilenceComplete(
       return;
     }
 
-    const nextPromptId =
-      globalThis.crypto?.randomUUID?.() ??
-      `${currentCue.id}-${Date.now()}`;
-
     Promise.resolve(
-      multiplayer.publishPrompt?.({
-        ...activePrompt,
-        id: nextPromptId,
-        payload: {
-          ...(activePrompt.payload ?? {}),
+      multiplayer.updatePrompt?.(activePrompt.id, {
+        sharedState: {
+          ...(activePrompt.sharedState ?? {}),
           foundClueIds: nextFoundClueIds,
         },
-        createdAt: new Date().toISOString(),
       }),
     )
       .catch((error) => {
-        console.error("Unable to refresh observation prompt", error);
+        console.error("Unable to update observation progress", error);
       })
       .finally(() => {
         processingObservationRef.current = false;
@@ -489,10 +551,12 @@ function handleFillTheSilenceComplete(
     isPhoneObservation,
     multiplayer?.activePrompt,
     multiplayer?.awardPlayerGlory,
+    multiplayer?.chapterId,
     multiplayer?.clearPrompt,
     multiplayer?.guests,
     multiplayer?.publishPrompt,
     multiplayer?.responses,
+    multiplayer?.updatePrompt,
     phoneObservationFoundClueIds,
   ]);
 

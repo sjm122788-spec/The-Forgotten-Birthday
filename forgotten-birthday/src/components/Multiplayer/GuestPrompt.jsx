@@ -27,6 +27,7 @@ export default function GuestPrompt({ prompt, onSubmit, error = "" }) {
         promptId: prompt.id,
         cueId: prompt.cueId,
         responseType: prompt.type,
+        responseKey: "final",
         responseData: {
           optionId: selectedOption.id,
           label: selectedOption.label,
@@ -54,19 +55,29 @@ export default function GuestPrompt({ prompt, onSubmit, error = "" }) {
   return (
     <section className="guest-prompt">
       <div className="guest-prompt__card">
-        <p className="guest-prompt__eyebrow">{prompt.payload?.eyebrow ?? "The story needs you"}</p>
-        <h1 className="guest-prompt__title">{prompt.payload?.title ?? "Choose carefully"}</h1>
+        <p className="guest-prompt__eyebrow">
+          {prompt.payload?.eyebrow ?? "The story needs you"}
+        </p>
+        <h1 className="guest-prompt__title">
+          {prompt.payload?.title ?? "Choose carefully"}
+        </h1>
 
         {prompt.payload?.prompt && (
           <p className="guest-prompt__copy">{prompt.payload.prompt}</p>
         )}
 
         {prompt.payload?.instructions && (
-          <p className="guest-prompt__instructions">{prompt.payload.instructions}</p>
+          <p className="guest-prompt__instructions">
+            {prompt.payload.instructions}
+          </p>
         )}
 
         <form className="guest-prompt__form" onSubmit={handleSubmit}>
-          <div className="guest-prompt__options" role="radiogroup" aria-label={prompt.payload?.title}>
+          <div
+            className="guest-prompt__options"
+            role="radiogroup"
+            aria-label={prompt.payload?.title}
+          >
             {options.map((option) => {
               const selected = option.id === selectedOptionId;
 
@@ -76,7 +87,9 @@ export default function GuestPrompt({ prompt, onSubmit, error = "" }) {
                   className={[
                     "guest-prompt__option",
                     selected ? "guest-prompt__option--selected" : "",
-                  ].filter(Boolean).join(" ")}
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
                 >
                   <input
                     type="radio"
@@ -98,7 +111,9 @@ export default function GuestPrompt({ prompt, onSubmit, error = "" }) {
           {error && <p className="guest-prompt__error">{error}</p>}
 
           <button type="submit" disabled={!selectedOption || submitting}>
-            {submitting ? "Sending your choice..." : prompt.payload?.confirmLabel ?? "Confirm Choice"}
+            {submitting
+              ? "Sending your choice..."
+              : prompt.payload?.confirmLabel ?? "Confirm Choice"}
           </button>
         </form>
       </div>

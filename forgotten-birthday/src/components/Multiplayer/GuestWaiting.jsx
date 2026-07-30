@@ -8,44 +8,51 @@ export default function GuestWaiting({
   playerName,
   guestCount = 0,
   started = false,
+  currentChapterId = null,
   activePrompt = null,
   onSubmitPrompt,
   promptError = "",
   onLeaveRoom,
-}) {const hasActivePrompt =
-  started &&
-  activePrompt?.status === "awaiting-response";
+}) {
+  const promptIsOpen =
+    activePrompt?.status === "open" ||
+    activePrompt?.status === "awaiting-response";
 
-const isObservationPrompt =
-  hasActivePrompt &&
-  activePrompt?.type === "observation";
+  const promptMatchesChapter =
+    Boolean(currentChapterId) &&
+    activePrompt?.chapterId === currentChapterId;
 
-const isTargetedPrompt =
-  hasActivePrompt &&
-  activePrompt?.type !== "observation" &&
-  activePrompt?.targetPlayerIds?.includes(playerId);
+  const promptTargetsPlayer =
+    Array.isArray(activePrompt?.targetPlayerIds) &&
+    activePrompt.targetPlayerIds.includes(playerId);
 
-if (isObservationPrompt) {
-  return (
-    <GuestObservation
-      key={activePrompt.id}
-      prompt={activePrompt}
-      onSubmit={onSubmitPrompt}
-      error={promptError}
-    />
-  );
-}
+  const hasActivePrompt =
+    started &&
+    promptIsOpen &&
+    promptMatchesChapter &&
+    promptTargetsPlayer;
 
-if (isTargetedPrompt) {
-  return (
-    <GuestPrompt
-      key={activePrompt.id}
-      prompt={activePrompt}
-      onSubmit={onSubmitPrompt}
-      error={promptError}
-    />
-  );
-}
+  if (hasActivePrompt && activePrompt.type === "observation") {
+    return (
+      <GuestObservation
+        key={activePrompt.id}
+        prompt={activePrompt}
+        onSubmit={onSubmitPrompt}
+        error={promptError}
+      />
+    );
+  }
+
+  if (hasActivePrompt) {
+    return (
+      <GuestPrompt
+        key={activePrompt.id}
+        prompt={activePrompt}
+        onSubmit={onSubmitPrompt}
+        error={promptError}
+      />
+    );
+  }
 
   return (
     <main className="multiplayer-guest-waiting">
