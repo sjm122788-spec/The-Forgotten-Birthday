@@ -1,5 +1,7 @@
+import GuestDice from "./GuestDice";
 import GuestObservation from "./GuestObservation";
 import GuestPrompt from "./GuestPrompt";
+import GuestRelic from "./GuestRelic";
 import "./GuestWaiting.css";
 
 export default function GuestWaiting({
@@ -31,6 +33,28 @@ export default function GuestWaiting({
     promptIsOpen &&
     promptMatchesChapter &&
     promptTargetsPlayer;
+
+  if (hasActivePrompt && activePrompt.type === "dice") {
+    return (
+      <GuestDice
+        key={activePrompt.id}
+        prompt={activePrompt}
+        onSubmit={onSubmitPrompt}
+        error={promptError}
+      />
+    );
+  }
+
+  if (hasActivePrompt && activePrompt.type === "relicReveal") {
+    return (
+      <GuestRelic
+        key={activePrompt.id}
+        prompt={activePrompt}
+        onSubmit={onSubmitPrompt}
+        error={promptError}
+      />
+    );
+  }
 
   if (hasActivePrompt && activePrompt.type === "observation") {
     return (

@@ -50,6 +50,7 @@ function ChapterDirector({
 
   const publishingCueIdRef = useRef(null);
   const handledPromptIdsRef = useRef(new Set());
+  const completedPhoneCueIdsRef = useRef(new Set());
   const handledObservationResponseIdsRef = useRef(new Set());
   const processingObservationRef = useRef(false);
 
@@ -63,6 +64,16 @@ function ChapterDirector({
     currentCue?.type === "observation" &&
     currentCue?.audience === "allGuests";
 
+  const isPhoneDice =
+    multiplayer?.enabled &&
+    currentCue?.type === "dice" &&
+    currentCue?.audience === "selectedGuest";
+
+  const isPhoneRelicReveal =
+    multiplayer?.enabled &&
+    currentCue?.type === "relicReveal" &&
+    currentCue?.audience === "resultPlayer";
+
   const TIER_RANK = {
     failure: 0,
     partial: 1,
@@ -70,12 +81,32 @@ function ChapterDirector({
     greatSuccess: 3,
   };
 
+  function selectGuestForCue(guests, cueId) {
+    if (!Array.isArray(guests) || guests.length === 0) {
+      return null;
+    }
+
+    const hash = String(cueId ?? "").split("").reduce(
+      (total, character) => total + character.charCodeAt(0),
+      0,
+    );
+
+    return guests[hash % guests.length] ?? guests[0];
+  }
+
+  function resolveDiceOutcome(cue, roll) {
+    return [...(cue?.outcomes ?? [])]
+      .sort((a, b) => (b.min ?? 1) - (a.min ?? 1))
+      .find((outcome) => roll >= (outcome.min ?? 1)) ?? null;
+  }
+
   useEffect(() => {
     setCurrentCueIndex(0);
     setDecisionOutcome(null);
     setCueResults({});
     setPhoneObservationFoundClueIds([]);
     handledPromptIdsRef.current.clear();
+    completedPhoneCueIdsRef.current.clear();
     handledObservationResponseIdsRef.current.clear();
     processingObservationRef.current = false;
   }, [sequence]);
@@ -316,11 +347,14 @@ function handleFillTheSilenceComplete(
     }
 
     if (!activePrompt || activePrompt.cueId !== currentCue.id) {
-      if (publishingCueIdRef.current === currentCue.id) {
+      if (
+        completedPhoneCueIdsRef.current.has(currentCue.id) ||
+        publishingCueIdRef.current === currentCue.id
+      ) {
         return;
       }
 
-      const selectedGuest = guests[0];
+      const selectedGuest = selectGuestForCue(guests, currentCue.id);
       const promptId =
         globalThis.crypto?.randomUUID?.() ??
         `${currentCue.id}-${Date.now()}`;
@@ -384,6 +418,7 @@ function handleFillTheSilenceComplete(
     }
 
     handledPromptIdsRef.current.add(activePrompt.id);
+    completedPhoneCueIdsRef.current.add(currentCue.id);
 
     Promise.resolve(multiplayer.clearPrompt?.(activePrompt.id))
       .catch((error) => {
@@ -417,7 +452,10 @@ function handleFillTheSilenceComplete(
     }
 
     if (!activePrompt || activePrompt.cueId !== currentCue.id) {
-      if (publishingCueIdRef.current === currentCue.id) {
+      if (
+        completedPhoneCueIdsRef.current.has(currentCue.id) ||
+        publishingCueIdRef.current === currentCue.id
+      ) {
         return;
       }
 
@@ -513,6 +551,8 @@ function handleFillTheSilenceComplete(
       nextFoundClueIds.length >= (currentCue.clues ?? []).length;
 
     if (allCluesFound) {
+      completedPhoneCueIdsRef.current.add(currentCue.id);
+
       Promise.resolve(multiplayer.clearPrompt?.(activePrompt.id))
         .catch((error) => {
           console.error("Unable to clear observation prompt", error);
@@ -558,6 +598,239 @@ function handleFillTheSilenceComplete(
     multiplayer?.responses,
     multiplayer?.updatePrompt,
     phoneObservationFoundClueIds,
+  ]);
+
+  useEffect(() => {
+    if (!isPhoneDice) {
+      return;
+    }
+
+    const guests = multiplayer?.guests ?? [];
+    const activePrompt = multiplayer?.activePrompt ?? null;
+
+    if (guests.length === 0) {
+      return;
+    }
+
+    if (!activePrompt || activePrompt.cueId !== currentCue.id) {
+      if (
+        completedPhoneCueIdsRef.current.has(currentCue.id) ||
+        publishingCueIdRef.current === currentCue.id
+      ) {
+        return;
+      }
+
+      const selectedGuest = selectGuestForCue(guests, currentCue.id);
+      const promptId =
+        globalThis.crypto?.randomUUID?.() ??
+        `${currentCue.id}-${Date.now()}`;
+
+      publishingCueIdRef.current = currentCue.id;
+
+      Promise.resolve(
+        multiplayer.publishPrompt?.({
+          id: promptId,
+          cueId: currentCue.id,
+          chapterId: multiplayer.chapterId,
+          type: "dice",
+          status: "open",
+          targetPlayerIds: [selectedGuest.id],
+          targetPlayerNames: [selectedGuest.name],
+          payload: {
+            eyebrow: currentCue.eyebrow,
+            title: currentCue.title,
+            prompt: currentCue.prompt,
+            instructions: currentCue.instructions,
+            sides: currentCue.sides ?? 12,
+            rollLabel: currentCue.rollLabel,
+          },
+          createdAt: new Date().toISOString(),
+        }),
+      )
+        .catch((error) => {
+          console.error("Unable to publish dice prompt", error);
+        })
+        .finally(() => {
+          if (publishingCueIdRef.current === currentCue.id) {
+            publishingCueIdRef.current = null;
+          }
+        });
+
+      return;
+    }
+
+    const response = (multiplayer?.responses ?? []).find(
+      (item) =>
+        item.prompt_id === activePrompt.id &&
+        item.response_key === "final" &&
+        activePrompt.targetPlayerIds?.includes(item.player_id),
+    );
+
+    if (!response || handledPromptIdsRef.current.has(activePrompt.id)) {
+      return;
+    }
+
+    const roll = Number(response.response_data?.roll);
+    const sides = Number(currentCue.sides ?? 12);
+    const resolvedOutcome = Number.isInteger(roll)
+      ? resolveDiceOutcome(currentCue, roll)
+      : null;
+
+    if (!resolvedOutcome || roll < 1 || roll > sides) {
+      console.warn("Phone dice response was invalid", response);
+      return;
+    }
+
+    handledPromptIdsRef.current.add(activePrompt.id);
+    completedPhoneCueIdsRef.current.add(currentCue.id);
+
+    const result = {
+      cueId: currentCue.id,
+      roll,
+      sides,
+      outcome: resolvedOutcome,
+      outcomeId: resolvedOutcome.id,
+      tier: resolvedOutcome.tier,
+      narration: resolvedOutcome.narration,
+      glory: resolvedOutcome.glory ?? 0,
+      playerId: response.player_id,
+      playerName:
+        activePrompt.targetPlayerNames?.[
+          activePrompt.targetPlayerIds?.indexOf(response.player_id)
+        ] ?? null,
+    };
+
+    multiplayer.awardPlayerGlory?.(
+      response.player_id,
+      resolvedOutcome.glory ?? 0,
+    );
+
+    Promise.resolve(multiplayer.clearPrompt?.(activePrompt.id))
+      .catch((error) => {
+        console.error("Unable to clear dice prompt", error);
+      })
+      .finally(() => {
+        handleDiceComplete(result);
+      });
+  }, [
+    currentCue,
+    isPhoneDice,
+    multiplayer?.activePrompt,
+    multiplayer?.awardPlayerGlory,
+    multiplayer?.chapterId,
+    multiplayer?.clearPrompt,
+    multiplayer?.guests,
+    multiplayer?.publishPrompt,
+    multiplayer?.responses,
+  ]);
+
+  useEffect(() => {
+    if (!isPhoneRelicReveal || !relicConditionMet(currentCue?.condition)) {
+      return;
+    }
+
+    const sourceResult = cueResults[currentCue?.playerSourceCueId];
+    const targetPlayerId = sourceResult?.playerId;
+    const targetPlayerName = sourceResult?.playerName ?? "A Guest";
+    const activePrompt = multiplayer?.activePrompt ?? null;
+
+    if (!targetPlayerId) {
+      console.warn(
+        `Relic cue ${currentCue?.id} could not find its source player`,
+      );
+      return;
+    }
+
+    if (!activePrompt || activePrompt.cueId !== currentCue.id) {
+      if (
+        completedPhoneCueIdsRef.current.has(currentCue.id) ||
+        publishingCueIdRef.current === currentCue.id
+      ) {
+        return;
+      }
+
+      const promptId =
+        globalThis.crypto?.randomUUID?.() ??
+        `${currentCue.id}-${Date.now()}`;
+
+      publishingCueIdRef.current = currentCue.id;
+
+      Promise.resolve(
+        multiplayer.publishPrompt?.({
+          id: promptId,
+          cueId: currentCue.id,
+          chapterId: multiplayer.chapterId,
+          type: "relicReveal",
+          status: "open",
+          targetPlayerIds: [targetPlayerId],
+          targetPlayerNames: [targetPlayerName],
+          payload: {
+            eyebrow: currentCue.eyebrow,
+            title: currentCue.title,
+            image: currentCue.image,
+            imageAlt: currentCue.imageAlt,
+            description: currentCue.description,
+            protects: currentCue.protects,
+            continueLabel: currentCue.continueLabel,
+            relicId: currentCue.relicId,
+          },
+          createdAt: new Date().toISOString(),
+        }),
+      )
+        .catch((error) => {
+          console.error("Unable to publish relic prompt", error);
+        })
+        .finally(() => {
+          if (publishingCueIdRef.current === currentCue.id) {
+            publishingCueIdRef.current = null;
+          }
+        });
+
+      return;
+    }
+
+    const response = (multiplayer?.responses ?? []).find(
+      (item) =>
+        item.prompt_id === activePrompt.id &&
+        item.response_key === "final" &&
+        item.player_id === targetPlayerId,
+    );
+
+    if (!response || handledPromptIdsRef.current.has(activePrompt.id)) {
+      return;
+    }
+
+    handledPromptIdsRef.current.add(activePrompt.id);
+    completedPhoneCueIdsRef.current.add(currentCue.id);
+
+    multiplayer.awardPlayerRelic?.(
+      targetPlayerId,
+      currentCue.relicId,
+    );
+
+    Promise.resolve(multiplayer.clearPrompt?.(activePrompt.id))
+      .catch((error) => {
+        console.error("Unable to clear relic prompt", error);
+      })
+      .finally(() => {
+        handleRelicRevealComplete({
+          cueId: currentCue.id,
+          relicId: currentCue.relicId,
+          awarded: true,
+          playerId: targetPlayerId,
+          playerName: targetPlayerName,
+        });
+      });
+  }, [
+    cueResults,
+    currentCue,
+    isPhoneRelicReveal,
+    multiplayer?.activePrompt,
+    multiplayer?.awardPlayerRelic,
+    multiplayer?.chapterId,
+    multiplayer?.clearPrompt,
+    multiplayer?.publishPrompt,
+    multiplayer?.responses,
   ]);
 
   useEffect(() => {
@@ -930,6 +1203,47 @@ function handleFillTheSilenceComplete(
         onAdvance={
           handleOutcomeComplete
         }
+      />
+    );
+  }
+
+  if (isPhoneDice) {
+    const targetName =
+      multiplayer?.activePrompt?.cueId === currentCue.id
+        ? multiplayer.activePrompt.targetPlayerNames?.[0]
+        : null;
+
+    return (
+      <section className="dice-cue">
+        <div className="dice-cue__card">
+          <header className="dice-cue__header">
+            <p className="dice-cue__eyebrow">
+              {currentCue.eyebrow ?? "A Moment of Chance"}
+            </p>
+            <h2 className="dice-cue__title">{currentCue.title}</h2>
+            <p className="dice-cue__prompt">
+              {targetName
+                ? `${targetName}, reach for the flame. Check your phone.`
+                : "Choosing the Guest who will roll..."}
+            </p>
+          </header>
+        </div>
+      </section>
+    );
+  }
+
+  if (isPhoneRelicReveal && relicConditionMet(currentCue.condition)) {
+    const sourceResult = cueResults[currentCue.playerSourceCueId];
+    const targetName = sourceResult?.playerName ?? "The chosen Guest";
+
+    return (
+      <RelicRevealCue
+        key={currentCue.id}
+        cue={{
+          ...currentCue,
+          continueLabel: `Waiting for ${targetName} to carry the light...`,
+        }}
+        disabled
       />
     );
   }

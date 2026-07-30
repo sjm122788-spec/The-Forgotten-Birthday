@@ -172,6 +172,7 @@ const chapterThree = {
     {
       id: "save-falling-flame",
       type: "dice",
+      audience: "selectedGuest",
 
       eyebrow: "A Moment of Chance",
       title: "Save the Falling Flame",
@@ -241,6 +242,8 @@ const chapterThree = {
     {
       id: "candle-of-first-light",
       type: "relicReveal",
+      audience: "resultPlayer",
+      playerSourceCueId: "save-falling-flame",
 
       relicId:
         "candle-of-first-light",

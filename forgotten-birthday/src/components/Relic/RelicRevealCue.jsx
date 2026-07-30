@@ -1,6 +1,6 @@
 import "./RelicRevealCue.css";
 
-function RelicRevealCue({ cue, onComplete }) {
+function RelicRevealCue({ cue, onComplete, disabled = false }) {
   const {
     eyebrow = "A Story Relic",
     title,
@@ -43,8 +43,9 @@ function RelicRevealCue({ cue, onComplete }) {
         <button
           type="button"
           className="relic-reveal-cue__button"
+          disabled={disabled}
           onClick={() =>
-            onComplete({
+            onComplete?.({
               cueId: cue.id,
               relicId: cue.relicId,
               awarded: true,
