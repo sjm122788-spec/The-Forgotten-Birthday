@@ -116,11 +116,12 @@ const chapterThree = {
     },
 
     {
-      id: "protect-a-flame",
-      type: "individualDecision",
+  id: "protect-a-flame",
+  type: "individualDecision",
+  audience: "selectedGuest",
 
-      eyebrow: "A Choice for One Guest",
-      title: "Which Flame Comes First?",
+  eyebrow: "A Choice for One Guest",
+  title: "Which Flame Comes First?",
 
       prompt:
         "All three candles will be tended. One Guest must choose which one receives protection first.",

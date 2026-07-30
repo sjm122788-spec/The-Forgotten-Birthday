@@ -129,7 +129,7 @@ export default function ObservationCue({
         </div>
 
         <aside className="observation-cue__clue-panel">
-          <h3>Things to Find</h3>
+          <h3>Fragments of Memory</h3>
 
           <ul className="observation-cue__clue-list">
             {clues.map((clue) => {
@@ -160,7 +160,7 @@ export default function ObservationCue({
           </ul>
 
           <p className="observation-cue__progress">
-            {foundClues.length} of {clues.length} found
+            {foundClues.length} of {clues.length} memories restored
           </p>
 
           {(allowEarlyFinish || allCluesFound) && (

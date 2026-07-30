@@ -86,14 +86,15 @@ const chapterFour = {
       ],
     },
 
-    {
-      id: "bakery-observation",
-      type: "observation",
+      {
+  id: "bakery-observation",
+  type: "observation",
+  audience: "allGuests",
 
       title: "The Bakery Remembers",
 
       instructions:
-        "Look carefully. Four small things still hold pieces of the Baker's memory.",
+  "The bakery remembers more than the Baker does.\n\nFour ordinary things still carry fragments of a forgotten celebration.\n\nFind them together.",
 
       image: observationFour,
 
@@ -110,8 +111,7 @@ const chapterFour = {
           id: "measuring-spoon",
           label:
             "A measuring spoon hidden in a flower pot",
-          hiddenLabel:
-            "Something among the flowers",
+          hiddenLabel: "Something carefully preserved",
           x: 18,
           y: 70,
           width: 9,
@@ -121,8 +121,7 @@ const chapterFour = {
           id: "flour-footprints",
           label:
             "Flour footprints",
-          hiddenLabel:
-            "A trail across the floor",
+          hiddenLabel: "Someone passed through here",
           x: 42,
           y: 78,
           width: 15,
@@ -132,8 +131,7 @@ const chapterFour = {
           id: "golden-rolling-pin",
           label:
             "A rolling pin repaired with gold",
-          hiddenLabel:
-            "Something mended",
+          hiddenLabel: "Something lovingly repaired",
           x: 70,
           y: 56,
           width: 13,
@@ -143,8 +141,7 @@ const chapterFour = {
           id: "handwritten-note",
           label:
             "A handwritten note beneath a cooling rack",
-          hiddenLabel:
-            "Something tucked away",
+          hiddenLabel: "A forgotten reminder",
           x: 83,
           y: 74,
           width: 11,
@@ -157,12 +154,13 @@ const chapterFour = {
       id: "memory-returning",
       type: "narration",
       text:
-        "With every clue, the bakery seemed to remember a little more. The Baker placed an empty bowl on the table.",
+        "With every memory returned, the bakery grew warmer.\n\nThe Celebration Baker smiled, placed an empty bowl upon the table, and rested a wooden spoon across its rim.\n\n\"I remember the ingredients now,\" the Baker whispered.\n\n\"But I still need someone to tell me what kind of birthday this should become.\"",
     },
 
-    {
-      id: "stir-the-batter",
-      type: "individualDecision",
+  {
+  id: "stir-the-batter",
+  type: "individualDecision",
+  audience: "selectedGuest",
 
       eyebrow:
         "A Choice for One Guest",
