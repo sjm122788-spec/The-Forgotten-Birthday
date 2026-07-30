@@ -67,7 +67,7 @@ const chapterThree = {
         "Four candles have gone dark. The surviving flames remember the order in which they once burned.",
 
       instructions:
-        "Discuss the clues together, then select the candles in the correct order.",
+        "Some of these candles have waited far longer than others. Look closely at how low they've burned — the one that has waited longest speaks first.",
 
       successLabel:
         "The pattern catches and the hall brightens.",
@@ -77,34 +77,26 @@ const chapterThree = {
 
       glory: 3,
 
-      items: [
-        {
-          id: "first-light",
-          label: "First Light",
-          symbol: "🕯️",
-          hint:
-            "The smallest flame begins the pattern.",
-        },
-        {
-          id: "steady-flame",
-          label: "Steady Flame",
-          symbol: "🔥",
-          hint:
-            "It follows the first and never flickers.",
-        },
+      candles: [
         {
           id: "twin-flame",
-          label: "Twin Flame",
-          symbol: "✨",
-          hint:
-            "It comes after the steady light.",
+          fragment: "doubles what the heart still hopes for,",
+          waxHeight: 0.65,
+        },
+        {
+          id: "first-light",
+          fragment: "The first flame you ever wished by,",
+          waxHeight: 0.15,
         },
         {
           id: "blue-flame",
-          label: "Blue Flame",
-          symbol: "💠",
-          hint:
-            "The rarest flame completes the pattern.",
+          fragment: "and burns bluest when it's finally seen.",
+          waxHeight: 0.9,
+        },
+        {
+          id: "steady-flame",
+          fragment: "steadies every wish that follows,",
+          waxHeight: 0.4,
         },
       ],
 

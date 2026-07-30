@@ -6,22 +6,24 @@
   place-items: center;
   padding: 2rem;
   overflow-y: auto;
-  color: #f8edda;
+  color: #f3ead9;
   background:
-    radial-gradient(circle at 50% 34%, rgba(255, 191, 92, 0.18), transparent 34%),
-    rgba(9, 7, 8, 0.92);
+    radial-gradient(circle at 50% 28%, rgba(255, 189, 107, 0.14), transparent 46%),
+    radial-gradient(circle at 15% 85%, rgba(120, 140, 168, 0.12), transparent 55%),
+    radial-gradient(circle at 85% 80%, rgba(120, 140, 168, 0.12), transparent 55%),
+    #0b0c11;
   box-sizing: border-box;
 }
 
 .cooperative-puzzle-cue__card {
-  width: min(900px, 94vw);
+  width: min(920px, 94vw);
   padding: clamp(1.5rem, 4vw, 3rem);
-  border: 1px solid rgba(255, 229, 188, 0.2);
+  border: 1px solid rgba(255, 229, 188, 0.16);
   border-radius: 24px;
-  background: rgba(24, 17, 20, 0.95);
+  background: rgba(17, 16, 22, 0.94);
   box-shadow:
-    0 28px 80px rgba(0, 0, 0, 0.52),
-    inset 0 0 60px rgba(255, 214, 153, 0.03);
+    0 28px 90px rgba(0, 0, 0, 0.58),
+    inset 0 0 70px rgba(255, 214, 153, 0.03);
 }
 
 .cooperative-puzzle-cue__header {
@@ -35,108 +37,208 @@
   font-size: 0.78rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  opacity: 0.7;
+  opacity: 0.68;
 }
 
 .cooperative-puzzle-cue__title {
   margin: 0;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(2rem, 5vw, 3.4rem);
+  font-size: clamp(2rem, 5vw, 3.2rem);
   line-height: 1.05;
+  color: #fbead0;
 }
 
 .cooperative-puzzle-cue__prompt {
-  margin: 1.35rem auto 0;
+  margin: 1.25rem auto 0;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(1.05rem, 2.4vw, 1.3rem);
+  font-size: clamp(1.02rem, 2.2vw, 1.25rem);
   line-height: 1.6;
 }
 
 .cooperative-puzzle-cue__instructions {
-  margin: 0.7rem 0 0;
-  opacity: 0.68;
+  margin: 0.7rem auto 0;
+  max-width: 560px;
+  font-size: 0.94rem;
+  line-height: 1.55;
+  opacity: 0.66;
 }
 
-.cooperative-puzzle-cue__sequence,
-.cooperative-puzzle-cue__items {
+/* The forming sentence — this is the only feedback the player gets */
+
+.cooperative-puzzle-cue__sentence {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 0.65rem;
+  margin: 1.85rem auto 0;
+  max-width: 640px;
+  min-height: 2.4rem;
+  text-align: center;
+}
+
+.cooperative-puzzle-cue__sentence-piece {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  font-style: italic;
+  color: rgba(255, 240, 219, 0.32);
+}
+
+.cooperative-puzzle-cue__sentence-piece--filled {
+  color: rgba(255, 231, 190, 0.94);
+}
+
+.cooperative-puzzle-cue__sentence-piece--tangled {
+  color: rgba(255, 172, 138, 0.85);
+  animation: candle-keeper-tangle 420ms ease;
+}
+
+/* Numbered slots showing where the next candle will land */
+
+.cooperative-puzzle-cue__row {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.8rem;
-}
-
-.cooperative-puzzle-cue__sequence {
-  margin: 2rem 0 1.5rem;
+  gap: 0.6rem;
+  width: min(100%, 480px);
+  margin: 1.4rem auto 0;
 }
 
 .cooperative-puzzle-cue__slot {
   display: grid;
-  min-height: 110px;
   place-items: center;
-  padding: 0.8rem;
-  border: 1px dashed rgba(255, 227, 180, 0.28);
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.025);
-  text-align: center;
+  min-height: 36px;
+  border-bottom: 1px solid rgba(255, 229, 188, 0.22);
 }
 
-.cooperative-puzzle-cue__slot--filled {
-  border-style: solid;
-  border-color: rgba(255, 214, 132, 0.56);
-  background: rgba(255, 203, 103, 0.08);
-  box-shadow: 0 0 24px rgba(255, 192, 88, 0.08);
+.cooperative-puzzle-cue__slot-index {
+  font-size: 0.78rem;
+  opacity: 0.4;
 }
 
-.cooperative-puzzle-cue__slot-symbol,
-.cooperative-puzzle-cue__item-flame {
-  font-size: 2rem;
-  line-height: 1;
+.cooperative-puzzle-cue__slot--filled .cooperative-puzzle-cue__slot-index {
+  opacity: 0;
 }
 
-.cooperative-puzzle-cue__item {
-  display: grid;
-  gap: 0.35rem;
-  place-items: center;
-  min-height: 130px;
-  padding: 1rem;
-  border: 1px solid rgba(255, 229, 188, 0.18);
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.025);
-  color: inherit;
-  font: inherit;
+/* The shelf of candles to choose from */
+
+.cooperative-puzzle-cue__shelf {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 1.6rem;
+  margin: 2.4rem auto 0;
+  padding: 1rem 0.5rem 0;
+}
+
+.cooperative-puzzle-cue__candle {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  width: 74px;
+  height: 190px;
+  border: none;
+  background: transparent;
   cursor: pointer;
+  padding: 0;
 }
 
-.cooperative-puzzle-cue__item:hover:not(:disabled) {
-  transform: translateY(-2px);
-  border-color: rgba(255, 224, 167, 0.5);
-  background: rgba(255, 215, 146, 0.06);
+.cooperative-puzzle-cue__candle:disabled {
+  cursor: default;
 }
 
-.cooperative-puzzle-cue__item--selected {
-  opacity: 0.36;
+.cooperative-puzzle-cue__candle--selected {
+  opacity: 0.3;
 }
 
-.cooperative-puzzle-cue__item-label {
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 1.05rem;
-  font-weight: 700;
+.cooperative-puzzle-cue__glow {
+  position: absolute;
+  bottom: calc(30px + 90px * var(--wax-height, 0.5));
+  left: 50%;
+  width: 70px;
+  height: 70px;
+  transform: translate(-50%, -20%);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 200, 120, calc(0.16 + var(--wax-height, 0.5) * 0.22)),
+    transparent 70%
+  );
+  filter: blur(6px);
+  pointer-events: none;
 }
 
-.cooperative-puzzle-cue__item-hint {
-  font-size: 0.8rem;
-  line-height: 1.35;
-  opacity: 0.62;
+.cooperative-puzzle-cue__flame {
+  position: absolute;
+  bottom: calc(34px + 90px * var(--wax-height, 0.5));
+  width: 9px;
+  height: 18px;
+  border-radius: 50% 50% 50% 50% / 65% 65% 35% 35%;
+  background: linear-gradient(
+    180deg,
+    #fff3d0 0%,
+    #ffb84d calc(45% + 10% * var(--wax-height, 0.5)),
+    #d9611f 100%
+  );
+  opacity: calc(0.55 + var(--wax-height, 0.5) * 0.4);
+  transform-origin: bottom center;
+  animation: candle-keeper-flicker 2.6s ease-in-out infinite;
+  animation-delay: calc(var(--wax-height, 0.5) * -1.6s);
+}
+
+.cooperative-puzzle-cue__wick {
+  position: absolute;
+  bottom: calc(30px + 90px * var(--wax-height, 0.5));
+  width: 2px;
+  height: 6px;
+  background: #2c2622;
+}
+
+.cooperative-puzzle-cue__body {
+  position: relative;
+  z-index: 1;
+  width: 32px;
+  height: calc(30px + 90px * var(--wax-height, 0.5));
+  border-radius: 4px 4px 2px 2px;
+  background: linear-gradient(
+    180deg,
+    #fff6e6 0%,
+    #f4dfb6 55%,
+    #e3c896 100%
+  );
+  box-shadow:
+    inset -4px 0 6px rgba(120, 90, 50, 0.22),
+    inset 3px 0 4px rgba(255, 255, 255, 0.5);
+}
+
+.cooperative-puzzle-cue__pool {
+  width: calc(40px + (1 - var(--wax-height, 0.5)) * 46px);
+  height: calc(6px + (1 - var(--wax-height, 0.5)) * 8px);
+  margin-top: -3px;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse,
+    rgba(244, 223, 182, 0.9),
+    rgba(244, 223, 182, 0.15) 75%,
+    transparent
+  );
+}
+
+.cooperative-puzzle-cue__candle:hover:not(:disabled) .cooperative-puzzle-cue__body {
+  filter: brightness(1.08);
 }
 
 .cooperative-puzzle-cue__status {
   min-height: 82px;
-  margin-top: 1.4rem;
+  margin-top: 1.6rem;
   text-align: center;
 }
 
 .cooperative-puzzle-cue__success {
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 1.35rem;
+  font-size: 1.3rem;
+  color: #f9ddb0;
 }
 
 .cooperative-puzzle-cue__action {
@@ -152,13 +254,76 @@
   cursor: pointer;
 }
 
+.cooperative-puzzle-cue__error {
+  text-align: center;
+}
+
+@keyframes candle-keeper-flicker {
+  0%,
+  100% {
+    transform: scaleY(1) scaleX(1) rotate(0deg);
+  }
+
+  30% {
+    transform: scaleY(1.06) scaleX(0.94) rotate(-1.5deg);
+  }
+
+  55% {
+    transform: scaleY(0.94) scaleX(1.04) rotate(1deg);
+  }
+
+  80% {
+    transform: scaleY(1.03) scaleX(0.97) rotate(-0.5deg);
+  }
+}
+
+@keyframes candle-keeper-tangle {
+  0% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-2px);
+  }
+
+  50% {
+    transform: translateX(2px);
+  }
+
+  75% {
+    transform: translateX(-1px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
 @media (max-width: 760px) {
   .cooperative-puzzle-cue {
     padding: 1rem;
   }
 
-  .cooperative-puzzle-cue__sequence,
-  .cooperative-puzzle-cue__items {
+  .cooperative-puzzle-cue__row {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cooperative-puzzle-cue__shelf {
+    gap: 1.1rem;
+  }
+
+  .cooperative-puzzle-cue__candle {
+    width: 60px;
+    height: 160px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cooperative-puzzle-cue__flame {
+    animation: none;
+  }
+
+  .cooperative-puzzle-cue__sentence-piece--tangled {
+    animation: none;
   }
 }
