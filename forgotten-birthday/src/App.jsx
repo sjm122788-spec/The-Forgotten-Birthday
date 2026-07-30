@@ -449,36 +449,61 @@ function App() {
   }, [multiplayerSession?.id]);
 
   useEffect(() => {
-    const activePromptId = multiplayerSession?.game_state?.activePrompt?.id;
+  const sessionId = multiplayerSession?.id;
+  const activePromptId =
+    multiplayerSession?.game_state?.activePrompt?.id;
 
-    if (multiplayerRole !== "host" || !multiplayerSession?.id || !activePromptId) {
-      setActivePromptResponses([]);
+  if (
+    multiplayerRole !== "host" ||
+    !sessionId ||
+    !activePromptId
+  ) {
+    setActivePromptResponses([]);
+    return undefined;
+  }
+
+  let cancelled = false;
+  let requestInFlight = false;
+
+  async function refreshPromptResponses() {
+    if (requestInFlight) {
       return;
     }
 
-    let cancelled = false;
+    requestInFlight = true;
 
-    void getPromptResponses({
-      sessionId: multiplayerSession.id,
-      promptId: activePromptId,
-    })
-      .then((responses) => {
-        if (!cancelled) {
-          setActivePromptResponses(responses);
-        }
-      })
-      .catch((error) => {
-        console.error("Unable to load phone responses", error);
+    try {
+      const responses = await getPromptResponses({
+        sessionId,
+        promptId: activePromptId,
       });
 
-    return () => {
-      cancelled = true;
-    };
-  }, [
-    multiplayerRole,
-    multiplayerSession?.id,
-    multiplayerSession?.game_state?.activePrompt?.id,
-  ]);
+      if (!cancelled) {
+        setActivePromptResponses(responses);
+      }
+    } catch (error) {
+      console.error("Unable to load phone responses", error);
+    } finally {
+      requestInFlight = false;
+    }
+  }
+
+  void refreshPromptResponses();
+
+  const intervalId = window.setInterval(
+    refreshPromptResponses,
+    1000,
+  );
+
+  return () => {
+    cancelled = true;
+    window.clearInterval(intervalId);
+  };
+}, [
+  multiplayerRole,
+  multiplayerSession?.id,
+  multiplayerSession?.game_state?.activePrompt?.id,
+]);
 
   useEffect(() => {
     if (multiplayerRole !== "host" || !multiplayerSession?.id || multiplayerSession.status !== "playing") {
@@ -763,7 +788,10 @@ function App() {
     { game_state: nextGameState },
     storedIdentity?.hostToken,
   );
-
+console.log(
+  "Published activePrompt:",
+  updatedSession.game_state?.activePrompt
+);
   setMultiplayerSession(updatedSession);
   setActivePromptResponses([]);
 
@@ -799,7 +827,61 @@ function App() {
 
   return updatedSession;
 }
+useEffect(() => {
+  if (
+    multiplayerRole !== "guest" ||
+    !multiplayerSession?.id
+  ) {
+    return undefined;
+  }
 
+  let cancelled = false;
+  let requestInFlight = false;
+
+  async function refreshGuestSession() {
+    if (requestInFlight) {
+      return;
+    }
+
+    requestInFlight = true;
+
+    try {
+      const freshSession = await getGameSession(multiplayerSession.id);
+
+      if (!cancelled && freshSession) {
+        setMultiplayerSession((currentSession) => {
+          const currentUpdatedAt = currentSession?.updated_at ?? "";
+          const freshUpdatedAt = freshSession.updated_at ?? "";
+
+          if (
+            currentSession?.id === freshSession.id &&
+            currentUpdatedAt === freshUpdatedAt
+          ) {
+            return currentSession;
+          }
+
+          return freshSession;
+        });
+      }
+    } catch (error) {
+      console.error("Unable to refresh guest session", error);
+    } finally {
+      requestInFlight = false;
+    }
+  }
+
+  void refreshGuestSession();
+
+  const intervalId = window.setInterval(
+    refreshGuestSession,
+    1000,
+  );
+
+  return () => {
+    cancelled = true;
+    window.clearInterval(intervalId);
+  };
+}, [multiplayerRole, multiplayerSession?.id]);
   async function handleSubmitGuestPrompt({
     promptId,
     cueId,
