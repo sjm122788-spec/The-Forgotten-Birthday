@@ -11,6 +11,7 @@ import ChapterScene from "./components/Chapter/ChapterScene";
 import QuietAfter from "./components/QuietAfter/QuietAfter";
 import FinaleScene from "./components/Finale/FinaleScene";
 import Prologue from "./components/prologue/Prologue";
+import BackgroundMusic from "./components/BackgroundMusic/BackgroundMusic";
 import RoleSelect from "./components/Multiplayer/RoleSelect";
 import HostLobby from "./components/Multiplayer/HostLobby";
 import GuestJoin from "./components/Multiplayer/GuestJoin";
@@ -1381,6 +1382,7 @@ useEffect(() => {
 
   return (
     <div className="app">
+      <BackgroundMusic screen={screen} selectedChapterId={selectedChapterId} />
       {renderScreen()}
 
       {transitionChapter && (
