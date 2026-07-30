@@ -224,57 +224,47 @@ function RhythmChallengeCue({ cue, onComplete }) {
           aria-label="The parade's instruments"
         >
           {displaySteps.map((step, stepIndex) => {
-            const isRevealing =
-              phase === "revealing" &&
-              activePrefix[revealIndex] === step.id;
+  const isRevealing =
+    phase === "revealing" &&
+    activePrefix[revealIndex] === step.id;
 
-            const tappedPosition = tappedIds.indexOf(step.id);
-            const isConfirmed =
-              phase === "repeating" && tappedPosition !== -1;
+  const isDisabled = phase !== "repeating";
 
-            const isDisabled = phase !== "repeating" || isConfirmed;
+  return (
+    <button
+      key={step.id}
+      type="button"
+      className={[
+        "rhythm-challenge-cue__pad",
+        `rhythm-challenge-cue__pad--${stepIndex % 4}`,
+        isRevealing
+          ? "rhythm-challenge-cue__pad--revealing"
+          : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+      onClick={() => handlePadTap(step.id)}
+      disabled={isDisabled}
+      aria-label={step.label}
+    >
+      <span
+        className="rhythm-challenge-cue__pad-ring"
+        aria-hidden="true"
+      />
 
-            return (
-              <button
-                key={step.id}
-                type="button"
-                className={[
-                  "rhythm-challenge-cue__pad",
-                  `rhythm-challenge-cue__pad--${stepIndex % 4}`,
-                  isRevealing
-                    ? "rhythm-challenge-cue__pad--revealing"
-                    : "",
-                  isConfirmed
-                    ? "rhythm-challenge-cue__pad--confirmed"
-                    : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-                onClick={() => handlePadTap(step.id)}
-                disabled={isDisabled}
-                aria-label={step.label}
-              >
-                <span className="rhythm-challenge-cue__pad-ring" aria-hidden="true" />
-                <span
-                  className="rhythm-challenge-cue__pad-symbol"
-                  aria-hidden="true"
-                >
-                  {step.symbol}
-                </span>
-                <span className="rhythm-challenge-cue__pad-label">
-                  {step.label}
-                </span>
-                {isConfirmed && (
-                  <span
-                    className="rhythm-challenge-cue__pad-check"
-                    aria-hidden="true"
-                  >
-                    ✓
-                  </span>
-                )}
-              </button>
-            );
-          })}
+      <span
+        className="rhythm-challenge-cue__pad-symbol"
+        aria-hidden="true"
+      >
+        {step.symbol}
+      </span>
+
+      <span className="rhythm-challenge-cue__pad-label">
+        {step.label}
+      </span>
+    </button>
+  );
+})}
         </div>
 
         <div

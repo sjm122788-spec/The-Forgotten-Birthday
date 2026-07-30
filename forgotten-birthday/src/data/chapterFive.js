@@ -89,8 +89,9 @@ const chapterFive = {
     },
 
     {
-      id: "parade-rhythm",
-      type: "rhythmChallenge",
+  id: "parade-rhythm",
+  type: "rhythmChallenge",
+  audience: "host",
 
       eyebrow: "A Shared Rhythm",
 
@@ -163,9 +164,10 @@ const chapterFive = {
         "One piece of frozen confetti finally fell. Then another. The Parade Marshal lifted the baton.",
     },
 
-    {
-      id: "escaped-balloon",
-      type: "individualDecision",
+      {
+  id: "escaped-balloon",
+  type: "individualDecision",
+  audience: "selectedGuest",
 
       eyebrow:
         "A Choice for One Guest",
@@ -212,8 +214,9 @@ const chapterFive = {
     },
 
     {
-      id: "laughter-balloon",
-      type: "relicReveal",
+  id: "laughter-balloon",
+  type: "relicReveal",
+  audience: "resultPlayer",
 
       relicId:
         "laughter-balloon",
