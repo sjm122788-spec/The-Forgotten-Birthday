@@ -8,21 +8,42 @@
   overflow-y: auto;
   color: #f9edd9;
   background:
-    radial-gradient(circle at 50% 40%, rgba(255, 181, 74, 0.18), transparent 34%),
-    rgba(10, 7, 8, 0.92);
+    radial-gradient(circle at 50% 32%, rgba(255, 181, 74, 0.16), transparent 40%),
+    radial-gradient(circle at 15% 88%, rgba(122, 173, 168, 0.08), transparent 55%),
+    radial-gradient(circle at 85% 84%, rgba(214, 156, 214, 0.07), transparent 55%),
+    #0b0709;
   box-sizing: border-box;
 }
 
 .rhythm-challenge-cue__card {
-  width: min(760px, 92vw);
-  padding: clamp(1.5rem, 4vw, 3rem);
-  border: 1px solid rgba(255, 231, 190, 0.2);
-  border-radius: 24px;
-  background: rgba(27, 18, 22, 0.95);
+  position: relative;
+  width: min(780px, 92vw);
+  padding: clamp(1.6rem, 4vw, 3rem);
+  border: 1px solid rgba(255, 231, 190, 0.18);
+  border-radius: 26px;
+  background: linear-gradient(180deg, rgba(32, 21, 25, 0.97), rgba(18, 13, 16, 0.98));
   box-shadow:
-    0 28px 80px rgba(0, 0, 0, 0.52),
-    inset 0 0 60px rgba(255, 205, 128, 0.03);
+    0 30px 90px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 240, 219, 0.06);
   text-align: center;
+  overflow: hidden;
+}
+
+.rhythm-challenge-cue__card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(214, 92, 92, 0.55) 0 22px,
+    rgba(224, 178, 96, 0.55) 22px 44px,
+    rgba(122, 173, 168, 0.55) 44px 66px,
+    rgba(214, 156, 214, 0.55) 66px 88px
+  );
+  opacity: 0.55;
 }
 
 .rhythm-challenge-cue__eyebrow {
@@ -36,60 +57,199 @@
 .rhythm-challenge-cue__title {
   margin: 0;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-size: clamp(2rem, 5vw, 3.4rem);
   line-height: 1.05;
+  color: #fbead0;
 }
 
 .rhythm-challenge-cue__prompt {
   max-width: 620px;
-  margin: 1.4rem auto 0;
+  margin: 1.35rem auto 0;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(1.05rem, 2.4vw, 1.3rem);
+  font-size: clamp(1.02rem, 2.2vw, 1.25rem);
   line-height: 1.6;
 }
 
 .rhythm-challenge-cue__instructions {
-  margin: 0.7rem 0 0;
-  opacity: 0.68;
+  margin: 0.7rem auto 0;
+  max-width: 520px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  opacity: 0.62;
 }
 
-.rhythm-challenge-cue__pulse {
-  display: grid;
-  width: clamp(130px, 22vw, 180px);
-  aspect-ratio: 1;
-  margin: 2rem auto 1rem;
-  place-items: center;
-  border: 1px solid rgba(255, 224, 172, 0.3);
+/* Round progress pips */
+
+.rhythm-challenge-cue__pips {
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  margin: 1.4rem 0 0;
+}
+
+.rhythm-challenge-cue__pip {
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
-  background:
-    radial-gradient(
-      circle,
-      rgba(255, 209, 130, 0.22),
-      rgba(255, 166, 73, 0.08) 48%,
-      transparent 72%
-    );
+  background: rgba(255, 240, 219, 0.16);
+  transition: background 200ms ease, transform 200ms ease;
+}
+
+.rhythm-challenge-cue__pip--filled {
+  background: rgba(244, 205, 139, 0.85);
+}
+
+.rhythm-challenge-cue__pip--active {
+  background: rgba(255, 224, 167, 0.95);
+  transform: scale(1.35);
+  box-shadow: 0 0 10px rgba(255, 205, 127, 0.55);
+}
+
+/* Instrument medallions */
+
+.rhythm-challenge-cue__pads {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  width: min(100%, 560px);
+  margin: 2rem auto 0.4rem;
+}
+
+.rhythm-challenge-cue__pad {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  aspect-ratio: 1;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.rhythm-challenge-cue__pad::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(var(--pad-accent, 255, 210, 130), 0.34);
+  background: radial-gradient(
+    circle at 50% 38%,
+    rgba(var(--pad-accent, 255, 210, 130), 0.16),
+    rgba(255, 255, 255, 0.02) 70%
+  );
   box-shadow:
-    0 0 42px rgba(255, 177, 77, 0.12),
-    inset 0 0 35px rgba(255, 233, 194, 0.04);
-  font-size: clamp(3rem, 8vw, 5rem);
+    0 10px 22px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition:
+    border-color 180ms ease,
+    box-shadow 220ms ease,
+    background 220ms ease;
+}
+
+.rhythm-challenge-cue__pad:disabled {
+  cursor: default;
+}
+
+.rhythm-challenge-cue__pad:hover:not(:disabled)::after {
+  border-color: rgba(var(--pad-accent, 255, 210, 130), 0.6);
+}
+
+.rhythm-challenge-cue__pad:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.rhythm-challenge-cue__pad--0 {
+  --pad-accent: 214, 92, 92;
+}
+
+.rhythm-challenge-cue__pad--1 {
+  --pad-accent: 224, 178, 96;
+}
+
+.rhythm-challenge-cue__pad--2 {
+  --pad-accent: 122, 173, 168;
+}
+
+.rhythm-challenge-cue__pad--3 {
+  --pad-accent: 214, 156, 214;
+}
+
+.rhythm-challenge-cue__pad-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid rgba(var(--pad-accent, 255, 210, 130), 0.6);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.rhythm-challenge-cue__pad--revealing::after {
+  border-color: rgba(var(--pad-accent, 255, 210, 130), 0.95);
+  background: radial-gradient(
+    circle at 50% 38%,
+    rgba(var(--pad-accent, 255, 210, 130), 0.36),
+    rgba(255, 255, 255, 0.03) 72%
+  );
+  box-shadow:
+    0 0 30px rgba(var(--pad-accent, 255, 210, 130), 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.rhythm-challenge-cue__pad--revealing .rhythm-challenge-cue__pad-ring {
+  animation: rhythm-ring-ripple 650ms ease-out;
+}
+
+.rhythm-challenge-cue__pad--confirmed::after {
+  border-color: rgba(var(--pad-accent, 255, 210, 130), 0.4);
+  opacity: 0.55;
+}
+
+.rhythm-challenge-cue__pad--confirmed .rhythm-challenge-cue__pad-symbol,
+.rhythm-challenge-cue__pad--confirmed .rhythm-challenge-cue__pad-label {
+  opacity: 0.5;
+}
+
+.rhythm-challenge-cue__pad-symbol {
+  position: relative;
+  font-size: clamp(1.6rem, 4vw, 2.1rem);
+  line-height: 1;
+}
+
+.rhythm-challenge-cue__pad-label {
+  position: relative;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
   opacity: 0.72;
+}
+
+.rhythm-challenge-cue__pad-check {
+  position: absolute;
+  top: 6%;
+  right: 10%;
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(122, 173, 168, 0.9);
+  color: #0b0709;
+  font-size: 0.75rem;
+  font-weight: 800;
 }
 
 .rhythm-challenge-cue__progress {
   min-height: 2rem;
-  opacity: 0.78;
+  margin-top: 1.3rem;
+  opacity: 0.82;
 }
 
 .rhythm-challenge-cue__actions {
-  margin-top: 1.2rem;
-}
-
-.rhythm-challenge-cue__button,
-.rhythm-challenge-cue__tap {
-  color: inherit;
-  font: inherit;
-  font-weight: 700;
-  cursor: pointer;
+  margin-top: 1rem;
 }
 
 .rhythm-challenge-cue__button {
@@ -98,34 +258,32 @@
   border: 1px solid rgba(255, 231, 190, 0.5);
   border-radius: 999px;
   background: rgba(255, 212, 144, 0.12);
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 160ms ease, transform 160ms ease;
 }
 
 .rhythm-challenge-cue__button:hover {
   background: rgba(255, 212, 144, 0.2);
+  transform: translateY(-1px);
 }
 
-.rhythm-challenge-cue__tap {
-  width: clamp(145px, 25vw, 190px);
-  aspect-ratio: 1;
-  border: 2px solid rgba(255, 229, 180, 0.62);
-  border-radius: 50%;
-  background:
-    radial-gradient(
-      circle,
-      rgba(255, 203, 120, 0.25),
-      rgba(255, 167, 74, 0.12) 55%,
-      rgba(255, 167, 74, 0.04)
-    );
-  box-shadow:
-    0 14px 30px rgba(0, 0, 0, 0.3),
-    0 0 38px rgba(255, 177, 77, 0.12);
-  font-size: 1.3rem;
-  user-select: none;
-  touch-action: manipulation;
+.rhythm-challenge-cue__error {
+  text-align: center;
 }
 
-.rhythm-challenge-cue__tap:active {
-  transform: scale(0.95);
+@keyframes rhythm-ring-ripple {
+  0% {
+    opacity: 0.85;
+    transform: scale(0.85);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.35);
+  }
 }
 
 @media (max-width: 640px) {
@@ -134,7 +292,25 @@
   }
 
   .rhythm-challenge-cue__card {
-    padding: 1.35rem;
-    border-radius: 18px;
+    padding: 1.4rem;
+    border-radius: 20px;
+  }
+
+  .rhythm-challenge-cue__pads {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.2rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rhythm-challenge-cue__pad,
+  .rhythm-challenge-cue__pad::after,
+  .rhythm-challenge-cue__pip,
+  .rhythm-challenge-cue__button {
+    transition: none;
+  }
+
+  .rhythm-challenge-cue__pad-ring {
+    animation: none;
   }
 }

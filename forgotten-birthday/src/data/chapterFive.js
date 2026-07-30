@@ -101,28 +101,51 @@ const chapterFive = {
         "The Parade Marshal raises the silver baton. The Guests must return the rhythm together.",
 
       instructions:
-        "Listen once, then tap the pattern back. The parade will wait as long as it needs to.",
+        "Watch the call, then answer it back. Each time you succeed, the Marshal's call grows a little longer.",
 
-      pattern: [
-        0,
-        430,
-        860,
-        1410,
+      steps: [
+        {
+          id: "drum",
+          label: "Drum",
+          symbol: "🥁",
+        },
+        {
+          id: "brass",
+          label: "Brass",
+          symbol: "🎺",
+        },
+        {
+          id: "banner",
+          label: "Banner",
+          symbol: "🚩",
+        },
+        {
+          id: "feet",
+          label: "Marching Feet",
+          symbol: "👣",
+        },
       ],
 
-      tolerance: 260,
+      sequence: [
+        "drum",
+        "brass",
+        "banner",
+        "drum",
+        "banner",
+        "feet",
+      ],
 
-      previewLabel:
-        "Hear the Parade Rhythm",
+      watchLabel:
+        "Watch the Call",
 
       startLabel:
         "We Are Ready",
 
-      tapLabel:
-        "Tap",
+      nextCallLabel:
+        "Hear the Next Call",
 
       retryLabel:
-        "Try the Rhythm Again",
+        "Watch From the Beginning",
 
       continueLabel:
         "Raise the Baton",
