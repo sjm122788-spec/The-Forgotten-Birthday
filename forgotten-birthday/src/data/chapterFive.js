@@ -155,6 +155,7 @@ const chapterFive = {
         "The rhythm passes from drum to brass, from brass to banner, and from banner to every waiting foot in the square.",
 
       glory: 4,
+      awardGloryTo: "allGuests",
     },
 
     {
@@ -183,6 +184,8 @@ const chapterFive = {
 
       confirmLabel:
         "Choose Its Path",
+
+      glory: 1,
 
       options: [
         {
@@ -217,6 +220,7 @@ const chapterFive = {
   id: "laughter-balloon",
   type: "relicReveal",
   audience: "resultPlayer",
+  playerSourceCueId: "escaped-balloon",
 
       relicId:
         "laughter-balloon",

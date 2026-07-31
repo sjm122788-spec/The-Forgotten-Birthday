@@ -194,8 +194,6 @@ const chapterSix = {
 
       continueLabel:
         "Remember Their Meaning",
-
-      glory: 4,
     },
 
     {

@@ -209,6 +209,9 @@ const chapterNine = {
       audience:
         "host",
 
+      awardGloryTo:
+        "allGuests",
+
       eyebrow:
         "A Difficult Choice",
 

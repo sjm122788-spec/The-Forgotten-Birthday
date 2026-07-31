@@ -108,6 +108,8 @@ atmosphere: [
 
       confirmLabel: "Choose Its Path",
 
+      glory: 1,
+
       options: [
         {
           id: "restore-it",
@@ -146,6 +148,7 @@ atmosphere: [
     {
       id: "catch-final-wish",
       type: "dice",
+      audience: "selectedGuest",
 
       eyebrow: "The First Roll",
       title: "Catch the Wish",

@@ -158,6 +158,22 @@ function ChapterDirector({
     });
   }
 
+  function awardAllGuestsGloryOnce(cueId, amount) {
+    if (
+      !cueId ||
+      !amount ||
+      awardedAllGuestCueIdsRef.current.has(cueId)
+    ) {
+      return;
+    }
+
+    awardedAllGuestCueIdsRef.current.add(cueId);
+
+    (multiplayer?.guests ?? []).forEach((guest) => {
+      multiplayer?.awardPlayerGlory?.(guest.id, amount);
+    });
+  }
+
   useEffect(() => {
     setCurrentCueIndex(0);
     setDecisionOutcome(null);
@@ -1440,6 +1456,15 @@ function handleFillTheSilenceComplete(
     );
 
     if (
+      currentCue.awardGloryTo === "allGuests"
+    ) {
+      awardAllGuestsGloryOnce(
+        currentCue.id,
+        result.glory ?? 0,
+      );
+    }
+
+    if (
       result.visualState
     ) {
       onVisualStateChange?.(
@@ -1520,14 +1545,12 @@ function handleFillTheSilenceComplete(
     );
 
     if (
-      currentCue.awardGloryTo === "allGuests" &&
-      !awardedAllGuestCueIdsRef.current.has(currentCue.id)
+      currentCue.awardGloryTo === "allGuests"
     ) {
-      awardedAllGuestCueIdsRef.current.add(currentCue.id);
-
-      (multiplayer?.guests ?? []).forEach((guest) => {
-        multiplayer?.awardPlayerGlory?.(guest.id, result.glory ?? 0);
-      });
+      awardAllGuestsGloryOnce(
+        currentCue.id,
+        result.glory ?? 0,
+      );
     }
 
     if (
@@ -1568,6 +1591,15 @@ function handleFillTheSilenceComplete(
       currentCue.id,
       result,
     );
+
+    if (
+      currentCue.awardGloryTo === "allGuests"
+    ) {
+      awardAllGuestsGloryOnce(
+        currentCue.id,
+        result.glory ?? 0,
+      );
+    }
 
     if (
       result.narration
@@ -1675,6 +1707,15 @@ function handleFillTheSilenceComplete(
       currentCue.id,
       result,
     );
+
+    if (
+      currentCue.awardGloryTo === "allGuests"
+    ) {
+      awardAllGuestsGloryOnce(
+        currentCue.id,
+        result.glory ?? 0,
+      );
+    }
 
     if (
       result.narration

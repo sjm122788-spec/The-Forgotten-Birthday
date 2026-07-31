@@ -177,6 +177,8 @@ const chapterFour = {
       confirmLabel:
         "Stir the Batter",
 
+      glory: 1,
+
       options: [
         {
           id: "carefully",

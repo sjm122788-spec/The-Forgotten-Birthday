@@ -76,6 +76,7 @@ const chapterThree = {
         "One by one, the extinguished candles reignite. Their light travels outward until the pattern is whole again.",
 
       glory: 3,
+      awardGloryTo: "allGuests",
 
       candles: [
         {
@@ -131,6 +132,8 @@ const chapterThree = {
 
       confirmLabel:
         "Protect This Flame",
+
+      glory: 1,
 
       options: [
         {
