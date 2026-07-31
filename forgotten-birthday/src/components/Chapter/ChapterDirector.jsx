@@ -470,6 +470,29 @@ function handleFillTheSilenceComplete(
 
       publishingCueIdRef.current = currentCue.id;
 
+      const fallbackPhoneOptions = [
+        {
+          id: "careful-drop",
+          label: "A careful drop",
+          description: "Offer one small, careful kindness.",
+        },
+        {
+          id: "steady-pour",
+          label: "A steady pour",
+          description: "Offer what you can with steady care.",
+        },
+        {
+          id: "all-i-can-spare",
+          label: "All I can spare",
+          description: "Give the flower everything you can spare.",
+        },
+      ];
+      const phoneOptions =
+        Array.isArray(currentCue.phoneOptions) &&
+        currentCue.phoneOptions.length > 0
+          ? currentCue.phoneOptions
+          : fallbackPhoneOptions;
+
       Promise.resolve(
         multiplayer.publishPrompt?.({
           id: promptId,
@@ -975,23 +998,11 @@ function handleFillTheSilenceComplete(
             prompt: currentCue.prompt,
             instructions: currentCue.instructions,
             confirmLabel: currentCue.contributeLabel ?? "Offer Water",
-            options: [
-              {
-                id: "careful-drop",
-                label: "A careful drop",
-                description: "Offer one small, careful kindness.",
-              },
-              {
-                id: "steady-pour",
-                label: "A steady pour",
-                description: "Offer what you can with steady care.",
-              },
-              {
-                id: "all-i-can-spare",
-                label: "All I can spare",
-                description: "Give the flower everything you can spare.",
-              },
-            ],
+            options: phoneOptions.map((option) => ({
+              id: option.id,
+              label: option.label,
+              description: option.description ?? "",
+            })),
           },
           createdAt: new Date().toISOString(),
         }),
@@ -1008,11 +1019,13 @@ function handleFillTheSilenceComplete(
       return;
     }
 
-    const validOptionIds = new Set([
-      "careful-drop",
-      "steady-pour",
-      "all-i-can-spare",
-    ]);
+    const validOptionIds = new Set(
+      (
+        Array.isArray(activePrompt.payload?.options)
+          ? activePrompt.payload.options
+          : []
+      ).map((option) => option.id),
+    );
     const currentGuestIds = new Set(guests.map((guest) => guest.id));
     const promptTargetPlayerIds = activePrompt.targetPlayerIds ?? [];
     const targetPlayerIds = new Set(promptTargetPlayerIds);

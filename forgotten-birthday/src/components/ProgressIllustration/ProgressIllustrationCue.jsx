@@ -38,6 +38,9 @@ function ProgressIllustrationCue({
     declineLabel =
       "Hold Back for Now",
 
+    allowDecline =
+      true,
+
     continueLabel =
       "Continue",
 
@@ -473,15 +476,17 @@ function ProgressIllustrationCue({
               {contributeLabel}
             </button>
 
-            <button
-              type="button"
-              className="progress-illustration-cue__choice progress-illustration-cue__choice--decline"
-              onClick={
-                handleDecline
-              }
-            >
-              {declineLabel}
-            </button>
+            {allowDecline && (
+              <button
+                type="button"
+                className="progress-illustration-cue__choice progress-illustration-cue__choice--decline"
+                onClick={
+                  handleDecline
+                }
+              >
+                {declineLabel}
+              </button>
+            )}
           </div>
         )}
 

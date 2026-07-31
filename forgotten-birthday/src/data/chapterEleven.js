@@ -291,6 +291,9 @@ const chapterEleven = {
       type:
         "progressIllustration",
 
+      audience:
+        "allGuests",
+
       eyebrow:
         "The Final Connection",
 
@@ -308,6 +311,59 @@ const chapterEleven = {
 
       declineLabel:
         "Wait and Consider",
+
+      allowDecline:
+        false,
+
+      phoneOptions: [
+        {
+          id:
+            "stone-support",
+
+          label:
+            "Place a stone support",
+        },
+
+        {
+          id:
+            "wooden-plank",
+
+          label:
+            "Lay a wooden plank",
+        },
+
+        {
+          id:
+            "knotted-rope",
+
+          label:
+            "Tie the bridge together",
+        },
+
+        {
+          id:
+            "lantern-post",
+
+          label:
+            "Raise a lantern post",
+        },
+
+        {
+          id:
+            "steady-hand",
+
+          label:
+            "Hold the piece steady",
+        },
+
+        {
+          id:
+            "first-light",
+
+          label:
+            "Light the way forward",
+        },
+      ],
 
       continueLabel:
         "Cross the Completed Bridge",
@@ -504,6 +560,9 @@ const chapterEleven = {
 
       type:
         "individualDecision",
+
+      audience:
+        "selectedGuest",
 
       eyebrow:
         "One Final Crossing",
