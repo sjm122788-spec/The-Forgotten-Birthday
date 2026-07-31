@@ -45,6 +45,11 @@ function ChapterDirector({
     setPhoneObservationFoundClueIds,
   ] = useState([]);
 
+  const [
+    phoneProgressContributions,
+    setPhoneProgressContributions,
+  ] = useState(0);
+
   const currentCue =
     sequence[currentCueIndex];
 
@@ -52,6 +57,7 @@ function ChapterDirector({
   const handledPromptIdsRef = useRef(new Set());
   const completedPhoneCueIdsRef = useRef(new Set());
   const awardedAllGuestCueIdsRef = useRef(new Set());
+  const awardedProgressResponseKeysRef = useRef(new Set());
   const handledObservationResponseIdsRef = useRef(new Set());
   const processingObservationRef = useRef(false);
 
@@ -63,6 +69,11 @@ function ChapterDirector({
   const isPhoneObservation =
     multiplayer?.enabled &&
     currentCue?.type === "observation" &&
+    currentCue?.audience === "allGuests";
+
+  const isPhoneProgressIllustration =
+    multiplayer?.enabled &&
+    currentCue?.type === "progressIllustration" &&
     currentCue?.audience === "allGuests";
 
   const isPhoneDice =
@@ -141,15 +152,18 @@ function ChapterDirector({
     setDecisionOutcome(null);
     setCueResults({});
     setPhoneObservationFoundClueIds([]);
+    setPhoneProgressContributions(0);
     handledPromptIdsRef.current.clear();
     completedPhoneCueIdsRef.current.clear();
     awardedAllGuestCueIdsRef.current.clear();
+    awardedProgressResponseKeysRef.current.clear();
     handledObservationResponseIdsRef.current.clear();
     processingObservationRef.current = false;
   }, [sequence]);
 
   useEffect(() => {
     setPhoneObservationFoundClueIds([]);
+    setPhoneProgressContributions(0);
     handledObservationResponseIdsRef.current.clear();
     processingObservationRef.current = false;
   }, [currentCue?.id]);
@@ -907,6 +921,175 @@ function handleFillTheSilenceComplete(
   ]);
 
   useEffect(() => {
+    if (!isPhoneProgressIllustration) {
+      return;
+    }
+
+    const guests = multiplayer?.guests ?? [];
+    const activePrompt = multiplayer?.activePrompt ?? null;
+
+    if (guests.length === 0) {
+      return;
+    }
+
+    if (!activePrompt || activePrompt.cueId !== currentCue.id) {
+      if (
+        completedPhoneCueIdsRef.current.has(currentCue.id) ||
+        publishingCueIdRef.current === currentCue.id
+      ) {
+        return;
+      }
+
+      const promptId =
+        globalThis.crypto?.randomUUID?.() ??
+        `${currentCue.id}-${Date.now()}`;
+
+      publishingCueIdRef.current = currentCue.id;
+
+      Promise.resolve(
+        multiplayer.publishPrompt?.({
+          id: promptId,
+          cueId: currentCue.id,
+          chapterId: multiplayer.chapterId,
+          type: currentCue.type,
+          status: "open",
+          targetPlayerIds: guests.map((guest) => guest.id),
+          targetPlayerNames: guests.map((guest) => guest.name),
+          payload: {
+            eyebrow: currentCue.eyebrow,
+            title: currentCue.title,
+            prompt: currentCue.prompt,
+            instructions: currentCue.instructions,
+            confirmLabel: currentCue.contributeLabel ?? "Offer Water",
+            options: [
+              {
+                id: "careful-drop",
+                label: "A careful drop",
+                description: "Offer one small, careful kindness.",
+              },
+              {
+                id: "steady-pour",
+                label: "A steady pour",
+                description: "Offer what you can with steady care.",
+              },
+              {
+                id: "all-i-can-spare",
+                label: "All I can spare",
+                description: "Give the flower everything you can spare.",
+              },
+            ],
+          },
+          createdAt: new Date().toISOString(),
+        }),
+      )
+        .catch((error) => {
+          console.error("Unable to publish watering prompt", error);
+        })
+        .finally(() => {
+          if (publishingCueIdRef.current === currentCue.id) {
+            publishingCueIdRef.current = null;
+          }
+        });
+
+      return;
+    }
+
+    const validOptionIds = new Set([
+      "careful-drop",
+      "steady-pour",
+      "all-i-can-spare",
+    ]);
+    const currentGuestIds = new Set(guests.map((guest) => guest.id));
+    const promptTargetPlayerIds = activePrompt.targetPlayerIds ?? [];
+    const targetPlayerIds = new Set(promptTargetPlayerIds);
+    const connectedTargetPlayerIds = promptTargetPlayerIds.filter((playerId) =>
+      currentGuestIds.has(playerId),
+    );
+    const responsesByPlayerId = new Map();
+
+    for (const response of multiplayer?.responses ?? []) {
+      if (
+        response.prompt_id !== activePrompt.id ||
+        response.response_key !== "final" ||
+        !targetPlayerIds.has(response.player_id) ||
+        !validOptionIds.has(response.response_data?.optionId)
+      ) {
+        continue;
+      }
+
+      responsesByPlayerId.set(response.player_id, response);
+    }
+
+    const acceptedResponses = Array.from(responsesByPlayerId.values());
+    setPhoneProgressContributions(acceptedResponses.length);
+
+    acceptedResponses.forEach((response) => {
+      const awardKey = `${activePrompt.id}:${response.player_id}`;
+
+      if (awardedProgressResponseKeysRef.current.has(awardKey)) {
+        return;
+      }
+
+      awardedProgressResponseKeysRef.current.add(awardKey);
+      multiplayer.awardPlayerGlory?.(
+        response.player_id,
+        currentCue.contributionGlory ?? 1,
+      );
+    });
+
+    const allTargetsResponded =
+      connectedTargetPlayerIds.length > 0 &&
+      connectedTargetPlayerIds.every((playerId) =>
+        responsesByPlayerId.has(playerId),
+      );
+
+    if (!allTargetsResponded || handledPromptIdsRef.current.has(activePrompt.id)) {
+      return;
+    }
+
+    handledPromptIdsRef.current.add(activePrompt.id);
+    completedPhoneCueIdsRef.current.add(currentCue.id);
+
+    const finalFrameIndex = Math.max((currentCue.frames ?? []).length - 1, 0);
+    const finalFrame = currentCue.frames?.[finalFrameIndex] ?? null;
+
+    Promise.resolve(multiplayer.clearPrompt?.(activePrompt.id))
+      .catch((error) => {
+        console.error("Unable to clear watering prompt", error);
+      })
+      .finally(() => {
+        handleProgressIllustrationComplete({
+          cueId: currentCue.id,
+          completed: true,
+          contributed: acceptedResponses.length > 0,
+          contributions: acceptedResponses.length,
+          frameIndex: finalFrameIndex,
+          finalFrameId: finalFrame?.id ?? null,
+          outcomeId:
+            acceptedResponses.length > 0
+              ? "contributed"
+              : "withheld",
+          narration: currentCue.completionNarration,
+          glory:
+            Math.min(
+              acceptedResponses.length * (currentCue.contributionGlory ?? 1),
+              currentCue.maximumSharedGlory ?? Infinity,
+            ),
+        });
+      });
+  }, [
+    currentCue,
+    isPhoneProgressIllustration,
+    multiplayer?.activePrompt,
+    multiplayer?.awardPlayerGlory,
+    multiplayer?.chapterId,
+    multiplayer?.clearPrompt,
+    multiplayer?.guests,
+    multiplayer?.publishPrompt,
+    multiplayer?.responses,
+  ]);
+
+  useEffect(() => {
     if (!isPhoneRelicReveal || !relicConditionMet(currentCue?.condition)) {
       return;
     }
@@ -1604,6 +1787,21 @@ function handleFillTheSilenceComplete(
           }
           cue={
             currentCue
+          }
+          controlledContributions={
+            isPhoneProgressIllustration &&
+            (multiplayer?.guests ?? []).length > 0
+              ? phoneProgressContributions
+              : null
+          }
+          controlledComplete={
+            isPhoneProgressIllustration &&
+            completedPhoneCueIdsRef.current.has(currentCue.id)
+          }
+          waitingForResponses={
+            isPhoneProgressIllustration &&
+            (multiplayer?.guests ?? []).length > 0 &&
+            !completedPhoneCueIdsRef.current.has(currentCue.id)
           }
           onComplete={
             handleProgressIllustrationComplete

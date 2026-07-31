@@ -9,6 +9,9 @@ import "./ProgressIllustrationCue.css";
 function ProgressIllustrationCue({
   cue,
   onComplete,
+  controlledContributions = null,
+  controlledComplete = false,
+  waitingForResponses = false,
 }) {
   const {
     eyebrow =
@@ -125,6 +128,38 @@ function ProgressIllustrationCue({
       );
     };
   }, []);
+
+  useEffect(() => {
+    if (controlledContributions === null) {
+      return;
+    }
+
+    const nextContributions =
+      Math.max(0, Number(controlledContributions) || 0);
+    const progressRatio =
+      maximumSharedGlory > 0
+        ? Math.min(nextContributions * contributionGlory, maximumSharedGlory) /
+          maximumSharedGlory
+        : 0;
+    const nextFrameIndex =
+      controlledComplete
+        ? Math.max(frames.length - 1, 0)
+        :
+      frames.length <= 1
+        ? 0
+        : Math.round(progressRatio * (frames.length - 1));
+
+    setHasChosen(true);
+    setContributions(nextContributions);
+    moveToFrame(nextFrameIndex);
+    setIsComplete(Boolean(controlledComplete));
+  }, [
+    controlledComplete,
+    controlledContributions,
+    contributionGlory,
+    frames.length,
+    maximumSharedGlory,
+  ]);
 
   function moveToFrame(
     nextFrameIndex,
@@ -450,7 +485,17 @@ function ProgressIllustrationCue({
           </div>
         )}
 
-        {hasChosen &&
+        {waitingForResponses && !isComplete && (
+          <p
+            className="progress-illustration-cue__waiting"
+            aria-live="polite"
+          >
+            The flower is responding to the care it receives...
+          </p>
+        )}
+
+        {!waitingForResponses &&
+          hasChosen &&
           !isComplete && (
             <p
               className="progress-illustration-cue__waiting"

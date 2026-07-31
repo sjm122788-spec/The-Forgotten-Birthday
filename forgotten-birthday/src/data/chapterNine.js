@@ -206,6 +206,9 @@ const chapterNine = {
       type:
         "difficultChoice",
 
+      audience:
+        "host",
+
       eyebrow:
         "A Difficult Choice",
 
@@ -318,6 +321,9 @@ const chapterNine = {
 
   type:
     "progressIllustration",
+
+  audience:
+    "allGuests",
 
   eyebrow:
     "A Quiet Offering",
