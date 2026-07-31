@@ -50,6 +50,11 @@ function ChapterDirector({
     setPhoneProgressContributions,
   ] = useState(0);
 
+  const [
+    phonePrivateChoiceResponses,
+    setPhonePrivateChoiceResponses,
+  ] = useState(0);
+
   const currentCue =
     sequence[currentCueIndex];
 
@@ -58,6 +63,7 @@ function ChapterDirector({
   const completedPhoneCueIdsRef = useRef(new Set());
   const awardedAllGuestCueIdsRef = useRef(new Set());
   const awardedProgressResponseKeysRef = useRef(new Set());
+  const awardedPrivateChoiceResponseKeysRef = useRef(new Set());
   const handledObservationResponseIdsRef = useRef(new Set());
   const processingObservationRef = useRef(false);
 
@@ -74,6 +80,11 @@ function ChapterDirector({
   const isPhoneProgressIllustration =
     multiplayer?.enabled &&
     currentCue?.type === "progressIllustration" &&
+    currentCue?.audience === "allGuests";
+
+  const isPhoneFillTheSilence =
+    multiplayer?.enabled &&
+    currentCue?.type === "fillTheSilence" &&
     currentCue?.audience === "allGuests";
 
   const isPhoneDice =
@@ -153,10 +164,12 @@ function ChapterDirector({
     setCueResults({});
     setPhoneObservationFoundClueIds([]);
     setPhoneProgressContributions(0);
+    setPhonePrivateChoiceResponses(0);
     handledPromptIdsRef.current.clear();
     completedPhoneCueIdsRef.current.clear();
     awardedAllGuestCueIdsRef.current.clear();
     awardedProgressResponseKeysRef.current.clear();
+    awardedPrivateChoiceResponseKeysRef.current.clear();
     handledObservationResponseIdsRef.current.clear();
     processingObservationRef.current = false;
   }, [sequence]);
@@ -164,6 +177,7 @@ function ChapterDirector({
   useEffect(() => {
     setPhoneObservationFoundClueIds([]);
     setPhoneProgressContributions(0);
+    setPhonePrivateChoiceResponses(0);
     handledObservationResponseIdsRef.current.clear();
     processingObservationRef.current = false;
   }, [currentCue?.id]);
@@ -1090,6 +1104,149 @@ function handleFillTheSilenceComplete(
   ]);
 
   useEffect(() => {
+    if (!isPhoneFillTheSilence) {
+      return;
+    }
+
+    const guests = multiplayer?.guests ?? [];
+    const activePrompt = multiplayer?.activePrompt ?? null;
+
+    if (guests.length === 0) {
+      return;
+    }
+
+    if (!activePrompt || activePrompt.cueId !== currentCue.id) {
+      if (
+        completedPhoneCueIdsRef.current.has(currentCue.id) ||
+        publishingCueIdRef.current === currentCue.id
+      ) {
+        return;
+      }
+
+      const promptId =
+        globalThis.crypto?.randomUUID?.() ??
+        `${currentCue.id}-${Date.now()}`;
+
+      publishingCueIdRef.current = currentCue.id;
+
+      Promise.resolve(
+        multiplayer.publishPrompt?.({
+          id: promptId,
+          cueId: currentCue.id,
+          chapterId: multiplayer.chapterId,
+          type: currentCue.type,
+          status: "open",
+          targetPlayerIds: guests.map((guest) => guest.id),
+          targetPlayerNames: guests.map((guest) => guest.name),
+          payload: {
+            eyebrow: currentCue.eyebrow,
+            title: currentCue.title,
+            prompt: currentCue.prompt,
+            instructions: currentCue.instructions,
+            confirmLabel: currentCue.confirmLabel,
+            options: (currentCue.options ?? []).map((option) => ({
+              id: option.id,
+              label: option.label,
+              description: "",
+            })),
+          },
+          createdAt: new Date().toISOString(),
+        }),
+      )
+        .catch((error) => {
+          console.error("Unable to publish private choice prompt", error);
+        })
+        .finally(() => {
+          if (publishingCueIdRef.current === currentCue.id) {
+            publishingCueIdRef.current = null;
+          }
+        });
+
+      return;
+    }
+
+    const validOptionIds = new Set(
+      (currentCue.options ?? []).map((option) => option.id),
+    );
+    const currentGuestIds = new Set(guests.map((guest) => guest.id));
+    const promptTargetPlayerIds = activePrompt.targetPlayerIds ?? [];
+    const targetPlayerIds = new Set(promptTargetPlayerIds);
+    const connectedTargetPlayerIds = promptTargetPlayerIds.filter((playerId) =>
+      currentGuestIds.has(playerId),
+    );
+    const responsesByPlayerId = new Map();
+
+    for (const response of multiplayer?.responses ?? []) {
+      if (
+        response.prompt_id !== activePrompt.id ||
+        response.response_key !== "final" ||
+        !targetPlayerIds.has(response.player_id) ||
+        !validOptionIds.has(response.response_data?.optionId)
+      ) {
+        continue;
+      }
+
+      responsesByPlayerId.set(response.player_id, response);
+    }
+
+    const acceptedResponses = Array.from(responsesByPlayerId.values());
+    setPhonePrivateChoiceResponses(acceptedResponses.length);
+
+    acceptedResponses.forEach((response) => {
+      const awardKey = `${activePrompt.id}:${response.player_id}`;
+
+      if (awardedPrivateChoiceResponseKeysRef.current.has(awardKey)) {
+        return;
+      }
+
+      awardedPrivateChoiceResponseKeysRef.current.add(awardKey);
+      multiplayer.awardPlayerGlory?.(response.player_id, currentCue.glory ?? 0);
+    });
+
+    const allTargetsResponded =
+      connectedTargetPlayerIds.length > 0 &&
+      connectedTargetPlayerIds.every((playerId) =>
+        responsesByPlayerId.has(playerId),
+      );
+
+    if (!allTargetsResponded || handledPromptIdsRef.current.has(activePrompt.id)) {
+      return;
+    }
+
+    handledPromptIdsRef.current.add(activePrompt.id);
+    completedPhoneCueIdsRef.current.add(currentCue.id);
+
+    Promise.resolve(multiplayer.clearPrompt?.(activePrompt.id))
+      .catch((error) => {
+        console.error("Unable to clear private choice prompt", error);
+      })
+      .finally(() => {
+        handleFillTheSilenceComplete({
+          cueId: currentCue.id,
+          completed: true,
+          outcomeId: "silence-filled",
+          selectedOptionId: null,
+          hidden: true,
+          narration: currentCue.completionNarration,
+          glory: acceptedResponses.length * (currentCue.glory ?? 0),
+          metadata: {
+            responseCount: acceptedResponses.length,
+          },
+        });
+      });
+  }, [
+    currentCue,
+    isPhoneFillTheSilence,
+    multiplayer?.activePrompt,
+    multiplayer?.awardPlayerGlory,
+    multiplayer?.chapterId,
+    multiplayer?.clearPrompt,
+    multiplayer?.guests,
+    multiplayer?.publishPrompt,
+    multiplayer?.responses,
+  ]);
+
+  useEffect(() => {
     if (!isPhoneRelicReveal || !relicConditionMet(currentCue?.condition)) {
       return;
     }
@@ -1665,6 +1822,50 @@ function handleFillTheSilenceComplete(
           </header>
           <p className="individual-decision__instructions">
             The story will continue when their choice is made.
+          </p>
+        </div>
+      </section>
+    );
+  }
+
+  if (isPhoneFillTheSilence && (multiplayer?.guests ?? []).length > 0) {
+    const guestCount = multiplayer?.activePrompt?.targetPlayerIds?.length ??
+      (multiplayer?.guests ?? []).length;
+
+    return (
+      <section className="fill-the-silence">
+        <div className="fill-the-silence__card">
+          <header className="fill-the-silence__header">
+            <p className="fill-the-silence__eyebrow">
+              {currentCue.eyebrow ?? "A Quiet Question"}
+            </p>
+
+            <h2 className="fill-the-silence__title">
+              {currentCue.title ?? "Fill the Silence"}
+            </h2>
+
+            {currentCue.prompt && (
+              <p className="fill-the-silence__prompt">
+                {currentCue.prompt}
+              </p>
+            )}
+          </header>
+
+          <div className="fill-the-silence__privacy">
+            <span
+              className="fill-the-silence__privacy-symbol"
+              aria-hidden="true"
+            >
+              O
+            </span>
+
+            <p>
+              {phonePrivateChoiceResponses} of {guestCount} Guests have answered.
+            </p>
+          </div>
+
+          <p className="fill-the-silence__complete-copy">
+            The story will continue when every current Guest has placed an answer.
           </p>
         </div>
       </section>

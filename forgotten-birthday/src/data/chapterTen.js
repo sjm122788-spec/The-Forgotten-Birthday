@@ -223,6 +223,9 @@ const chapterTen = {
       type:
         "groupDecision",
 
+      audience:
+        "host",
+
       eyebrow:
         "Three Invitations",
 
@@ -362,6 +365,9 @@ const chapterTen = {
       type:
         "fillTheSilence",
 
+      audience:
+        "allGuests",
+
       eyebrow:
         "The Blank Space",
 
@@ -475,6 +481,12 @@ const chapterTen = {
       type:
         "individualDecision",
 
+      audience:
+        "selectedGuest",
+
+      glory:
+        2,
+
       eyebrow:
         "The Final Seal",
 
@@ -533,6 +545,12 @@ const chapterTen = {
 
   type:
     "relicReveal",
+
+  audience:
+    "resultPlayer",
+
+  playerSourceCueId:
+    "chapter-ten-final-seal",
 
   relicId:
     "open-seal",
