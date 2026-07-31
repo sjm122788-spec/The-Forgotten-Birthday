@@ -225,9 +225,18 @@ function App() {
   const [multiplayerError, setMultiplayerError] = useState("");
   const [activePromptResponses, setActivePromptResponses] = useState([]);
   const [guestPromptError, setGuestPromptError] = useState("");
+  const [adminOpen, setAdminOpen] = useState(false);
 
   const selectedChapter = chapterById[selectedChapterId] ?? chapters[0];
   const activeChapterId = chapters[activeChapterIndex]?.id ?? null;
+  const canUseAdmin =
+    multiplayerRole !== "guest" &&
+    !multiplayerLoading;
+  const currentChapterIndex = chapters.findIndex(
+    (chapter) => chapter.id === selectedChapterId,
+  );
+  const nextChapter =
+    currentChapterIndex >= 0 ? chapters[currentChapterIndex + 1] : null;
 
   const completedChapterIdSet = useMemo(
     () => new Set(completedChapterIds),
@@ -237,10 +246,45 @@ function App() {
   const hasSavedStateRef = useRef(false);
   const lastHostSyncRef = useRef(null);
   const activePromptRef = useRef(null);
+  const adminTapRef = useRef({
+    count: 0,
+    timerId: null,
+  });
   const promptWriteQueueRef = useRef(Promise.resolve());
   const sessionChannelRef = useRef(null);
   const playersChannelRef = useRef(null);
   const responsesChannelRef = useRef(null);
+
+  useEffect(() => {
+    function handleAdminShortcut(event) {
+      if (!canUseAdmin) {
+        return;
+      }
+
+      if (
+        event.ctrlKey &&
+        event.shiftKey &&
+        event.key.toLowerCase() === "a"
+      ) {
+        event.preventDefault();
+        setAdminOpen((isOpen) => !isOpen);
+      }
+    }
+
+    window.addEventListener("keydown", handleAdminShortcut);
+
+    return () => {
+      window.removeEventListener("keydown", handleAdminShortcut);
+    };
+  }, [canUseAdmin]);
+
+  useEffect(() => {
+    return () => {
+      if (adminTapRef.current.timerId) {
+        window.clearTimeout(adminTapRef.current.timerId);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (players.length === 0) {
@@ -1068,6 +1112,73 @@ useEffect(() => {
     resetMultiplayerState();
   }
 
+  function clearAdminPromptIfNeeded() {
+    const promptId = multiplayerSession?.active_prompt?.id;
+
+    if (!promptId || multiplayerRole !== "host") {
+      return;
+    }
+
+    void handleClearPhonePrompt(promptId).catch((error) => {
+      console.error("Unable to clear the active phone prompt", error);
+    });
+  }
+
+  function handleAdminNavigate(navigate) {
+    clearAdminPromptIfNeeded();
+    setTransitionChapter(null);
+    setTransitionOrigin(null);
+    setShowResumeScreen(false);
+    navigate();
+    setAdminOpen(false);
+  }
+
+  function handleAdminOpenChapter(chapterId) {
+    handleAdminNavigate(() => {
+      handleDevOpenChapter(chapterId);
+    });
+  }
+
+  function handleAdminCompleteCurrentChapter() {
+    if (screen !== SCREENS.CHAPTER || !selectedChapter?.id) {
+      return;
+    }
+
+    handleAdminNavigate(() => {
+      handleCompleteChapter();
+    });
+  }
+
+  function handleAdminClearPrompt() {
+    clearAdminPromptIfNeeded();
+    setAdminOpen(false);
+  }
+
+  function handleAdminHotspotTap() {
+    if (!canUseAdmin) {
+      return;
+    }
+
+    if (adminTapRef.current.timerId) {
+      window.clearTimeout(adminTapRef.current.timerId);
+    }
+
+    const nextCount = adminTapRef.current.count + 1;
+
+    if (nextCount >= 4) {
+      adminTapRef.current.count = 0;
+      adminTapRef.current.timerId = null;
+      setAdminOpen(true);
+      return;
+    }
+
+    adminTapRef.current.count = nextCount;
+    adminTapRef.current.timerId = window.setTimeout(() => {
+      adminTapRef.current.count = 0;
+      adminTapRef.current.timerId = null;
+    }, 1200);
+  }
+
   function handleDevOpenChapter(chapterId) {
     const chapter = chapterById[chapterId];
 
@@ -1413,6 +1524,114 @@ useEffect(() => {
           onCoveredScreen={handleTransitionCoveredScreen}
           onFinished={handleTransitionFinished}
         />
+      )}
+
+      {canUseAdmin && (
+        <button
+          type="button"
+          className="admin-hotspot"
+          aria-label="Open host admin controls"
+          onClick={handleAdminHotspotTap}
+        />
+      )}
+
+      {canUseAdmin && adminOpen && (
+        <aside
+          className="admin-panel"
+          role="dialog"
+          aria-label="Host emergency controls"
+        >
+          <div className="admin-panel__header">
+            <div>
+              <p className="admin-panel__eyebrow">Host Only</p>
+              <h2>Emergency Jump</h2>
+            </div>
+
+            <button
+              type="button"
+              className="admin-panel__close"
+              onClick={() => setAdminOpen(false)}
+              aria-label="Close admin controls"
+            >
+              x
+            </button>
+          </div>
+
+          <p className="admin-panel__copy">
+            Use this only if a puzzle, phone prompt, or transition gets stuck.
+          </p>
+
+          <div className="admin-panel__actions">
+            <button
+              type="button"
+              onClick={() => handleAdminNavigate(handleDevOpenPrologue)}
+            >
+              Prologue
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleAdminNavigate(handleDevOpenMap)}
+            >
+              Map
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleAdminNavigate(handleDevOpenQuietAfter)}
+            >
+              Quiet After
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleAdminNavigate(handleDevOpenFinale)}
+            >
+              Finale
+            </button>
+
+            <button
+              type="button"
+              onClick={handleAdminCompleteCurrentChapter}
+              disabled={screen !== SCREENS.CHAPTER}
+            >
+              Complete Current Chapter
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleAdminOpenChapter(nextChapter.id)}
+              disabled={!nextChapter}
+            >
+              Next Chapter
+            </button>
+
+            <button
+              type="button"
+              onClick={handleAdminClearPrompt}
+              disabled={!multiplayerSession?.active_prompt?.id}
+            >
+              Clear Phone Prompt
+            </button>
+          </div>
+
+          <div className="admin-panel__chapters">
+            {chapters.map((chapter, index) => (
+              <button
+                key={chapter.id}
+                type="button"
+                onClick={() => handleAdminOpenChapter(chapter.id)}
+                className={
+                  chapter.id === selectedChapterId
+                    ? "admin-panel__chapter admin-panel__chapter--active"
+                    : "admin-panel__chapter"
+                }
+              >
+                {index + 1}
+              </button>
+            ))}
+          </div>
+        </aside>
       )}
 
       {DEV_MODE && (
