@@ -10,6 +10,7 @@ function CooperativePuzzleCue({ cue, onComplete }) {
     instructions = "Work together to choose the pieces in the correct order.",
     candles = [],
     items = [],
+    variant = "",
     solution = [],
     successLabel = "The Pattern Holds",
     resetLabel = "Try Again",
@@ -18,6 +19,7 @@ function CooperativePuzzleCue({ cue, onComplete }) {
 
   const puzzleItems = candles.length > 0 ? candles : items;
   const usesCandles = candles.length > 0;
+  const usesClock = variant === "clock";
 
   const [selectedIds, setSelectedIds] = useState([]);
   const [attempts, setAttempts] = useState(1);
@@ -174,13 +176,37 @@ function CooperativePuzzleCue({ cue, onComplete }) {
           className={[
             "cooperative-puzzle-cue__shelf",
             usesCandles ? "" : "cooperative-puzzle-cue__shelf--cards",
+            usesClock ? "cooperative-puzzle-cue__shelf--clock" : "",
           ]
             .filter(Boolean)
             .join(" ")}
           aria-label="Waiting puzzle pieces - choose one at a time"
         >
+          {usesClock && (
+            <div className="cooperative-puzzle-cue__clock-face" aria-hidden="true">
+              <span className="cooperative-puzzle-cue__clock-mark cooperative-puzzle-cue__clock-mark--12">
+                XII
+              </span>
+              <span className="cooperative-puzzle-cue__clock-mark cooperative-puzzle-cue__clock-mark--3">
+                III
+              </span>
+              <span className="cooperative-puzzle-cue__clock-mark cooperative-puzzle-cue__clock-mark--6">
+                VI
+              </span>
+              <span className="cooperative-puzzle-cue__clock-mark cooperative-puzzle-cue__clock-mark--9">
+                IX
+              </span>
+              <span className="cooperative-puzzle-cue__clock-hand cooperative-puzzle-cue__clock-hand--minute" />
+              <span className="cooperative-puzzle-cue__clock-hand cooperative-puzzle-cue__clock-hand--hour" />
+              <span className="cooperative-puzzle-cue__clock-center" />
+            </div>
+          )}
+
           {puzzleItems.map((item) => {
             const isSelected = selectedIds.includes(item.id);
+            const clockIndex = puzzleItems.findIndex(
+              (puzzleItem) => puzzleItem.id === item.id,
+            );
 
             if (usesCandles) {
               return (
@@ -230,12 +256,20 @@ function CooperativePuzzleCue({ cue, onComplete }) {
                 type="button"
                 className={[
                   "cooperative-puzzle-cue__memory-card",
+                  usesClock ? "cooperative-puzzle-cue__clock-piece" : "",
                   isSelected
                     ? "cooperative-puzzle-cue__memory-card--selected"
                     : "",
                 ]
                   .filter(Boolean)
                   .join(" ")}
+                style={
+                  usesClock
+                    ? {
+                        "--clock-piece-angle": `${clockIndex * (360 / puzzleItems.length) - 90}deg`,
+                      }
+                    : undefined
+                }
                 onClick={() => handleSelect(item.id)}
                 disabled={isSelected || status !== "playing"}
               >

@@ -177,6 +177,12 @@ const chapterEight = {
       type:
         "cooperativePuzzle",
 
+      audience:
+        "host",
+
+      variant:
+        "clock",
+
       eyebrow:
         "A Shared Mechanism",
 
@@ -192,30 +198,16 @@ const chapterEight = {
       items: [
         {
           id:
-            "winding-key",
+            "striking-bell",
 
           symbol:
-            "🗝️",
+            "🔔",
 
           label:
-            "The Winding Key",
+            "The Bell",
 
           hint:
-            "I give the mechanism the strength to begin.",
-        },
-
-        {
-          id:
-            "turning-gears",
-
-          symbol:
-            "⚙️",
-
-          label:
-            "The Turning Gears",
-
-          hint:
-            "I carry movement from one part of the clock to another.",
+            "I speak only after every other piece has done its work.",
         },
 
         {
@@ -234,6 +226,20 @@ const chapterEight = {
 
         {
           id:
+            "winding-key",
+
+          symbol:
+            "🗝️",
+
+          label:
+            "The Winding Key",
+
+          hint:
+            "I give the mechanism the strength to begin.",
+        },
+
+        {
+          id:
             "clock-hands",
 
           symbol:
@@ -248,16 +254,16 @@ const chapterEight = {
 
         {
           id:
-            "striking-bell",
+            "turning-gears",
 
           symbol:
-            "🔔",
+            "⚙️",
 
           label:
-            "The Bell",
+            "The Turning Gears",
 
           hint:
-            "I speak only after every other piece has done its work.",
+            "I carry movement from one part of the clock to another.",
         },
       ],
 
@@ -280,6 +286,9 @@ const chapterEight = {
 
       glory:
         5,
+
+      awardGloryTo:
+        "allGuests",
     },
 
     {
@@ -343,6 +352,9 @@ const chapterEight = {
 
   type:
     "dice",
+
+  audience:
+    "selectedGuest",
 
   eyebrow:
     "One Falling Moment",
@@ -489,6 +501,15 @@ const chapterEight = {
       type:
         "individualDecision",
 
+      audience:
+        "selectedGuest",
+
+      glory:
+        1,
+
+      excludePreviousPlayerFromCueId:
+        "chapter-eight-falling-memory-roll",
+
       eyebrow:
         "A Private Moment",
 
@@ -552,6 +573,12 @@ const chapterEight = {
 
       type:
         "relicReveal",
+
+      audience:
+        "resultPlayer",
+
+      playerSourceCueId:
+        "chapter-eight-secret-clock",
 
       relicId:
         "pocket-watch-of-lost-time",
