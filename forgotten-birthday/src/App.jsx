@@ -1287,6 +1287,12 @@ useEffect(() => {
     }
   }
 
+  const musicScreen = transitionChapter ? SCREENS.CHAPTER : screen;
+  const musicChapterId =
+    musicScreen === SCREENS.CHAPTER
+      ? transitionChapter?.id ?? selectedChapterId
+      : null;
+
   if (multiplayerLoading) {
     return (
       <div className="app">
@@ -1382,7 +1388,10 @@ useEffect(() => {
 
   return (
     <div className="app">
-      <BackgroundMusic screen={screen} selectedChapterId={selectedChapterId} />
+      <BackgroundMusic
+        screen={musicScreen}
+        selectedChapterId={musicChapterId}
+      />
       {renderScreen()}
 
       {transitionChapter && (

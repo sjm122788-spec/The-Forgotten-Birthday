@@ -51,6 +51,7 @@ function ChapterDirector({
   const publishingCueIdRef = useRef(null);
   const handledPromptIdsRef = useRef(new Set());
   const completedPhoneCueIdsRef = useRef(new Set());
+  const awardedAllGuestCueIdsRef = useRef(new Set());
   const handledObservationResponseIdsRef = useRef(new Set());
   const processingObservationRef = useRef(false);
 
@@ -81,17 +82,21 @@ function ChapterDirector({
     greatSuccess: 3,
   };
 
-  function selectGuestForCue(guests, cueId) {
+  function selectGuestForCue(guests, cueId, excludedPlayerIds = []) {
     if (!Array.isArray(guests) || guests.length === 0) {
       return null;
     }
+
+    const excludedIds = new Set(excludedPlayerIds.filter(Boolean));
+    const availableGuests = guests.filter((guest) => !excludedIds.has(guest.id));
+    const selectableGuests = availableGuests.length > 0 ? availableGuests : guests;
 
     const hash = String(cueId ?? "").split("").reduce(
       (total, character) => total + character.charCodeAt(0),
       0,
     );
 
-    return guests[hash % guests.length] ?? guests[0];
+    return selectableGuests[hash % selectableGuests.length] ?? selectableGuests[0];
   }
 
   function resolveDiceOutcome(cue, roll) {
@@ -138,6 +143,7 @@ function ChapterDirector({
     setPhoneObservationFoundClueIds([]);
     handledPromptIdsRef.current.clear();
     completedPhoneCueIdsRef.current.clear();
+    awardedAllGuestCueIdsRef.current.clear();
     handledObservationResponseIdsRef.current.clear();
     processingObservationRef.current = false;
   }, [sequence]);
@@ -423,7 +429,13 @@ function handleFillTheSilenceComplete(
         return;
       }
 
-      const selectedGuest = selectGuestForCue(guests, currentCue.id);
+      const previousResult =
+        cueResults[currentCue.excludePreviousPlayerFromCueId];
+      const selectedGuest = selectGuestForCue(
+        guests,
+        currentCue.id,
+        [previousResult?.playerId],
+      );
       const promptId =
         globalThis.crypto?.randomUUID?.() ??
         `${currentCue.id}-${Date.now()}`;
@@ -538,6 +550,7 @@ function handleFillTheSilenceComplete(
     });
   }, [
     currentCue,
+    cueResults,
     isPhoneIndividualDecision,
     multiplayer?.activePrompt,
     multiplayer?.awardPlayerGlory,
@@ -1152,6 +1165,17 @@ function handleFillTheSilenceComplete(
       currentCue.id,
       result,
     );
+
+    if (
+      currentCue.awardGloryTo === "allGuests" &&
+      !awardedAllGuestCueIdsRef.current.has(currentCue.id)
+    ) {
+      awardedAllGuestCueIdsRef.current.add(currentCue.id);
+
+      (multiplayer?.guests ?? []).forEach((guest) => {
+        multiplayer?.awardPlayerGlory?.(guest.id, result.glory ?? 0);
+      });
+    }
 
     if (
       result.narration

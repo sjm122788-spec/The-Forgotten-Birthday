@@ -132,6 +132,9 @@ const chapterSeven = {
       type:
         "cooperativePuzzle",
 
+      audience:
+        "host",
+
       eyebrow:
         "A Shared Memory",
 
@@ -139,87 +142,90 @@ const chapterSeven = {
         "Restore the Celebration",
 
       prompt:
-        "The tapestry remembers the pieces of a birthday, but not the order in which they happened.",
+        "The tapestry remembers the feeling of being welcomed, but not the order in which that feeling grew.",
 
       instructions:
-        "Work together to choose the four memory fragments in the order the celebration unfolded.",
+        "Work together to restore the memory from first welcome to lasting remembrance.",
 
       items: [
         {
           id:
-            "invitation-opened",
-
-          symbol:
-            "✉️",
-
-          label:
-            "The Invitation",
-
-          hint:
-            "A sealed envelope is opened beneath a kitchen lamp.",
-        },
-
-        {
-          id:
-            "candles-lit",
-
-          symbol:
-            "🕯️",
-
-          label:
-            "The Candles",
-
-          hint:
-            "Small flames appear as everyone gathers close.",
-        },
-
-        {
-          id:
-            "wish-made",
-
-          symbol:
-            "⭐",
-
-          label:
-            "The Wish",
-
-          hint:
-            "Someone closes their eyes while the room becomes quiet.",
-        },
-
-        {
-          id:
-            "gift-shared",
+            "remembered-detail",
 
           symbol:
             "🎁",
 
           label:
-            "The Gift",
+            "The Remembered Detail",
 
           hint:
-            "A carefully wrapped package is passed across the table.",
+            "A gift waited with no name tag, chosen too carefully to be random.",
+        },
+
+        {
+          id:
+            "story-retold",
+
+          symbol:
+            "🧵",
+
+          label:
+            "The Story Retold",
+
+          hint:
+            "Long after the plates were cleared, someone was still telling the moment back.",
+        },
+
+        {
+          id:
+            "waiting-chair",
+
+          symbol:
+            "🪑",
+
+          label:
+            "The Waiting Chair",
+
+          hint:
+            "Before anyone arrived, one chair had already been pulled from the table.",
+        },
+
+        {
+          id:
+            "familiar-knock",
+
+          symbol:
+            "🚪",
+
+          label:
+            "The Familiar Knock",
+
+          hint:
+            "The room changed before the door fully opened. Someone knew that sound.",
         },
       ],
 
       solution: [
-        "invitation-opened",
-        "candles-lit",
-        "wish-made",
-        "gift-shared",
+        "waiting-chair",
+        "familiar-knock",
+        "remembered-detail",
+        "story-retold",
       ],
 
       successLabel:
-        "The Memory Holds",
+        "The Feeling Holds",
 
       resetLabel:
-        "Gather the Threads Again",
+        "Gather the Feeling Again",
 
       successNarration:
-        "The fragments joined together. Golden thread raced through the tapestry, stitching one moment to the next until the celebration could remember itself.",
+        "The fragments joined together. First the chair, then the door, then the careful gift, then the story carried forward. Golden thread raced through the tapestry until the celebration remembered not only what happened, but why it mattered.",
 
       glory:
         4,
+
+      awardGloryTo:
+        "allGuests",
     },
 
     {
@@ -261,6 +267,12 @@ const chapterSeven = {
 
       type:
         "individualDecision",
+
+      audience:
+        "selectedGuest",
+
+      glory:
+        1,
 
       eyebrow:
         "A Choice for One Guest",
@@ -372,6 +384,15 @@ const chapterSeven = {
 
       type:
         "individualDecision",
+
+      audience:
+        "selectedGuest",
+
+      glory:
+        1,
+
+      excludePreviousPlayerFromCueId:
+        "chapter-seven-individual-decision",
 
       eyebrow:
         "A Quiet Choice",

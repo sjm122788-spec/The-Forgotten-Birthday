@@ -19,7 +19,6 @@ import chapterElevenTrack from "../../assets/audio/Chapter11.mp3";
 const SCREENS = {
   PROLOGUE: "prologue",
   STORYBOOK: "storybook",
-  MEMORY_WINDOW: "memory-window",
   CHAPTER: "chapter",
   QUIET_AFTER: "quiet-after",
   FINALE: "finale",
@@ -39,125 +38,40 @@ const CHAPTER_TRACKS = {
   "chapter-11": chapterElevenTrack,
 };
 
-const CROSSFADE_MS = 500;
-const TARGET_VOLUME = 0.50;
+const FADE_MS = 500;
+const TARGET_VOLUME = 0.5;
 
 function getTrackForScreen(screen, selectedChapterId) {
-  if (screen === SCREENS.PROLOGUE) {
-    return prologueTrack;
-  }
+  switch (screen) {
+    case SCREENS.PROLOGUE:
+      return prologueTrack;
 
-  if (screen === SCREENS.STORYBOOK) {
-    return mapTrack;
-  }
+    case SCREENS.STORYBOOK:
+      return mapTrack;
 
-  if (screen === SCREENS.QUIET_AFTER) {
-    return secretChapterTrack;
-  }
+    case SCREENS.QUIET_AFTER:
+      return secretChapterTrack;
 
-  if (screen === SCREENS.FINALE) {
-    return finaleTrack;
-  }
+    case SCREENS.FINALE:
+      return finaleTrack;
 
-  if (
-    screen === SCREENS.CHAPTER ||
-    screen === SCREENS.MEMORY_WINDOW ||
-    screen === "chapter" ||
-    screen === "memory-window" ||
-    screen === "memoryWindow"
-  ) {
-    if (!CHAPTER_TRACKS[selectedChapterId]) {
-  console.warn(
-    "No soundtrack found for chapter:",
-    selectedChapterId,
-  );
+    case SCREENS.CHAPTER:
+      return CHAPTER_TRACKS[selectedChapterId] ?? mapTrack;
+
+    default:
+      return mapTrack;
+  }
 }
 
-return CHAPTER_TRACKS[selectedChapterId] ?? mapTrack;
-  }
-
-  return mapTrack;
-}
-
-function isSameTrack(currentSrc, nextTrack) {
-  if (!currentSrc || !nextTrack) {
-    return false;
-  }
-
-  return currentSrc.includes(nextTrack);
-}
-
-function fadeAudio({ fromAudio, toAudio, onComplete }) {
-  let frameId = null;
-  let cancelled = false;
-
-  if (!toAudio) {
-    if (typeof onComplete === "function") {
-      onComplete();
-    }
-
-    return () => {};
-  }
-
-  const startTime = performance.now();
-  const fromVolume = fromAudio?.volume ?? 0;
-
-  function step(timestamp) {
-    if (cancelled) {
-      return;
-    }
-
-    const progress = Math.min(
-      1,
-      (timestamp - startTime) / CROSSFADE_MS,
-    );
-
-    if (fromAudio) {
-      fromAudio.volume = Math.max(
-        0,
-        fromVolume * (1 - progress),
-      );
-    }
-
-    toAudio.volume = TARGET_VOLUME * progress;
-
-    if (progress < 1) {
-      frameId = requestAnimationFrame(step);
-      return;
-    }
-
-    if (fromAudio) {
-      try {
-        fromAudio.pause();
-        fromAudio.currentTime = 0;
-      } catch (error) {
-        console.warn(
-          "Error pausing old track during crossfade",
-          error,
-        );
-      }
-    }
-
-    if (typeof onComplete === "function") {
-      onComplete();
-    }
-  }
-
-  frameId = requestAnimationFrame(step);
-
-  return () => {
-    cancelled = true;
-
-    if (frameId !== null) {
-      cancelAnimationFrame(frameId);
-    }
-  };
+function getAssignedSrc(audio) {
+  return audio?.getAttribute("src") ?? "";
 }
 
 export default function BackgroundMusic({ screen, selectedChapterId }) {
-  const audioRefs = useRef([null, null]);
-  const activeIndexRef = useRef(0);
-  const activeTrackRef = useRef(null);
+  const audioRef = useRef(null);
+  const frameRef = useRef(null);
+  const currentTrackRef = useRef(null);
+  const pendingTrackRef = useRef(null);
 
   const resolvedTrack = useMemo(
     () => getTrackForScreen(screen, selectedChapterId),
@@ -165,122 +79,138 @@ export default function BackgroundMusic({ screen, selectedChapterId }) {
   );
 
   useEffect(() => {
-  const activeIndex = activeIndexRef.current;
-  const nextIndex = 1 - activeIndex;
-  const activeAudio = audioRefs.current[activeIndex];
-  const nextAudio = audioRefs.current[nextIndex];
+    const audio = audioRef.current;
 
-  if (!activeAudio || !nextAudio) {
+    if (!audio || !resolvedTrack) {
+      return undefined;
+    }
+
+    pendingTrackRef.current = resolvedTrack;
+
+    if (frameRef.current !== null) {
+      cancelAnimationFrame(frameRef.current);
+      frameRef.current = null;
+    }
+
+    if (currentTrackRef.current === resolvedTrack && getAssignedSrc(audio)) {
+      audio.volume = TARGET_VOLUME;
+      void audio.play().catch(() => undefined);
+      return undefined;
+    }
+
+    const previousVolume = audio.volume || 0;
+    const previousTrack = currentTrackRef.current;
+
+    function startNextTrack() {
+      if (pendingTrackRef.current !== resolvedTrack) {
+        return;
+      }
+
+      audio.pause();
+      audio.src = resolvedTrack;
+      audio.loop = true;
+      audio.preload = "auto";
+      audio.currentTime = 0;
+      audio.volume = 0;
+      audio.load();
+
+      currentTrackRef.current = resolvedTrack;
+
+      void audio.play().catch(() => undefined);
+
+      const fadeInStart = performance.now();
+
+      function fadeIn(timestamp) {
+        if (pendingTrackRef.current !== resolvedTrack) {
+          return;
+        }
+
+        const progress = Math.min(1, (timestamp - fadeInStart) / FADE_MS);
+        audio.volume = TARGET_VOLUME * progress;
+
+        if (progress < 1) {
+          frameRef.current = requestAnimationFrame(fadeIn);
+          return;
+        }
+
+        audio.volume = TARGET_VOLUME;
+        frameRef.current = null;
+      }
+
+      frameRef.current = requestAnimationFrame(fadeIn);
+    }
+
+    if (!previousTrack || previousVolume <= 0) {
+      startNextTrack();
+      return undefined;
+    }
+
+    const fadeOutStart = performance.now();
+
+    function fadeOut(timestamp) {
+      if (pendingTrackRef.current !== resolvedTrack) {
+        return;
+      }
+
+      const progress = Math.min(1, (timestamp - fadeOutStart) / FADE_MS);
+      audio.volume = Math.max(0, previousVolume * (1 - progress));
+
+      if (progress < 1) {
+        frameRef.current = requestAnimationFrame(fadeOut);
+        return;
+      }
+
+      frameRef.current = null;
+      startNextTrack();
+    }
+
+    frameRef.current = requestAnimationFrame(fadeOut);
+
     return undefined;
-  }
+  }, [resolvedTrack]);
 
-  let cancelFade = () => {};
+  useEffect(() => {
+    function resumePlayback() {
+      const audio = audioRef.current;
 
-  const playAudio = (audio) => {
-    if (!audio) {
-      return;
+      if (audio?.paused && currentTrackRef.current) {
+        void audio.play().catch(() => undefined);
+      }
     }
 
-    void audio.play().catch(() => undefined);
-  };
-
-  const resumePlayback = () => {
-    const currentAudio =
-      audioRefs.current[activeIndexRef.current];
-
-    if (currentAudio?.paused) {
-      playAudio(currentAudio);
-    }
-  };
-
-  window.addEventListener("pointerdown", resumePlayback);
-  window.addEventListener("keydown", resumePlayback);
-
-  if (
-    activeTrackRef.current === resolvedTrack &&
-    activeAudio.src
-  ) {
-    if (activeAudio.paused) {
-      playAudio(activeAudio);
-    }
+    window.addEventListener("pointerdown", resumePlayback);
+    window.addEventListener("keydown", resumePlayback);
 
     return () => {
-      window.removeEventListener(
-        "pointerdown",
-        resumePlayback,
-      );
-      window.removeEventListener(
-        "keydown",
-        resumePlayback,
-      );
+      window.removeEventListener("pointerdown", resumePlayback);
+      window.removeEventListener("keydown", resumePlayback);
     };
-  }
+  }, []);
 
-  if (isSameTrack(activeAudio.src, resolvedTrack)) {
-    activeTrackRef.current = resolvedTrack;
+  useEffect(
+    () => () => {
+      if (frameRef.current !== null) {
+        cancelAnimationFrame(frameRef.current);
+      }
 
-    if (activeAudio.paused) {
-      playAudio(activeAudio);
-    }
+      const audio = audioRef.current;
 
-    return () => {
-      window.removeEventListener(
-        "pointerdown",
-        resumePlayback,
-      );
-      window.removeEventListener(
-        "keydown",
-        resumePlayback,
-      );
-    };
-  }
-
-  const prepareAudio = (audio, src) => {
-    audio.pause();
-    audio.src = src;
-    audio.loop = true;
-    audio.preload = "auto";
-    audio.volume = 0;
-    audio.currentTime = 0;
-    audio.load();
-    playAudio(audio);
-  };
-
-  const incomingAudio = nextAudio;
-
-  prepareAudio(incomingAudio, resolvedTrack);
-
-  cancelFade = fadeAudio({
-    fromAudio: activeAudio.src ? activeAudio : null,
-    toAudio: incomingAudio,
-    onComplete: () => {
-      activeIndexRef.current = nextIndex;
-      activeTrackRef.current = resolvedTrack;
+      if (audio) {
+        audio.pause();
+        audio.removeAttribute("src");
+        audio.load();
+      }
     },
-  });
-
-  return () => {
-    cancelFade();
-
-    window.removeEventListener(
-      "pointerdown",
-      resumePlayback,
-    );
-    window.removeEventListener(
-      "keydown",
-      resumePlayback,
-    );
-  };
-}, [resolvedTrack]);
+    [],
+  );
 
   return (
     <div aria-hidden="true" style={{ display: "none" }}>
-      <audio ref={(node) => {
-        audioRefs.current[0] = node;
-      }} />
-      <audio ref={(node) => {
-        audioRefs.current[1] = node;
-      }} />
+      <audio
+        ref={(node) => {
+          audioRef.current = node;
+        }}
+      />
     </div>
   );
 }
