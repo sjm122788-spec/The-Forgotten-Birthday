@@ -1270,6 +1270,18 @@ useEffect(() => {
             }
             glory={DEV_MODE && glory === 0 ? 72 : glory}
             maximumGlory={100}
+            playerProgress={playerProgress}
+            multiplayer={{
+              enabled:
+                multiplayerRole === "host" &&
+                multiplayerSession?.status === "playing",
+              chapterId: selectedChapterId,
+              guests: multiplayerGuests,
+              activePrompt: multiplayerSession?.active_prompt ?? null,
+              responses: activePromptResponses,
+              publishPrompt: handlePublishPhonePrompt,
+              clearPrompt: handleClearPhonePrompt,
+            }}
           />
         );
 
