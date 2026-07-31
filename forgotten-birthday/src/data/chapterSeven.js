@@ -51,10 +51,20 @@ const chapterSeven = {
     },
 
     {
+      id:
+        "chapter-seven-tapestry-ripple",
+
       type: "effect",
 
       className:
         "atmosphere--chapter-seven-memory-dust",
+    },
+
+    {
+      type: "effect",
+
+      className:
+        "atmosphere--chapter-seven-tapestry-ripple",
     },
   ],
 

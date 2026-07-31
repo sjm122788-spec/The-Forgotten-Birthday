@@ -193,19 +193,19 @@
 }
 
 .atmosphere--chapter-three-candle-glow::before {
-  left: 8%;
-  bottom: -4%;
+  left: 10%;
+  bottom: 2%;
 
-  width: 48%;
-  height: 70%;
+  width: 38%;
+  height: 58%;
 }
 
 .atmosphere--chapter-three-candle-glow::after {
-  right: 2%;
-  bottom: 4%;
+  right: 8%;
+  bottom: 10%;
 
-  width: 42%;
-  height: 58%;
+  width: 34%;
+  height: 48%;
 
   opacity: 0.6;
   animation-delay: -2.4s;
@@ -219,8 +219,8 @@
   }
 
   50% {
-    opacity: 0.8;
-    transform: scale(1.04);
+    opacity: 0.82;
+    transform: scale(1.05) translate3d(0, -1%, 0);
   }
 }
 .atmosphere--chapter-three-embers {
@@ -265,17 +265,17 @@
     80px 120px,
     45px 160px;
 
-  opacity: 0.3;
+  opacity: 0.22;
 
   animation:
     chapter-three-embers-rise
-    17s linear infinite;
+    26s linear infinite;
 }
 
 .atmosphere--chapter-three-embers::after {
-  opacity: 0.18;
+  opacity: 0.12;
   transform: scale(1.12);
-  animation-duration: 24s;
+  animation-duration: 34s;
   animation-delay: -8s;
 }
 
@@ -326,41 +326,41 @@
 }
 
 .atmosphere--chapter-four-oven-glow::before {
-  right: -10%;
-  bottom: -18%;
+  right: 0%;
+  bottom: -2%;
 
-  width: 74%;
-  height: 88%;
+  width: 42%;
+  height: 48%;
 }
 
 .atmosphere--chapter-four-oven-glow::after {
-  right: 16%;
-  bottom: -4%;
+  right: 17%;
+  bottom: 8%;
 
-  width: 44%;
-  height: 54%;
+  width: 24%;
+  height: 30%;
 
   opacity: 0.68;
 
   animation-delay: -1.7s;
-  animation-duration: 5.1s;
+  animation-duration: 6.8s;
 }
 
 @keyframes chapter-four-oven-flare {
   0%,
   100% {
-    opacity: 0.48;
-    transform: scale(0.94);
+    opacity: 0.38;
+    transform: scale(0.96);
   }
 
   42% {
-    opacity: 0.92;
-    transform: scale(1.08);
+    opacity: 0.7;
+    transform: scale(1.04);
   }
 
   65% {
-    opacity: 0.68;
-    transform: scale(1.02);
+    opacity: 0.54;
+    transform: scale(1.01);
   }
 }
 
@@ -398,16 +398,16 @@
     );
 
   background-size:
-    90px 115px,
-    145px 165px,
-    65px 135px;
+    180px 230px,
+    275px 320px,
+    135px 265px;
 
   background-position:
     10px 20px,
     55px 95px,
     30px 145px;
 
-  opacity: 0.22;
+  opacity: 0.13;
 
   filter:
     blur(0.25px)
@@ -418,36 +418,48 @@
 
   animation:
     chapter-four-flour-storm
-    21s linear infinite;
+    46s ease-in-out infinite;
 }
 
 .atmosphere--chapter-four-flour-dust::after {
-  opacity: 0.14;
+  opacity: 0.08;
 
   transform: scale(1.15);
 
-  animation-duration: 17s;
-  animation-delay: -7s;
-  animation-direction: reverse;
+  animation-duration: 61s;
+  animation-delay: -19s;
+  animation-direction: alternate-reverse;
 }
 
 @keyframes chapter-four-flour-storm {
   0% {
     transform:
-      translate3d(-5%, 12%, 0)
-      rotate(-2deg);
+      translate3d(-4%, 6%, 0)
+      rotate(-0.6deg);
+  }
+
+  28% {
+    transform:
+      translate3d(1%, 1%, 0)
+      rotate(0.35deg);
   }
 
   50% {
     transform:
-      translate3d(3%, -2%, 0)
-      rotate(1deg);
+      translate3d(-1%, -3%, 0)
+      rotate(-0.2deg);
+  }
+
+  74% {
+    transform:
+      translate3d(3%, -5%, 0)
+      rotate(0.5deg);
   }
 
   100% {
     transform:
-      translate3d(7%, -16%, 0)
-      rotate(3deg);
+      translate3d(5%, -9%, 0)
+      rotate(0.8deg);
   }
 }
 .atmosphere--chapter-five-banner-light {
@@ -1109,6 +1121,113 @@
       rotate(2deg);
   }
 }
+
+.atmosphere--chapter-seven-tapestry-ripple {
+  position: absolute;
+  inset: 0;
+
+  z-index: 3;
+
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.atmosphere--chapter-seven-tapestry-ripple::before,
+.atmosphere--chapter-seven-tapestry-ripple::after {
+  content: "";
+
+  position: absolute;
+
+  top: 10%;
+
+  width: 18%;
+  height: 58%;
+
+  border-radius: 48% 48% 42% 42%;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(182, 199, 236, 0.08) 20%,
+      rgba(232, 211, 255, 0.12) 48%,
+      rgba(151, 174, 218, 0.07) 72%,
+      transparent 100%
+    );
+
+  filter:
+    blur(3px)
+    drop-shadow(0 0 18px rgba(178, 199, 255, 0.18));
+
+  opacity: 0;
+
+  transform-origin:
+    top center;
+}
+
+.atmosphere--chapter-seven-tapestry-ripple::before {
+  left: 18%;
+
+  animation:
+    chapter-seven-tapestry-wave
+    13s ease-in-out infinite;
+}
+
+.atmosphere--chapter-seven-tapestry-ripple::after {
+  right: 20%;
+
+  width: 15%;
+  height: 52%;
+
+  opacity: 0;
+
+  animation:
+    chapter-seven-tapestry-wave
+    17s ease-in-out infinite;
+
+  animation-delay:
+    -7s;
+}
+
+@keyframes chapter-seven-tapestry-wave {
+  0%,
+  58%,
+  100% {
+    opacity: 0;
+
+    transform:
+      translate3d(0, 0, 0)
+      skewX(0deg)
+      scaleX(0.96);
+  }
+
+  66% {
+    opacity: 0.5;
+
+    transform:
+      translate3d(0.8%, -0.4%, 0)
+      skewX(-2.4deg)
+      scaleX(1.04);
+  }
+
+  74% {
+    opacity: 0.34;
+
+    transform:
+      translate3d(-0.7%, 0.2%, 0)
+      skewX(2deg)
+      scaleX(0.98);
+  }
+
+  82% {
+    opacity: 0.18;
+
+    transform:
+      translate3d(0.3%, 0, 0)
+      skewX(-0.8deg)
+      scaleX(1.01);
+  }
+}
 .atmosphere--chapter-eight-clocklight {
   position: absolute;
   inset: 0;
@@ -1135,9 +1254,9 @@
   background:
     radial-gradient(
       ellipse at 48% 18%,
-      rgba(255, 231, 174, 0.46) 0%,
-      rgba(225, 175, 92, 0.2) 30%,
-      rgba(167, 111, 53, 0.08) 52%,
+      rgba(255, 234, 188, 0.54) 0%,
+      rgba(225, 176, 103, 0.22) 28%,
+      rgba(167, 111, 53, 0.07) 54%,
       transparent 72%
     );
 
@@ -1147,7 +1266,7 @@
 
   animation:
     chapter-eight-clocklight-breathe
-    8s ease-in-out infinite;
+    11s ease-in-out infinite;
 }
 
 .atmosphere--chapter-eight-clocklight::after {
@@ -1159,52 +1278,64 @@
 
   background:
     radial-gradient(
-      circle at 52% 42%,
-      rgba(255, 212, 126, 0.24) 0%,
-      rgba(255, 190, 89, 0.08) 22%,
-      transparent 48%
+      ellipse at 52% 42%,
+      rgba(255, 219, 145, 0.26) 0%,
+      rgba(255, 190, 89, 0.08) 26%,
+      transparent 54%
     );
 
   opacity: 0.45;
 
   animation:
     chapter-eight-clocklight-pulse
-    5.5s ease-in-out infinite;
+    8.5s ease-in-out infinite;
 }
 
 @keyframes chapter-eight-clocklight-breathe {
   0%,
   100% {
-    opacity: 0.42;
+    opacity: 0.34;
 
     transform:
-      translate3d(-2%, 1%, 0)
-      scale(0.96);
+      translate3d(-3%, 1%, 0)
+      rotate(-0.5deg)
+      scale(0.94);
   }
 
-  50% {
-    opacity: 0.82;
+  48% {
+    opacity: 0.86;
 
     transform:
-      translate3d(3%, -1%, 0)
-      scale(1.06);
+      translate3d(4%, -1.5%, 0)
+      rotate(0.7deg)
+      scale(1.07);
+  }
+
+  72% {
+    opacity: 0.58;
+
+    transform:
+      translate3d(1%, -0.2%, 0)
+      rotate(0deg)
+      scale(1);
   }
 }
 
 @keyframes chapter-eight-clocklight-pulse {
   0%,
   100% {
-    opacity: 0.28;
+    opacity: 0.22;
 
     transform:
-      scale(0.98);
+      scale(0.96);
   }
 
   50% {
-    opacity: 0.62;
+    opacity: 0.66;
 
     transform:
-      scale(1.05);
+      scale(1.07)
+      translate3d(0.8%, -0.6%, 0);
   }
 }
 .atmosphere--chapter-eight-dust {
@@ -1555,7 +1686,7 @@
 
   animation:
     chapter-nine-petal-drift
-    24s linear infinite;
+    34s ease-in-out infinite;
 }
 
 .atmosphere--chapter-nine-drifting-petals::after {
@@ -1563,28 +1694,28 @@
 
   transform: scale(1.14);
 
-  animation-duration: 31s;
+  animation-duration: 46s;
   animation-delay: -12s;
-  animation-direction: reverse;
+  animation-direction: alternate-reverse;
 }
 
 @keyframes chapter-nine-petal-drift {
   0% {
     transform:
-      translate3d(-4%, -8%, 0)
-      rotate(-2deg);
+      translate3d(-3%, -5%, 0)
+      rotate(-1deg);
   }
 
   45% {
     transform:
-      translate3d(1%, 1%, 0)
-      rotate(1deg);
+      translate3d(1%, 0, 0)
+      rotate(0.5deg);
   }
 
   100% {
     transform:
-      translate3d(6%, 12%, 0)
-      rotate(4deg);
+      translate3d(4%, 8%, 0)
+      rotate(1.6deg);
   }
 }
 
@@ -1632,7 +1763,7 @@
 
   animation:
     chapter-nine-pollen-rise
-    20s linear infinite;
+    32s ease-in-out infinite;
 }
 
 .atmosphere--chapter-nine-pollen::after {
@@ -1640,19 +1771,114 @@
 
   transform: scale(1.18);
 
-  animation-duration: 28s;
+  animation-duration: 43s;
   animation-delay: -9s;
 }
 
 @keyframes chapter-nine-pollen-rise {
   from {
     transform:
-      translate3d(-2%, 7%, 0);
+      translate3d(-2%, 5%, 0);
   }
 
   to {
     transform:
-      translate3d(4%, -9%, 0);
+      translate3d(4%, -7%, 0);
+  }
+}
+
+.atmosphere--chapter-nine-flower-sway {
+  position: absolute;
+  inset: 0;
+
+  z-index: 5;
+
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.atmosphere--chapter-nine-flower-sway::before,
+.atmosphere--chapter-nine-flower-sway::after {
+  content: "";
+
+  position: absolute;
+
+  left: 6%;
+  bottom: 0;
+
+  width: 88%;
+  height: 34%;
+
+  background:
+    linear-gradient(
+      86deg,
+      transparent 0%,
+      rgba(83, 127, 78, 0.08) 16%,
+      transparent 25%,
+      rgba(244, 214, 150, 0.08) 42%,
+      transparent 52%,
+      rgba(93, 138, 82, 0.07) 72%,
+      transparent 100%
+    );
+
+  filter:
+    blur(6px);
+
+  opacity: 0.28;
+
+  transform-origin:
+    center bottom;
+
+  animation:
+    chapter-nine-flower-sway
+    12s ease-in-out infinite;
+}
+
+.atmosphere--chapter-nine-flower-sway::after {
+  left: 18%;
+  bottom: 9%;
+
+  width: 58%;
+  height: 18%;
+
+  opacity: 0.22;
+
+  background:
+    radial-gradient(
+      ellipse at 50% 60%,
+      rgba(255, 228, 155, 0.16) 0%,
+      rgba(255, 208, 114, 0.08) 38%,
+      transparent 70%
+    );
+
+  animation-duration:
+    16s;
+
+  animation-delay:
+    -6s;
+}
+
+@keyframes chapter-nine-flower-sway {
+  0%,
+  100% {
+    transform:
+      translate3d(-0.8%, 0, 0)
+      skewX(-1deg)
+      scaleY(0.98);
+  }
+
+  45% {
+    transform:
+      translate3d(1.1%, -0.4%, 0)
+      skewX(1.4deg)
+      scaleY(1.02);
+  }
+
+  70% {
+    transform:
+      translate3d(0.2%, 0, 0)
+      skewX(0.2deg)
+      scaleY(1);
   }
 }
 .atmosphere--chapter-ten-window-light {
@@ -1981,7 +2207,7 @@
 
   animation:
     chapter-eleven-moonlight-drift
-    6s ease-in-out infinite;
+    10s ease-in-out infinite;
 }
 
 .atmosphere--chapter-eleven-moonlight::after {
@@ -2010,7 +2236,7 @@
 
   animation:
     chapter-eleven-moon-glow
-    6s ease-in-out infinite;
+    9s ease-in-out infinite;
 }
 
 @keyframes chapter-eleven-moonlight-drift {
@@ -2051,6 +2277,84 @@
   }
 }
 
+.atmosphere--chapter-eleven-stars {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+
+  overflow: hidden;
+  pointer-events: none;
+
+  mix-blend-mode: screen;
+}
+
+.atmosphere--chapter-eleven-stars::before,
+.atmosphere--chapter-eleven-stars::after {
+  content: "";
+
+  position: absolute;
+  inset: -8%;
+
+  background-image:
+    radial-gradient(circle, rgba(225, 238, 255, 0.86) 0 1px, transparent 2px),
+    radial-gradient(circle, rgba(185, 209, 255, 0.64) 0 1px, transparent 2px),
+    radial-gradient(circle, rgba(255, 240, 202, 0.5) 0 0.8px, transparent 1.8px);
+
+  background-size:
+    180px 150px,
+    260px 220px,
+    130px 190px;
+
+  background-position:
+    40px 25px,
+    120px 70px,
+    20px 115px;
+
+  opacity: 0.22;
+
+  animation:
+    chapter-eleven-stars-twinkle
+    9s ease-in-out infinite;
+}
+
+.atmosphere--chapter-eleven-stars::after {
+  opacity: 0.12;
+
+  transform:
+    scale(1.18);
+
+  animation-duration:
+    13s;
+
+  animation-delay:
+    -5s;
+}
+
+@keyframes chapter-eleven-stars-twinkle {
+  0%,
+  100% {
+    opacity: 0.12;
+
+    transform:
+      translate3d(0, 0, 0);
+  }
+
+  35% {
+    opacity: 0.28;
+  }
+
+  62% {
+    opacity: 0.18;
+
+    transform:
+      translate3d(0.5%, -0.4%, 0);
+  }
+
+  82% {
+    opacity: 0.34;
+  }
+}
+
 .atmosphere--chapter-eleven-lantern-shimmer {
   position: absolute;
   inset: 0;
@@ -2066,18 +2370,30 @@
 
   position: absolute;
 
-  left: 4%;
-  bottom: 18%;
+  left: 0%;
+  bottom: 14%;
 
-  width: 82%;
-  height: 48%;
+  width: 92%;
+  height: 54%;
 
   background:
     radial-gradient(
-      ellipse at 34% 48%,
-      rgba(255, 208, 129, 0.24) 0%,
-      rgba(255, 175, 83, 0.08) 35%,
-      transparent 68%
+      ellipse at 17% 48%,
+      rgba(255, 221, 156, 0.28) 0%,
+      rgba(255, 180, 88, 0.08) 20%,
+      transparent 38%
+    ),
+    radial-gradient(
+      ellipse at 42% 54%,
+      rgba(255, 226, 167, 0.22) 0%,
+      rgba(255, 175, 83, 0.07) 18%,
+      transparent 34%
+    ),
+    radial-gradient(
+      ellipse at 72% 44%,
+      rgba(255, 218, 148, 0.25) 0%,
+      rgba(255, 175, 83, 0.07) 20%,
+      transparent 38%
     );
 
   filter:
@@ -2085,7 +2401,7 @@
 
   animation:
     chapter-eleven-lantern-breathe
-    6.5s ease-in-out infinite;
+    7.8s ease-in-out infinite;
 }
 
 .atmosphere--chapter-eleven-lantern-shimmer::after {
@@ -2114,10 +2430,10 @@
     );
 
   background-size:
-    104px 82px,
-    154px 126px;
+    96px 78px,
+    148px 118px;
 
-  opacity: 0.1;
+  opacity: 0.16;
 
   filter:
     drop-shadow(
@@ -2127,23 +2443,25 @@
 
   animation:
     chapter-eleven-lantern-sparkle
-    9s ease-in-out infinite;
+    12s ease-in-out infinite;
 }
 
 @keyframes chapter-eleven-lantern-breathe {
   0%,
   100% {
-    opacity: 0.34;
+    opacity: 0.28;
 
     transform:
-      scale(0.98);
+      scale(0.96)
+      translate3d(-0.5%, 0.3%, 0);
   }
 
   50% {
-    opacity: 0.66;
+    opacity: 0.7;
 
     transform:
-      scale(1.035);
+      scale(1.05)
+      translate3d(0.6%, -0.4%, 0);
   }
 }
 
@@ -2186,26 +2504,26 @@
 
   position: absolute;
 
-  left: -14%;
-  bottom: -20%;
+  left: -20%;
+  bottom: -24%;
 
-  width: 128%;
-  height: 62%;
+  width: 142%;
+  height: 70%;
 
   background:
     radial-gradient(
       ellipse at center,
-      rgba(189, 205, 230, 0.12) 0%,
-      rgba(103, 123, 160, 0.06) 42%,
+      rgba(189, 205, 230, 0.2) 0%,
+      rgba(103, 123, 160, 0.08) 42%,
       transparent 74%
     );
 
   filter:
-    blur(28px);
+    blur(34px);
 
   animation:
     chapter-eleven-mist-drift
-    18s ease-in-out infinite;
+    26s ease-in-out infinite;
 }
 
 .atmosphere--chapter-eleven-mist::after {
@@ -2217,7 +2535,7 @@
     scaleX(1.14);
 
   animation-duration:
-    24s;
+    38s;
 
   animation-delay:
     -9s;

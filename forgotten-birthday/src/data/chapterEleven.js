@@ -76,6 +76,17 @@ const chapterEleven = {
 
   {
     id:
+      "chapter-eleven-stars",
+
+    type:
+      "effect",
+
+    className:
+      "atmosphere--chapter-eleven-stars",
+  },
+
+  {
+    id:
       "chapter-eleven-mist",
 
     type:

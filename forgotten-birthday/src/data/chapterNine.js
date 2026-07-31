@@ -86,6 +86,17 @@ const chapterNine = {
     className:
       "atmosphere--chapter-nine-drifting-petals",
   },
+
+  {
+    id:
+      "chapter-nine-flower-sway",
+
+    type:
+      "effect",
+
+    className:
+      "atmosphere--chapter-nine-flower-sway",
+  },
 ],
 
   sequence: [

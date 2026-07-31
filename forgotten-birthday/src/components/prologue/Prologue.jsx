@@ -188,7 +188,7 @@ const isNearInteraction =
 
   const performInteraction = useCallback(() => {
   if (phase === PROLOGUE_PHASES.TITLE) {
-    beginWaitingRoom();
+    beginWorld();
     return;
   }
 
@@ -282,7 +282,6 @@ const isNearInteraction =
       markInteractionComplete(nearbyObject.id);
   }
 }, [
-  beginWaitingRoom,
   beginWorld,
   bookStage,
   finishPrologue,
@@ -438,7 +437,7 @@ const movingRight = keys.has("arrowright") || keys.has("d");
           <button
             type="button"
             className="prologue-prompt prologue-prompt--pulse"
-            onClick={beginWaitingRoom}
+            onClick={beginWorld}
           >
             PRESS START
           </button>
