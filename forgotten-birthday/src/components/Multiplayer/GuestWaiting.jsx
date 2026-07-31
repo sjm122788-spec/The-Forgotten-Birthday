@@ -2,6 +2,7 @@ import GuestDice from "./GuestDice";
 import GuestObservation from "./GuestObservation";
 import GuestPrompt from "./GuestPrompt";
 import GuestRelic from "./GuestRelic";
+import GuestReward from "./GuestReward";
 import "./GuestWaiting.css";
 
 export default function GuestWaiting({
@@ -41,6 +42,26 @@ export default function GuestWaiting({
         prompt={activePrompt}
         onSubmit={onSubmitPrompt}
         error={promptError}
+      />
+    );
+  }
+
+  if (hasActivePrompt && activePrompt.type === "reward") {
+    return (
+      <GuestReward
+        key={activePrompt.id}
+        prompt={activePrompt}
+        onAcknowledge={() =>
+          onSubmitPrompt({
+            promptId: activePrompt.id,
+            cueId: activePrompt.cueId,
+            responseType: "reward",
+            responseKey: "final",
+            responseData: {
+              acknowledged: true,
+            },
+          })
+        }
       />
     );
   }

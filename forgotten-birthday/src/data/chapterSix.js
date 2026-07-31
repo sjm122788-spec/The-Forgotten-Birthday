@@ -109,6 +109,9 @@ const chapterSix = {
       type:
         "giftSelection",
 
+      audience:
+        "host",
+
       eyebrow:
         "A Shared Choice",
 
@@ -213,6 +216,12 @@ const chapterSix = {
       type:
         "individualDecision",
 
+      audience:
+        "selectedGuest",
+
+      glory:
+        4,
+
       eyebrow:
         "A Choice for One Guest",
 
@@ -290,6 +299,12 @@ const chapterSix = {
 
       type:
         "relicReveal",
+
+      audience:
+        "resultPlayer",
+
+      playerSourceCueId:
+        "chapter-six-individual-decision",
 
       relicId:
         "ribbon-of-belonging",

@@ -100,6 +100,37 @@ function ChapterDirector({
       .find((outcome) => roll >= (outcome.min ?? 1)) ?? null;
   }
 
+  function publishGloryReward({
+    sourceCue,
+    playerId,
+    playerName,
+    amount,
+    result,
+  }) {
+    const promptId =
+      globalThis.crypto?.randomUUID?.() ??
+      `${sourceCue.id}-glory-reward-${Date.now()}`;
+
+    return multiplayer.publishPrompt?.({
+      id: promptId,
+      cueId: `${sourceCue.id}-glory-reward`,
+      sourceCueId: sourceCue.id,
+      chapterId: multiplayer.chapterId,
+      type: "reward",
+      status: "open",
+      targetPlayerIds: [playerId],
+      targetPlayerNames: [playerName],
+      payload: {
+        rewardKind: "glory",
+        glory: amount,
+        title: "Glory Restored",
+        message: "The celebration grows brighter.",
+        result,
+      },
+      createdAt: new Date().toISOString(),
+    });
+  }
+
   useEffect(() => {
     setCurrentCueIndex(0);
     setDecisionOutcome(null);
@@ -163,7 +194,11 @@ function ChapterDirector({
 
     const promptBelongsToCurrentCue =
       activePrompt.chapterId === multiplayer?.chapterId &&
-      activePrompt.cueId === currentCue?.id;
+      (activePrompt.cueId === currentCue?.id ||
+        (
+          activePrompt.type === "reward" &&
+          activePrompt.sourceCueId === currentCue?.id
+        ));
 
     if (promptBelongsToCurrentCue) {
       return;
@@ -346,6 +381,40 @@ function handleFillTheSilenceComplete(
       return;
     }
 
+    if (
+      activePrompt?.type === "reward" &&
+      activePrompt.sourceCueId === currentCue.id
+    ) {
+      const response = (multiplayer?.responses ?? []).find(
+        (item) =>
+          item.prompt_id === activePrompt.id &&
+          item.response_key === "final" &&
+          item.response_type === "reward" &&
+          activePrompt.targetPlayerIds?.includes(item.player_id) &&
+          item.response_data?.acknowledged === true,
+      );
+
+      if (!response || handledPromptIdsRef.current.has(activePrompt.id)) {
+        return;
+      }
+
+      handledPromptIdsRef.current.add(activePrompt.id);
+
+      Promise.resolve(multiplayer.clearPrompt?.(activePrompt.id))
+        .catch((error) => {
+          console.error("Unable to clear individual reward prompt", error);
+        })
+        .finally(() => {
+          const option = activePrompt.payload?.result?.option;
+
+          if (option) {
+            handleIndividualDecision(option);
+          }
+        });
+
+      return;
+    }
+
     if (!activePrompt || activePrompt.cueId !== currentCue.id) {
       if (
         completedPhoneCueIdsRef.current.has(currentCue.id) ||
@@ -420,17 +489,58 @@ function handleFillTheSilenceComplete(
     handledPromptIdsRef.current.add(activePrompt.id);
     completedPhoneCueIdsRef.current.add(currentCue.id);
 
-    Promise.resolve(multiplayer.clearPrompt?.(activePrompt.id))
-      .catch((error) => {
-        console.error("Unable to clear phone prompt", error);
-      })
-      .finally(() => {
-        handleIndividualDecision(selectedOption);
-      });
+    const playerName =
+      activePrompt.targetPlayerNames?.[
+        activePrompt.targetPlayerIds?.indexOf(response.player_id)
+      ] ?? null;
+    const glory = currentCue.glory ?? 0;
+    const result = {
+      completed: true,
+      option: selectedOption,
+      optionId: selectedOption.id,
+      glory,
+      playerId: response.player_id,
+      playerName,
+    };
+
+    saveCueResult(currentCue.id, result);
+    multiplayer.awardPlayerGlory?.(response.player_id, glory);
+
+    if (glory <= 0) {
+      Promise.resolve(multiplayer.clearPrompt?.(activePrompt.id))
+        .catch((error) => {
+          console.error("Unable to clear phone prompt", error);
+        })
+        .finally(() => {
+          handleIndividualDecision(selectedOption);
+        });
+
+      return;
+    }
+
+    Promise.resolve(
+      publishGloryReward({
+        sourceCue: currentCue,
+        playerId: response.player_id,
+        playerName,
+        amount: glory,
+        result,
+      }),
+    ).catch((error) => {
+      console.error("Unable to publish individual glory reward", error);
+      Promise.resolve(multiplayer.clearPrompt?.(activePrompt.id))
+        .catch((clearError) => {
+          console.error("Unable to clear phone prompt", clearError);
+        })
+        .finally(() => {
+          handleIndividualDecision(selectedOption);
+        });
+    });
   }, [
     currentCue,
     isPhoneIndividualDecision,
     multiplayer?.activePrompt,
+    multiplayer?.awardPlayerGlory,
     multiplayer?.chapterId,
     multiplayer?.enabled,
     multiplayer?.guests,
@@ -612,6 +722,40 @@ function handleFillTheSilenceComplete(
       return;
     }
 
+    if (
+      activePrompt?.type === "reward" &&
+      activePrompt.sourceCueId === currentCue.id
+    ) {
+      const response = (multiplayer?.responses ?? []).find(
+        (item) =>
+          item.prompt_id === activePrompt.id &&
+          item.response_key === "final" &&
+          item.response_type === "reward" &&
+          activePrompt.targetPlayerIds?.includes(item.player_id) &&
+          item.response_data?.acknowledged === true,
+      );
+
+      if (!response || handledPromptIdsRef.current.has(activePrompt.id)) {
+        return;
+      }
+
+      handledPromptIdsRef.current.add(activePrompt.id);
+
+      Promise.resolve(multiplayer.clearPrompt?.(activePrompt.id))
+        .catch((error) => {
+          console.error("Unable to clear reward prompt", error);
+        })
+        .finally(() => {
+          const result = activePrompt.payload?.result;
+
+          if (result) {
+            handleDiceComplete(result);
+          }
+        });
+
+      return;
+    }
+
     if (!activePrompt || activePrompt.cueId !== currentCue.id) {
       if (
         completedPhoneCueIdsRef.current.has(currentCue.id) ||
@@ -705,13 +849,38 @@ function handleFillTheSilenceComplete(
       resolvedOutcome.glory ?? 0,
     );
 
-    Promise.resolve(multiplayer.clearPrompt?.(activePrompt.id))
-      .catch((error) => {
-        console.error("Unable to clear dice prompt", error);
-      })
-      .finally(() => {
-        handleDiceComplete(result);
-      });
+    saveCueResult(currentCue.id, result);
+
+    if ((resolvedOutcome.glory ?? 0) <= 0) {
+      Promise.resolve(multiplayer.clearPrompt?.(activePrompt.id))
+        .catch((error) => {
+          console.error("Unable to clear dice prompt", error);
+        })
+        .finally(() => {
+          handleDiceComplete(result);
+        });
+
+      return;
+    }
+
+    Promise.resolve(
+      publishGloryReward({
+        sourceCue: currentCue,
+        playerId: response.player_id,
+        playerName: result.playerName,
+        amount: resolvedOutcome.glory ?? 0,
+        result,
+      }),
+    ).catch((error) => {
+      console.error("Unable to publish glory reward", error);
+      Promise.resolve(multiplayer.clearPrompt?.(activePrompt.id))
+        .catch((clearError) => {
+          console.error("Unable to clear dice prompt", clearError);
+        })
+        .finally(() => {
+          handleDiceComplete(result);
+        });
+    });
   }, [
     currentCue,
     isPhoneDice,
