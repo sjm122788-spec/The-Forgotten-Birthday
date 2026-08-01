@@ -1080,11 +1080,17 @@ function handleFillTheSilenceComplete(
       );
     });
 
+    const minimumResponsesToContinue = Math.max(
+      1,
+      Math.min(
+        connectedTargetPlayerIds.length,
+        currentCue.minimumResponsesToContinue ??
+          connectedTargetPlayerIds.length,
+      ),
+    );
     const allTargetsResponded =
       connectedTargetPlayerIds.length > 0 &&
-      connectedTargetPlayerIds.every((playerId) =>
-        responsesByPlayerId.has(playerId),
-      );
+      acceptedResponses.length >= minimumResponsesToContinue;
 
     if (!allTargetsResponded || handledPromptIdsRef.current.has(activePrompt.id)) {
       return;

@@ -40,6 +40,7 @@ const CHAPTER_TRACKS = {
 
 const FADE_MS = 500;
 const TARGET_VOLUME = 0.5;
+let audioUnlocked = false;
 
 function getTrackForScreen(screen, selectedChapterId) {
   switch (screen) {
@@ -116,7 +117,9 @@ export default function BackgroundMusic({ screen, selectedChapterId }) {
 
       currentTrackRef.current = resolvedTrack;
 
-      void audio.play().catch(() => undefined);
+      if (audioUnlocked) {
+        void audio.play().catch(() => undefined);
+      }
 
       const fadeInStart = performance.now();
 
@@ -171,9 +174,15 @@ export default function BackgroundMusic({ screen, selectedChapterId }) {
 
   useEffect(() => {
     function resumePlayback() {
+      audioUnlocked = true;
+
       const audio = audioRef.current;
 
-      if (audio?.paused && currentTrackRef.current) {
+      if (!audio || !currentTrackRef.current) {
+        return;
+      }
+
+      if (audio.paused) {
         void audio.play().catch(() => undefined);
       }
     }

@@ -1456,14 +1456,21 @@ useEffect(() => {
 
   if (multiplayerRole === "host" && multiplayerSession?.status === "lobby") {
     return (
-      <HostLobby
-        roomCode={multiplayerSession.room_code}
-        guests={multiplayerGuests}
-        loading={multiplayerBusy}
-        error={multiplayerError}
-        onStartStory={handleStartStory}
-        onLeaveRoom={handleLeaveRoom}
-      />
+      <div className="app">
+        <BackgroundMusic
+          screen={SCREENS.PROLOGUE}
+          selectedChapterId={null}
+        />
+
+        <HostLobby
+          roomCode={multiplayerSession.room_code}
+          guests={multiplayerGuests}
+          loading={multiplayerBusy}
+          error={multiplayerError}
+          onStartStory={handleStartStory}
+          onLeaveRoom={handleLeaveRoom}
+        />
+      </div>
     );
   }
 

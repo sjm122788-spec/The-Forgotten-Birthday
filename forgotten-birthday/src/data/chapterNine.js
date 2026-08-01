@@ -372,6 +372,9 @@ const chapterNine = {
   maximumSharedGlory:
     5,
 
+  minimumResponsesToContinue:
+    1,
+
   previewMode:
     true,
 
