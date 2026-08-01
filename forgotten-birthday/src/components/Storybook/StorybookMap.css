@@ -21,6 +21,7 @@
 
 .storybook-book {
   position: relative;
+  isolation: isolate;
 
   width: min(1400px, 90vw);
   max-height: 90vh;
@@ -49,6 +50,84 @@
   object-position: center;
 }
 
+.storybook-book::before {
+  content: "";
+  position: absolute;
+  left: 15%;
+  bottom: -8%;
+  z-index: 2;
+
+  width: 28%;
+  aspect-ratio: 1;
+
+  pointer-events: none;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(255, 210, 126, 0.42) 0%,
+      rgba(232, 147, 61, 0.22) 26%,
+      rgba(150, 74, 31, 0.1) 48%,
+      transparent 72%
+    );
+
+  filter: blur(10px);
+  mix-blend-mode: screen;
+
+  animation: storybookCandleGlow 3600ms ease-in-out infinite;
+}
+
+.storybook-book::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+
+  pointer-events: none;
+
+  background:
+    radial-gradient(
+      circle at 7% 85%,
+      rgba(255, 220, 144, 0.24) 0 1px,
+      transparent 2px
+    ),
+    radial-gradient(
+      circle at 18% 74%,
+      rgba(255, 201, 112, 0.16) 0 1px,
+      transparent 2px
+    ),
+    radial-gradient(
+      circle at 39% 18%,
+      rgba(255, 224, 166, 0.12) 0 1px,
+      transparent 2px
+    ),
+    radial-gradient(
+      circle at 62% 39%,
+      rgba(255, 220, 144, 0.14) 0 1px,
+      transparent 2px
+    ),
+    radial-gradient(
+      circle at 81% 22%,
+      rgba(255, 201, 112, 0.12) 0 1px,
+      transparent 2px
+    ),
+    linear-gradient(
+      115deg,
+      transparent 0%,
+      rgba(255, 236, 186, 0.045) 42%,
+      rgba(255, 236, 186, 0.085) 50%,
+      rgba(255, 236, 186, 0.035) 58%,
+      transparent 100%
+    );
+
+  opacity: 0.75;
+  mix-blend-mode: screen;
+
+  animation:
+    storybookMapMotes 9000ms ease-in-out infinite,
+    storybookPageShimmer 7600ms ease-in-out infinite;
+}
+
 .storybook-map-placeholder {
   display: grid;
   place-items: center;
@@ -57,4 +136,63 @@
   color: #3b2e22;
 
   font-family: Georgia, "Times New Roman", serif;
+}
+
+@keyframes storybookCandleGlow {
+  0%,
+  100% {
+    opacity: 0.62;
+    transform: scale(0.94);
+  }
+
+  45% {
+    opacity: 0.92;
+    transform: scale(1.08);
+  }
+
+  68% {
+    opacity: 0.72;
+    transform: scale(1.01);
+  }
+}
+
+@keyframes storybookMapMotes {
+  0%,
+  100% {
+    background-position:
+      0 0,
+      0 0,
+      0 0,
+      0 0,
+      0 0,
+      -18% 0;
+  }
+
+  50% {
+    background-position:
+      12px -18px,
+      -10px -24px,
+      8px -14px,
+      -14px -16px,
+      10px -20px,
+      18% 0;
+  }
+}
+
+@keyframes storybookPageShimmer {
+  0%,
+  100% {
+    opacity: 0.58;
+  }
+
+  50% {
+    opacity: 0.86;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .storybook-book::before,
+  .storybook-book::after {
+    animation: none;
+  }
 }

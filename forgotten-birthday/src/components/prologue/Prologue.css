@@ -288,8 +288,8 @@
   position: absolute;
   z-index: 20;
   bottom: 100px;
-  width: 82px;
-  height: auto;
+  width: auto;
+  height: clamp(170px, 20vh, 214px);
   transform-origin: center bottom;
   filter: drop-shadow(0 8px 4px rgba(0, 0, 0, 0.45));
 }
