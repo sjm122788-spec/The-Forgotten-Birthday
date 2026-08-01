@@ -43,6 +43,37 @@ function StoryRouteOverlay({
     [completedChapterIds],
   );
 
+  const trailPoints = useMemo(() => {
+    const orderedChapterIds = [];
+
+    chapters.forEach((chapter) => {
+      if (completedSet.has(chapter.id)) {
+        orderedChapterIds.push(chapter.id);
+      }
+    });
+
+    if (
+      activeChapterId &&
+      !orderedChapterIds.includes(activeChapterId)
+    ) {
+      orderedChapterIds.push(activeChapterId);
+    }
+
+    return orderedChapterIds
+      .map((chapterId) => {
+        const chapter = chapters.find(
+          (candidate) => candidate.id === chapterId,
+        );
+
+        if (!chapter?.mapPosition) {
+          return null;
+        }
+
+        return `${chapter.mapPosition.left},${chapter.mapPosition.top}`;
+      })
+      .filter(Boolean);
+  }, [activeChapterId, chapters, completedSet]);
+
   useEffect(() => {
     if (!unlockingChapterId) {
       setRevealedUnlockId(null);
@@ -105,6 +136,14 @@ function StoryRouteOverlay({
         preserveAspectRatio="none"
         aria-hidden="true"
       >
+        {trailPoints.length >= 2 && (
+          <polyline
+            className="story-route-ink-trail"
+            points={trailPoints.join(" ")}
+            pathLength="1"
+          />
+        )}
+
         {chapters.map((chapter, index) => {
           const nextChapter = chapters[index + 1];
 

@@ -38,6 +38,32 @@
   stroke-dasharray: 0.018 0.034;
 }
 
+.story-route-ink-trail {
+  fill: none;
+
+  stroke: rgba(91, 54, 20, 0.78);
+  stroke-width: 2.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+
+  vector-effect: non-scaling-stroke;
+
+  stroke-dasharray: 0.036 0.058;
+  stroke-dashoffset: 0;
+
+  filter:
+    drop-shadow(0 0 1px rgba(31, 18, 8, 0.48))
+    drop-shadow(0 0 5px rgba(246, 197, 104, 0.42));
+
+  opacity: 0.82;
+
+  animation:
+    storyRouteInkTrailDrift
+    9400ms
+    linear
+    infinite;
+}
+
 .story-route-path--revealed {
   stroke-dashoffset: 0;
 }
@@ -171,6 +197,13 @@
     infinite;
 }
 
+.story-route-marker--active .story-route-inkblot {
+  filter:
+    contrast(1.08)
+    drop-shadow(0 0 2px rgba(0, 0, 0, 0.72))
+    drop-shadow(0 0 8px rgba(231, 181, 91, 0.24));
+}
+
 @keyframes storyRouteDraw {
   from {
     stroke-dashoffset: 1;
@@ -178,6 +211,16 @@
 
   to {
     stroke-dashoffset: 0;
+  }
+}
+
+@keyframes storyRouteInkTrailDrift {
+  from {
+    stroke-dashoffset: 0;
+  }
+
+  to {
+    stroke-dashoffset: -1;
   }
 }
 
@@ -242,9 +285,13 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .story-route-path--drawing,
-  .story-route-marker--forming,
+  .story-route-ink-trail,
   .story-route-active-glow {
+    animation: none;
+  }
+
+  .story-route-path--drawing,
+  .story-route-marker--forming {
     animation-duration: 180ms;
     animation-delay: 0ms;
   }
