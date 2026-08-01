@@ -261,12 +261,15 @@ function App() {
         return;
       }
 
-      if (
-        event.ctrlKey &&
-        event.shiftKey &&
-        event.key.toLowerCase() === "a"
-      ) {
+      const key = event.key.toLowerCase();
+      const isOriginalShortcut =
+        event.ctrlKey && event.shiftKey && key === "a";
+      const isPartyShortcut =
+        event.altKey && event.shiftKey && key === "k";
+
+      if (isOriginalShortcut || isPartyShortcut) {
         event.preventDefault();
+        event.stopPropagation();
         setAdminOpen((isOpen) => !isOpen);
       }
     }
@@ -1165,7 +1168,7 @@ useEffect(() => {
 
     const nextCount = adminTapRef.current.count + 1;
 
-    if (nextCount >= 4) {
+    if (nextCount >= 3) {
       adminTapRef.current.count = 0;
       adminTapRef.current.timerId = null;
       setAdminOpen(true);
