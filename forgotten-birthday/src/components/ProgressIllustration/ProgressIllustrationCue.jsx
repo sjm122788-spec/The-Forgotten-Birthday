@@ -112,6 +112,9 @@ function ProgressIllustrationCue({
   const autoGrowthIntervalRef =
     useRef(null);
 
+  const controlledCompletionStartedRef =
+    useRef(false);
+
   const currentFrame =
     frames[currentFrameIndex];
 
@@ -154,13 +157,39 @@ function ProgressIllustrationCue({
 
     setHasChosen(true);
     setContributions(nextContributions);
+
+    if (
+      controlledComplete &&
+      !isComplete &&
+      !controlledCompletionStartedRef.current
+    ) {
+      controlledCompletionStartedRef.current = true;
+
+      if (
+        frames.length <= 1 ||
+        currentFrameIndex >= Math.max(frames.length - 1, 0)
+      ) {
+        setIsComplete(true);
+        return;
+      }
+
+      beginGrowthSequence();
+      return;
+    }
+
+    if (controlledComplete) {
+      return;
+    }
+
     moveToFrame(nextFrameIndex);
     setIsComplete(Boolean(controlledComplete));
   }, [
     controlledComplete,
     controlledContributions,
     contributionGlory,
+    currentFrameIndex,
     frames.length,
+    isComplete,
     maximumSharedGlory,
   ]);
 

@@ -288,12 +288,29 @@ function FinaleScene({
         );
       }
 
-      finalePromptComplete(currentCue.id, () => {
-        setReturnedRelicCount(returnedRelics.length);
-        window.setTimeout(moveToNextCue, 700);
-      });
+      if (returnedRelicCount >= returnedRelics.length) {
+        const activeFinalePrompt = multiplayer?.activePrompt;
+        const completionTimer = window.setTimeout(() => {
+          if (activeFinalePrompt?.sourceCueId === currentCue.id) {
+            Promise.resolve(multiplayer?.clearPrompt?.(activeFinalePrompt.id))
+              .catch((error) => {
+                console.error("Unable to clear finale relic prompt", error);
+              });
+          }
 
-      return undefined;
+          moveToNextCue();
+        }, 900);
+
+        return () => window.clearTimeout(completionTimer);
+      }
+
+      const relicTimer = window.setTimeout(() => {
+        setReturnedRelicCount((current) =>
+          Math.min(current + 1, returnedRelics.length),
+        );
+      }, 900);
+
+      return () => window.clearTimeout(relicTimer);
     }
 
     if (returnedRelicCount >= returnedRelics.length) {
@@ -362,12 +379,21 @@ function FinaleScene({
         setDisplayedGlory(Math.round(glory * ratio));
       }
 
-      finalePromptComplete(currentCue.id, () => {
-        setDisplayedGlory(glory);
-        window.setTimeout(moveToNextCue, 700);
-      });
+      const gloryTimer = window.setTimeout(() => {
+        const activeFinalePrompt = multiplayer?.activePrompt;
 
-      return undefined;
+        if (activeFinalePrompt?.sourceCueId === currentCue.id) {
+          Promise.resolve(multiplayer?.clearPrompt?.(activeFinalePrompt.id))
+            .catch((error) => {
+              console.error("Unable to clear finale glory prompt", error);
+            });
+        }
+
+        setDisplayedGlory(glory);
+        moveToNextCue();
+      }, 2600);
+
+      return () => window.clearTimeout(gloryTimer);
     }
 
     setDisplayedGlory(glory);

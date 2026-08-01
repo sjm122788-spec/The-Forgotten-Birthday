@@ -56,6 +56,14 @@ const SCREENS = {
   FINALE: "finale",
 };
 const DEV_MODE = import.meta.env.DEV;
+const FINALE_CHAPTER_ID = "finale";
+const FINALE_FALLBACK_RELICS = [
+  "candle-of-first-light",
+  "laughter-balloon",
+  "ribbon-of-belonging",
+  "pocket-watch-of-lost-time",
+  "open-seal",
+];
 
 function isObject(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -566,7 +574,12 @@ function App() {
 
     const nextHostState = {
       current_screen: screen,
-      current_chapter_id: screen === SCREENS.CHAPTER ? selectedChapterId : null,
+      current_chapter_id:
+        screen === SCREENS.CHAPTER
+          ? selectedChapterId
+          : screen === SCREENS.FINALE
+            ? FINALE_CHAPTER_ID
+            : null,
       game_state: {
         completedChapterIds,
         activeChapterIndex,
@@ -1372,24 +1385,18 @@ useEffect(() => {
         return (
           <FinaleScene
             earnedRelics={
-              DEV_MODE && relics.length === 0
-                ? [
-                    "candle-of-first-light",
-                    "laughter-balloon",
-                    "ribbon-of-belonging",
-                    "pocket-watch-of-lost-time",
-                    "open-seal",
-                  ]
+              relics.length === 0
+                ? FINALE_FALLBACK_RELICS
                 : relics
             }
-            glory={DEV_MODE && glory === 0 ? 72 : glory}
+            glory={glory === 0 ? 72 : glory}
             maximumGlory={100}
             playerProgress={playerProgress}
             multiplayer={{
               enabled:
                 multiplayerRole === "host" &&
                 multiplayerSession?.status === "playing",
-              chapterId: selectedChapterId,
+              chapterId: FINALE_CHAPTER_ID,
               guests: multiplayerGuests,
               activePrompt: multiplayerSession?.active_prompt ?? null,
               responses: activePromptResponses,

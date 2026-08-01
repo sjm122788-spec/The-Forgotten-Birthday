@@ -40,7 +40,7 @@
 .quiet-after__map-camera {
   position: absolute;
   inset: 0;
-  transform-origin: 24% 45.5%;
+  transform-origin: 29.2% 46.3%;
   transform: translate3d(0, 0, 0) scale(1);
   will-change: transform;
 }
@@ -61,8 +61,8 @@
 */
 .quiet-after__window-light {
   position: absolute;
-  left: 24%;
-  top: 45.5%;
+  left: 29.2%;
+  top: 46.3%;
   z-index: 2;
 
   width: 1.00%;
@@ -411,11 +411,11 @@
   }
 
   55% {
-    transform: translate3d(8%, 1%, 0) scale(2.35);
+    transform: translate3d(17%, 0%, 0) scale(2.35);
   }
 
   100% {
-    transform: translate3d(24%, 4%, 0) scale(6.2);
+    transform: translate3d(30.3%, 0.2%, 0) scale(6.2);
   }
 }
 

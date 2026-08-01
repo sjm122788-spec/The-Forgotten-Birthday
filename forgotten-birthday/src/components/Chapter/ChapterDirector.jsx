@@ -110,15 +110,43 @@ function ChapterDirector({
     }
 
     const excludedIds = new Set(excludedPlayerIds.filter(Boolean));
-    const availableGuests = guests.filter((guest) => !excludedIds.has(guest.id));
-    const selectableGuests = availableGuests.length > 0 ? availableGuests : guests;
+    const selectableGuests = guests.filter((guest) => !excludedIds.has(guest.id));
+    const guestPool = selectableGuests.length > 0 ? selectableGuests : guests;
+    const storageKey = `forgottenBirthday.selectedGuestCursor.${
+      multiplayer?.sessionId ?? "local"
+    }`;
 
-    const hash = String(cueId ?? "").split("").reduce(
-      (total, character) => total + character.charCodeAt(0),
-      0,
+    let cursor = 0;
+
+    try {
+      cursor = Number.parseInt(
+        window.localStorage.getItem(storageKey) ?? "0",
+        10,
+      );
+
+      if (!Number.isFinite(cursor) || cursor < 0) {
+        cursor = 0;
+      }
+    } catch {
+      cursor = 0;
+    }
+
+    const selectedGuest = guestPool[cursor % guestPool.length] ?? guestPool[0];
+    const selectedIndexInFullList = guests.findIndex(
+      (guest) => guest.id === selectedGuest.id,
     );
+    const nextCursor =
+      selectedIndexInFullList >= 0
+        ? selectedIndexInFullList + 1
+        : cursor + 1;
 
-    return selectableGuests[hash % selectableGuests.length] ?? selectableGuests[0];
+    try {
+      window.localStorage.setItem(storageKey, String(nextCursor));
+    } catch {
+      // Local storage is a convenience for fair turn order, not required.
+    }
+
+    return selectedGuest;
   }
 
   function resolveDiceOutcome(cue, roll) {
@@ -486,29 +514,6 @@ function handleFillTheSilenceComplete(
 
       publishingCueIdRef.current = currentCue.id;
 
-      const fallbackPhoneOptions = [
-        {
-          id: "careful-drop",
-          label: "A careful drop",
-          description: "Offer one small, careful kindness.",
-        },
-        {
-          id: "steady-pour",
-          label: "A steady pour",
-          description: "Offer what you can with steady care.",
-        },
-        {
-          id: "all-i-can-spare",
-          label: "All I can spare",
-          description: "Give the flower everything you can spare.",
-        },
-      ];
-      const phoneOptions =
-        Array.isArray(currentCue.phoneOptions) &&
-        currentCue.phoneOptions.length > 0
-          ? currentCue.phoneOptions
-          : fallbackPhoneOptions;
-
       Promise.resolve(
         multiplayer.publishPrompt?.({
           id: promptId,
@@ -652,6 +657,28 @@ function handleFillTheSilenceComplete(
       const promptId =
         globalThis.crypto?.randomUUID?.() ??
         `${currentCue.id}-${Date.now()}`;
+      const fallbackPhoneOptions = [
+        {
+          id: "careful-drop",
+          label: "A careful drop",
+          description: "Offer one small, careful kindness.",
+        },
+        {
+          id: "steady-pour",
+          label: "A steady pour",
+          description: "Offer what you can with steady care.",
+        },
+        {
+          id: "all-i-can-spare",
+          label: "All I can spare",
+          description: "Give the flower everything you can spare.",
+        },
+      ];
+      const phoneOptions =
+        Array.isArray(currentCue.phoneOptions) &&
+        currentCue.phoneOptions.length > 0
+          ? currentCue.phoneOptions
+          : fallbackPhoneOptions;
 
       publishingCueIdRef.current = currentCue.id;
 
@@ -1014,7 +1041,28 @@ function handleFillTheSilenceComplete(
             prompt: currentCue.prompt,
             instructions: currentCue.instructions,
             confirmLabel: currentCue.contributeLabel ?? "Offer Water",
-            options: phoneOptions.map((option) => ({
+            options: (
+              Array.isArray(currentCue.phoneOptions) &&
+              currentCue.phoneOptions.length > 0
+                ? currentCue.phoneOptions
+                : [
+                    {
+                      id: "careful-drop",
+                      label: "A careful drop",
+                      description: "Offer one small, careful kindness.",
+                    },
+                    {
+                      id: "steady-pour",
+                      label: "A steady pour",
+                      description: "Offer what you can with steady care.",
+                    },
+                    {
+                      id: "all-i-can-spare",
+                      label: "All I can spare",
+                      description: "Give the flower everything you can spare.",
+                    },
+                  ]
+            ).map((option) => ({
               id: option.id,
               label: option.label,
               description: option.description ?? "",
@@ -1099,32 +1147,9 @@ function handleFillTheSilenceComplete(
     handledPromptIdsRef.current.add(activePrompt.id);
     completedPhoneCueIdsRef.current.add(currentCue.id);
 
-    const finalFrameIndex = Math.max((currentCue.frames ?? []).length - 1, 0);
-    const finalFrame = currentCue.frames?.[finalFrameIndex] ?? null;
-
     Promise.resolve(multiplayer.clearPrompt?.(activePrompt.id))
       .catch((error) => {
         console.error("Unable to clear watering prompt", error);
-      })
-      .finally(() => {
-        handleProgressIllustrationComplete({
-          cueId: currentCue.id,
-          completed: true,
-          contributed: acceptedResponses.length > 0,
-          contributions: acceptedResponses.length,
-          frameIndex: finalFrameIndex,
-          finalFrameId: finalFrame?.id ?? null,
-          outcomeId:
-            acceptedResponses.length > 0
-              ? "contributed"
-              : "withheld",
-          narration: currentCue.completionNarration,
-          glory:
-            Math.min(
-              acceptedResponses.length * (currentCue.contributionGlory ?? 1),
-              currentCue.maximumSharedGlory ?? Infinity,
-            ),
-        });
       });
   }, [
     currentCue,
