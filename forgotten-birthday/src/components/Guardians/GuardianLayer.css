@@ -22,10 +22,9 @@
 
 /* Chapter-specific placement remains a CSS configuration class. */
 .guardian--confetti-sweeper {
-  left: 8%;
-  bottom: 3%;
-
-  width: clamp(85px, 9vw, 155px);
+  left: 6%;
+  bottom: 2%;
+  width: clamp(200px, 14vw, 800px);
   aspect-ratio: 1 / 1.3;
 }
 
@@ -33,17 +32,14 @@
   left: 0;
   bottom: 0;
   z-index: 1;
-
-  width: 72%;
+  width: 125%;
 }
 
 .guardian-prop--broom {
-  left: 40%;
-  bottom: 1%;
+  left: 280%;
+  bottom: 40%;
   z-index: 2;
-
-  width: 70%;
-
+  width: 175%;
   transform-origin: 20% 20%;
   animation: broomSweep 3.8s ease-in-out infinite;
 }
@@ -244,18 +240,18 @@
 }
 .guardian--parade-marshal {
   position: absolute;
-  right: 30%;
-  bottom: 30%;
+  right: 70%;
+  bottom: 10%;
   z-index: 6;
 
   width: clamp(
     250px,
     25vw,
-    390px
+    550px
   );
   height: min(
     78vh,
-    730px
+    900px
   );
 
   pointer-events: none;
@@ -385,12 +381,12 @@
 .guardian--clock-mender {
   position: absolute;
 
-  right: 5%;
-  bottom: -2%;
+  right: 75%;
+  bottom: 20%;
 
   z-index: 6;
 
-  width: min(25vw, 410px);
+  width: min(30vw, 410px);
   height: auto;
 
   pointer-events: none;
@@ -475,12 +471,12 @@
 .guardian--name-gardener {
   position: absolute;
 
-  left: 4%;
-  bottom: -2%;
+  left: 75%;
+  bottom: 40%;
 
   z-index: 6;
 
-  width: min(27vw, 430px);
+  width: min(23vw, 430px);
   height: auto;
 
   pointer-events: none;
@@ -565,12 +561,12 @@
 .guardian--invitation-keeper {
   position: absolute;
 
-  right: 5%;
-  bottom: -2%;
+  right: -2%;
+  bottom: 15%;
 
   z-index: 6;
 
-  width: min(27vw, 430px);
+  width: min(50vw, 430px);
   height: auto;
 
   pointer-events: none;
@@ -667,14 +663,14 @@
 .guardian--bridge-keeper {
   position: absolute;
 
-  left: 4%;
+  left: -5%;
   bottom: 1%;
 
   z-index: 8;
 
   width: clamp(
-    220px,
-    28vw,
+    250px,
+    33vw,
     440px
   );
 
@@ -728,12 +724,11 @@
 .guardian--memory-weaver {
   position: absolute;
 
-  left: 6%;
-  bottom: -2%;
+  left: -22%;
+  bottom: 3%;
 
   z-index: 6;
-
-  width: min(27vw, 430px);
+  width: min(40vw, 600px);
   height: auto;
 
   pointer-events: none;
